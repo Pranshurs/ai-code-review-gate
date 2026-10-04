@@ -201,25 +201,51 @@ corpus is still pending.
   residuals while re-verifying the fixes; every one was reproduced, fixed and
   pinned by a regression test.
 * **Self-review** ([docs/self-review/](docs/self-review/)): AICRG reviews its own
-  changes under its own [review-gate.yaml](review-gate.yaml), then is handed
+  changes under its own [review-gate.yaml](review-gate.yaml), then is handed 18
   adversarial copies of itself (weakened test, deleted trusted evidence, wrong
-  bundle digest, manipulated or unsigned receipt, skipped/erroring provider,
-  moved head, weakened gate config). Each is blocked, and the repository is
-  verified to be restored exactly.
+  bundle digest, manipulated, resealed, re-subjected, unsigned or attacker-signed
+  receipt, skipped/erroring provider, moved head, weakened or disabled gate job,
+  container downgraded to local, a report bound to an unrelated CI commit). Each
+  is blocked; positive controls (an allowed-key signature, a report bound to the
+  head) are accepted; the repository is verified to be restored exactly. The
+  latest full-range self-review is **FAIL**: the gate blocked test changes made
+  in the 0.2 continuation, which await owner review (run 3).
 
 ## Overhead
 
-Gate only, project tests excluded (4 vCPU x86_64, Python 3.11, git 2.43;
-[raw](docs/results/bench.json)):
+Measured at commit 2f3b70f (production code identical to dac57d0), clean tree,
+4 vCPU x86_64, Python 3.12.3, git 2.43, `python scripts/bench.py -n 100`
+([raw](docs/results/bench.json)). Each row is measured separately; none is folded
+into another.
 
-| patch | p50 | p95 | p99 | n |
+| what | p50 | p95 | p99 | n |
 |---|---|---|---|---|
-| 2 files, 11 changed lines | 62 ms | 78 ms | 83 ms | 100 |
-| whole repository as one patch: 308 files, 17.9k lines | 1.76 s | 1.85 s | 1.88 s | 20 |
+| gate only, 2 files / 11 changed lines | 96 ms | 111 ms | 118 ms | 100 |
+| gate only, whole repository as one patch (524 files, 50k lines) | 14.4 s | 15.0 s | 15.3 s | 20 |
+| target project's own test suite (belongs to the project) | 341 ms | 391 ms | 399 ms | 10 |
+| + one trivial check, head checkout, local executor (evidence stage) | 50 ms | 59 ms | 61 ms | 20 |
+| + the same as base-owned trusted evidence (evidence stage) | 84 ms | 92 ms | 93 ms | 20 |
+| + the same in the container executor (evidence stage) | 779 ms | 801 ms | 801 ms | 5 |
+| + required external SARIF provider, empty (evidence stage) | 1.1 ms | 1.7 ms | 1.8 ms | 20 |
+| + required external SARIF provider, 1000 results (evidence stage) | 12 ms | 21 ms | 21 ms | 20 |
+| verify-receipt (integrity, staleness, patch digest) | 16 ms | 19 ms | 20 ms | 20 |
+| SSH-sign a receipt | 6 ms | 9 ms | 9 ms | 20 |
+| verify-receipt with SSH signature | 26 ms | 28 ms | 30 ms | 20 |
+| test potency, 3 changed lines, 5 mutants + controls, fixture suite | 2.9 s | 3.0 s | 3.0 s | 3 |
 
-Policy evaluation is about 0.5 ms p50; sealing and writing the receipt about 1.3 ms
-(small) and 9 ms (large). Peak Python heap is 0.3 MiB / 22 MiB. The fixture's own
-test suite takes 341 ms p50: that time belongs to the project, not the gate.
+Policy evaluation is about 0.6 ms p50; sealing and writing the receipt about
+1.3 ms (small) and 12 ms (large). Test potency is deliberately expensive: about
+one target-suite run per mutant (here ~480 ms each); its p95/p99 at n=3 are not
+meaningful. GitHub artifact-attestation verification (`gh attestation verify`)
+needs the attestation service and is not benchmarked.
+
+Known cost: the large case is superlinear. 10.5 s of its 14.4 s is the security
+stage, where the check that a test-named module is used by production code
+(security-review fixes F7/N3) rescans production files for every test-named file
+without caching. It cannot turn a decision into PASS (a slow run times out to
+ERROR), but large patches pay for it; a memoised index is a follow-up. The 0.1
+release measured 62 ms / 1.76 s (308 files) on Python 3.11 with fewer analyses;
+the difference is not attributed to a single cause.
 
 ## GitHub Actions
 

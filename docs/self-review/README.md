@@ -48,3 +48,56 @@ the mutant receipt (decision FAIL).
 
 `main` does not exist in the repository yet, so these runs use explicit base
 commits instead of `--base main`.
+
+## Runs 3 and 4: the 0.2 continuation, head 2e9e3f1
+
+`scripts/self_review_challenge.py` now runs 18 challenges and two positive
+controls: a receipt signed with the allowed SSH key must be accepted, and an
+external report bound to the evaluated head must PASS. Without the controls, a
+"rejected" challenge could just mean the mechanism is broken for everyone.
+
+### Run 3: base 7290835 → head 2e9e3f1 (everything this continuation changed)
+
+| | decision | notes |
+|---|---|---|
+| self-review | **FAIL** | all 7 checks COMPLETE (lint, format, types, tests, dev corpus, mutation gate, trusted invariants), but the gate blocked test changes made in this continuation |
+| challenges | 18/18 blocked or rejected | receipt challenges are **confounded**: the receipt is FAIL, so the verifier also rejects it for its decision |
+| control `trusted-signed` | rejected | signature `VERIFIED`; rejected only because the receipt decision is FAIL. The run's verdict is therefore FAILED |
+| restoration | exact | no challenge commit reachable |
+
+Findings, each attributed to its commit by re-running the gate per commit:
+
+| finding | commit | assessment |
+|---|---|---|
+| `assertion_weakened` (BLOCK) | 6096bdd potency test | correct detection: exact equality became membership, deliberately, so the test stops pinning CPython 3.11's optimiser |
+| `dynamic_code_execution` (BLOCK), `security_suppression_added` (REVIEW) | 6096bdd potency test | correct: `exec()` (with `# noqa: S102`) in a test that runs in CI |
+| `assertion_weakened` (BLOCK) | fcc6f00 container-leak test | correct: the assertion now covers only the containers this run created (so concurrent suites cannot fail it). The finding pairs the old assertion with `assert created` rather than the real replacement, a reporting imprecision |
+| `trusted_evidence_modified` (REVIEW) | 6a79373, dac57d0, fcc6f00 | correct: base-owned trusted test files changed |
+
+These need **owner review**. The policy was not relaxed and the tests were not
+rewritten to avoid the detector. The provenance fix itself (6a79373) raised no
+blocking finding.
+
+Files: `run3-*.json`.
+
+### Run 4: base fcc6f00 → head 2e9e3f1 (the harness commit only)
+
+Run so the receipt challenges act on a PASS receipt.
+
+| | result |
+|---|---|
+| self-review | **PASS**, all 7 checks COMPLETE, no block or review findings |
+| weaken-test, sabotage-with-trusted, delete-trusted, weaken-gate-config, weaken-policy, bypass-gate-condition | FAIL (`assertion_weakened`; `required_check_failed` + `trusted_evidence_failed`; `test_file_deleted`; `ci_failure_masked`; `path_outside_contract` + `protected_path_modified`; `ci_job_disabled`). Doctor: FAIL on both weakened workflows |
+| manipulate-receipt | REJECTED: digest mismatch |
+| reseal-receipt, unsigned-required | REJECTED: attestation required, UNATTESTED |
+| head-moved | REJECTED: STALE |
+| change-subject | REJECTED: patch digest mismatch |
+| attacker-signed | REJECTED: signature does not verify |
+| provider-skipped, provider-error, bundle-digest, weaken-isolation | ERROR (skipped/invalid report, digest mismatch, container-to-local downgrade refused) |
+| unrelated-github-sha | ERROR: report analysed `eeee…`, not the head; receipt subject stays the head, `ci.relation` = `unresolved` |
+| controls | `trusted-signed` ACCEPTED, `report-for-head` PASS |
+| restoration | exact; no challenge commit reachable. **CHALLENGE PASSED** |
+
+Files: `run4-*.json`. These two runs printed their verdict and checks to stdout
+only. Since f2536f0 the verdict is also written to `challenge.json`.
+
