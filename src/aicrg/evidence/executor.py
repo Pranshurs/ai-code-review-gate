@@ -138,9 +138,8 @@ class LocalExecutor:
         return None
 
     def run(self, req: ExecRequest) -> ExecOutcome:
-        # A private temp dir per run: evidence must not share (or be disturbed by) the
-        # host's temp state, e.g. pytest's per-user basetemp, which concurrent pytest
-        # sessions prune.
+        # A private temp dir per run (hygiene): evidence does not share the host's temp
+        # state, e.g. pytest's per-user basetemp, which concurrent pytest sessions prune.
         tmp = tempfile.mkdtemp(prefix="aicrg-tmp-")
         try:
             env = {**req.env, "TMPDIR": tmp, "TEMP": tmp, "TMP": tmp}

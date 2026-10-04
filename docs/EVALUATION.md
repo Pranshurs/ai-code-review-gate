@@ -103,7 +103,17 @@ Re-running the existing corpora with the 0.2 code gives **identical** results:
 dev 37/37 bad and 7/7 legitimate with no mismatches; held-out v1 the same 6
 post-hoc mismatches; held-out v2 28/36 and 11/13 with the same 10 mismatches.
 The reported rows above (v1 25/35 · 10/11, v2 28/36 · 11/13) remain the
-headline and were not re-tuned.
+headline and were not re-tuned. The corpora were re-run again after the
+security-review fixes (which touched glob matching and test-file
+classification): identical results.
+
+A harness mistake worth recording: two re-runs reported every fixture's tests
+failing. The cause was the evaluator's shell command, not AICRG —
+`. activate && (A) & (B)` activates the virtualenv only in the backgrounded
+subshell, so the corpus ran under a Python without pytest, and the gate
+correctly reported each required check as FAIL. Commit 50893b5 initially
+attributed this to pytest temp-directory pruning; that diagnosis was wrong
+(the private per-run `TMPDIR` it added is kept as hygiene, not as a fix).
 
 ## Real-world track (pinned upstream patches)
 
