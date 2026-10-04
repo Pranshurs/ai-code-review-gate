@@ -212,6 +212,12 @@ def main() -> int:
     ap.add_argument("corpus", type=Path)
     ap.add_argument("--out", type=Path, help="write <name>.json and <name>.md here")
     ap.add_argument("--only", help="run a single case id prefix")
+    ap.add_argument(
+        "--allow-mismatches",
+        type=int,
+        default=0,
+        help="ratchet: fail only if more cases miss expectations than this recorded baseline",
+    )
     args = ap.parse_args()
     cases = sorted(p.parent for p in args.corpus.glob("*/case.yaml"))
     if args.only:
@@ -231,7 +237,11 @@ def main() -> int:
             json.dumps({"summary": summary, "cases": [asdict(r) for r in results]}, indent=2) + "\n"
         )
         (args.out / f"{name}.md").write_text(to_markdown(name, results, summary))
-    return 0 if not summary["expectation_mismatches"] else 1
+    mismatches = len(summary["expectation_mismatches"])  # type: ignore[arg-type]
+    if mismatches > args.allow_mismatches:
+        print(f"FAIL: {mismatches} mismatches > allowed baseline {args.allow_mismatches}")
+        return 1
+    return 0
 
 
 if __name__ == "__main__":

@@ -1,0 +1,55 @@
+# Review contract for AI Code Review Gate itself. Read from the base commit.
+version: 1
+
+allowed_paths:
+  - src/**
+  - tests/**
+  - docs/**
+  - corpus/**
+  - scripts/**
+  - .github/**
+  - action.yml
+  - pyproject.toml
+  - README.md
+  - CONTRIBUTING.md
+  - SECURITY.md
+  - CODE_OF_CONDUCT.md
+  - .gitignore
+
+protected_paths:
+  - review-gate.yaml
+  - LICENSE
+
+# The adversarial corpora contain deliberately bad code and fake credentials.
+exclude_from_analysis:
+  - corpus/**
+
+review_required_surfaces:
+  - ci
+
+required_checks:
+  - name: lint
+    command: ruff check src tests corpus/run_corpus.py scripts
+  - name: format
+    command: ruff format --check src tests corpus/run_corpus.py scripts
+  - name: types
+    command: mypy
+  - name: tests
+    command: python -m pytest -q -p no:cacheprovider
+    timeout_seconds: 1800
+  - name: dev-corpus
+    command: python corpus/run_corpus.py corpus/dev
+    timeout_seconds: 1800
+  - name: mutation-gate
+    command: python scripts/mutation_gate.py
+    timeout_seconds: 1800
+
+dependency_policy:
+  allow_new_runtime_dependencies: false
+  allow_new_dev_dependencies: true
+  max_new_dependencies: 2
+
+minimum_test_integrity:
+  forbid_new_unconditional_skips: true
+  forbid_removed_security_assertions: true
+  forbid_assertion_weakening: true
