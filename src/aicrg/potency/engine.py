@@ -25,12 +25,13 @@ reported (``test_potency_suppressed``): the patch cannot quietly opt out.
 
 from __future__ import annotations
 
+import secrets
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from aicrg.analysis.context import is_python, is_test_path
+from aicrg.analysis.context import is_production_path, is_python
 from aicrg.evidence.collect import CollectOptions, build_executor
 from aicrg.evidence.commands import filtered_env
 from aicrg.evidence.executor import ExecRequest, Executor, ExecutorError
@@ -40,7 +41,7 @@ from aicrg.git.repo import Repo
 from aicrg.globmatch import match_any
 from aicrg.model import Finding, GateError, Severity
 from aicrg.policy.contract import ReviewContract, TestPotencyPolicy
-from aicrg.potency.mutators import Mutant, generate, sample
+from aicrg.potency.mutators import Mutant, control_mutant, generate, sample
 from aicrg.rules import finding
 
 ENGINE = "aicrg-diffmut/1"
@@ -77,6 +78,7 @@ class PotencyReport:
     suppressed: dict[str, list[int]] = field(default_factory=dict)
     reason: str = ""
     seconds: float = 0.0
+    seed: int | None = None
     findings: list[Finding] = field(default_factory=list)
     errors: list[GateError] = field(default_factory=list)
 
@@ -92,6 +94,7 @@ class PotencyReport:
             "files": self.files,
             "relevant_mutants": self.generated,
             "sampled_from": self.sampled_from,
+            "sample_seed": self.seed,
             "killed": self.count("killed"),
             "killed_by_timeout": self.count("timeout"),
             "survived": self.count("survived"),
@@ -103,11 +106,13 @@ class PotencyReport:
         }
 
 
-def _targets(patch: Patch, pol: TestPotencyPolicy) -> dict[str, set[int]]:
+def _targets(repo: Repo, patch: Patch, pol: TestPotencyPolicy) -> dict[str, set[int]]:
     out: dict[str, set[int]] = {}
     for fc in patch.files:
         p = fc.new_path
-        if not p or not fc.added or not is_python(p) or p.endswith(".pyi") or is_test_path(p):
+        if not p or not fc.added or not is_python(p) or p.endswith(".pyi"):
+            continue
+        if not is_production_path(repo, patch.head, p):
             continue
         if match_any(p, pol.paths) is None:
             continue
@@ -146,7 +151,7 @@ def _run(
     rep: PotencyReport,
     t0: float,
 ) -> None:
-    targets = _targets(patch, pol)
+    targets = _targets(repo, patch, pol)
     rep.changed_lines = sum(len(v) for v in targets.values())
     rep.files = sorted(targets)
     all_mutants: list[Mutant] = []
@@ -156,13 +161,18 @@ def _run(
         if src is None:
             continue
         gen = generate(path, src, lines)
+        if gen.parse_error:
+            rep.status = "ERROR"
+            rep.reason = f"cannot parse {path} to generate mutants: {gen.parse_error}"
+            return
         all_mutants.extend(gen.mutants)
         equivalent.extend(gen.equivalent)
         if gen.suppressed_lines:
             rep.suppressed[path] = gen.suppressed_lines
     rep.results.extend(MutantResult(m, "equivalent") for m in equivalent)
     rep.sampled_from = len(all_mutants)
-    chosen = sample(all_mutants, pol.max_mutants)
+    rep.seed = secrets.randbits(32)
+    chosen = sample(all_mutants, pol.max_mutants, rep.seed)
     rep.generated = len(chosen)
     if not chosen:
         rep.status = "NO_MUTANTS"
@@ -194,6 +204,21 @@ def _run(
             rep.reason = f"unmutated baseline did not pass ({why}); potency cannot be measured"
             return
         originals: dict[str, bytes] = {}
+        ctl = control_mutant(chosen[0].file, _read(ws, chosen[0].file))
+        originals[ctl.file] = _read(ws, ctl.file)
+        safe_write(ws, ctl.file, ctl.source)
+        ex.workspace_ready(ws)
+        try:
+            cres = ex.run(ExecRequest(pol.command, ws, env, pol.mutant_timeout_seconds))
+        finally:
+            safe_write(ws, ctl.file, originals[ctl.file])
+        if cres.start_error or cres.timed_out or cres.returncode != 0:
+            rep.status = "ERROR"
+            rep.reason = (
+                "control mutant (behaviour unchanged, bytes changed) was killed: the tests "
+                "depend on source text, so mutant kills prove nothing"
+            )
+            return
         for m in chosen:
             if time.monotonic() - t0 > pol.total_timeout_seconds:
                 rep.results.append(MutantResult(m, "not_run"))
@@ -224,6 +249,12 @@ def _run(
         )
     elif rep.count("survived"):
         rep.status = "SURVIVORS"
+    elif rep.sampled_from > rep.generated:
+        rep.status = "SAMPLED"
+        rep.reason = (
+            f"only {rep.generated} of {rep.sampled_from} mutants were run (max_mutants); "
+            "the unsampled behaviour is unmeasured"
+        )
     else:
         rep.status = "COMPLETE"
 
@@ -259,6 +290,10 @@ def _judge(contract: ReviewContract, pol: TestPotencyPolicy, rep: PotencyReport)
                 f"{len(survivors) - 10} more surviving mutant(s) (see receipt)",
                 severity=sev,
             )
+        )
+    if rep.status == "SAMPLED":
+        rep.findings.append(
+            finding("test_potency_unavailable", c, f"test potency incomplete: {rep.reason}")
         )
     if rep.status in ("ERROR", "TIMEOUT"):
         msg = f"test potency {rep.status}: {rep.reason}"

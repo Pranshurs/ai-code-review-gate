@@ -109,8 +109,9 @@ AICRG runs `gh attestation verify` (signature, Rekor inclusion, subject digest
 2. `buildSignerURI` equals `https://github.com/<signer_workflow>@<signer_ref>`
    exactly. A `pull_request` run is signed by `…@refs/pull/N/merge`, a workflow
    the PR can edit; it does not satisfy a pin on `refs/heads/main`. Pin the
-   ref the enforcing workflow actually runs from (a ruleset-required workflow,
-   or `push`/`merge_group` on the protected branch);
+   ref the enforcing workflow actually runs from (e.g. a ruleset-required
+   workflow pinned to `refs/heads/main`). `merge_group` runs are signed from
+   `refs/heads/gh-readonly-queue/…` and do not match a `refs/heads/main` pin;
 3. `sourceRepositoryDigest` equals the commit the gate ran on
    (`subject.ci.sha`, else `subject.head`).
 

@@ -243,9 +243,12 @@ class TestCli:
         repo.commit({"README.md": "x"})
         path = write_receipt(gate().receipt, tmp_path / "rc")
         monkeypatch.chdir(repo.root)
-        assert main(["verify-receipt", str(path)]) == 0
-        repo.commit({"README.md": "y"})
+        assert main(["verify-receipt", str(path), "--base", "main"]) == 0
+        # Without --base the CLI refuses to vouch for the base contract.
         assert main(["verify-receipt", str(path)]) == 5
+        assert main(["verify-receipt", str(path), "--no-base"]) == 0
+        repo.commit({"README.md": "y"})
+        assert main(["verify-receipt", str(path), "--base", "main"]) == 5
 
     def test_policy_validate(self, tmp_path, capsys):
         good = tmp_path / "p.yaml"

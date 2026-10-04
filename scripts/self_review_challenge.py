@@ -119,7 +119,8 @@ def check(cwd: Path, base: str, head: str, receipt: Path, *extra: str) -> dict[s
 
 
 class Challenges:
-    def __init__(self, tmp: Path, head: str, self_receipt: Path) -> None:
+    def __init__(self, tmp: Path, head: str, self_receipt: Path, review_base: str) -> None:
+        self.review_base = review_base
         self.tmp = tmp
         self.head = head
         self.self_receipt = self_receipt
@@ -191,7 +192,7 @@ class Challenges:
         self._mutant("weaken-policy", weaken_policy, "--no-run")
 
     def _verify(self, name: str, receipt: Path, cwd: Path, *extra: str) -> None:
-        proc = aicrg(cwd, "verify-receipt", str(receipt), *extra)
+        proc = aicrg(cwd, "verify-receipt", str(receipt), "--base", self.review_base, *extra)
         self.results[name] = {
             "exit_code": proc.returncode,
             "decision": "REJECTED" if proc.returncode != 0 else "ACCEPTED",
@@ -284,7 +285,9 @@ def main() -> int:
         "review_head": review_head,
         "challenge_head": before["head"],
     }
-    ch = Challenges(tmp, before["head"], tmp / "self-review-receipt.json")
+    ch = Challenges(
+        tmp, before["head"], tmp / "self-review-receipt.json", git("rev-parse", args.review_base)
+    )
     try:
         print(f"== self-review {args.review_base[:12]}..{review_head[:12]}")
         wt = tmp / "review"

@@ -14,6 +14,10 @@ Attestation is *required* when the base contract says so
 (``attestation.required``, read from ``--base``) or the verifier passes
 ``--require-attestation``. A required but missing/invalid attestation rejects
 the receipt; it never degrades to "integrity only".
+
+The applicable policy is chosen by the verifier (``--base`` plus its own
+``--policy``), never taken from the receipt's ``policy.source``. The CLI
+requires ``--base`` unless ``--no-base`` is passed explicitly.
 """
 
 from __future__ import annotations
@@ -67,6 +71,9 @@ def verify_receipt(
     require_pass: bool = True,
     *,
     attestation: AttestationOptions | None = None,
+    policy: str | None = None,
+    policy_from: str = "base",
+    require_base: bool = False,
 ) -> Verification:
     att = attestation or AttestationOptions()
     problems: list[str] = []
@@ -121,26 +128,30 @@ def verify_receipt(
                     f"STALE: {base} has moved to {cur_base[:12]} since evaluation against "
                     f"{str(subject.get('base'))[:12]}; re-run the gate on the updated branch"
                 )
+            # Which policy applies is decided by the verifier, never by the receipt: a forged
+            # receipt could otherwise claim a non-base source and skip the base contract.
+            pol = load_policy(repo, cur_base, policy, policy_from)
             policy_rec = r.get("policy") or {}
-            source = str(policy_rec.get("source", ""))
-            if source.startswith("base:") or source == "builtin-default":
-                pol = load_policy(
-                    repo,
-                    cur_base,
-                    source.removeprefix("base:") if source.startswith("base:") else None,
-                    "base",
+            if policy_rec.get("source") != pol.source:
+                problems.append(
+                    f"receipt was evaluated under policy {policy_rec.get('source')!r}; "
+                    f"the verifier's policy is {pol.source!r}"
                 )
-                if pol.contract.digest() != policy_rec.get("contract_digest"):
-                    problems.append("policy on the base branch changed since evaluation")
-                policy_att = pol.contract.attestation
-                if policy_att.method == "ssh" and policy_att.allowed_signers:
-                    blob = repo.read_blob(cur_base, policy_att.allowed_signers)
-                    if blob is None:
-                        problems.append(
-                            f"allowed_signers {policy_att.allowed_signers} missing at base"
-                        )
-                    else:
-                        att = replace(att, base_signers=blob)
+            if pol.contract.digest() != policy_rec.get("contract_digest"):
+                problems.append("policy changed since evaluation (contract digest differs)")
+            policy_att = pol.contract.attestation
+            if policy_att.method == "ssh" and policy_att.allowed_signers:
+                blob = repo.read_blob(cur_base, policy_att.allowed_signers)
+                if blob is None:
+                    problems.append(f"allowed_signers {policy_att.allowed_signers} missing at base")
+                else:
+                    att = replace(att, base_signers=blob)
+        elif require_base:
+            problems.append(
+                "BASE NOT CHECKED: pass --base <target branch>; without it the base contract "
+                "(attestation requirement, signer list, policy binding) and base staleness "
+                "cannot be verified"
+            )
         _check_ci_commit(repo, subject, problems)
     except (GitError, PolicyError) as exc:
         problems.append(f"cannot verify against repository: {exc}")

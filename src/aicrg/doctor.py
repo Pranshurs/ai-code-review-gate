@@ -41,7 +41,11 @@ _HEAD_REF = re.compile(
     r"github\.event\.workflow_run\.head_(sha|branch)|refs/pull/"
 )
 _MASK = re.compile(r"\|\|\s*(true|:|exit\s+0)\b|;\s*exit\s+0\b|set\s+\+e")
-_GATE_RUN = re.compile(r"\baicrg\s+check\b")
+# The gate command at the start of a shell command (not inside an echo or a string).
+_GATE_RUN = re.compile(
+    r"(?:^|[;&|(]\s*|\bthen\s+|\bdo\s+)(?:\S*/)?(?:aicrg|python3?\s+-m\s+aicrg)\s+check\b",
+    re.M,
+)
 _GATE_USES = re.compile(r"ai-code-review-gate(@|$)", re.I)
 
 
@@ -102,6 +106,34 @@ class Workflow:
         return (
             {k: v for k, v in jobs.items() if isinstance(v, dict)} if isinstance(jobs, dict) else {}
         )
+
+
+def _maybe_true(value: Any) -> bool:
+    """continue-on-error that is not provably false (literals or `${{ ... }}` expressions)."""
+    if value is None or value is False:
+        return False
+    text = re.sub(r"\s+", "", str(value).lower())
+    return text not in ("false", "${{false}}", "0", "${{0}}")
+
+
+def _gate_line_hazards(run: str, shell: str) -> list[str]:
+    """Shell constructs on the gate's own command line that lose its exit status."""
+    out: list[str] = []
+    for line in run.splitlines():
+        if not _GATE_RUN.search(line):
+            continue
+        rest = line[_GATE_RUN.search(line).end() :]  # type: ignore[union-attr]
+        if re.search(r"\|\|", rest):
+            out.append("gate command followed by `||` (failure handled/ignored)")
+        elif re.search(r"(?<!\|)\|(?!\|)", rest) and not _pipefail(run, shell):
+            out.append("gate output piped without `set -o pipefail` (exit status lost)")
+    return out
+
+
+def _pipefail(run: str, shell: str) -> bool:
+    # `shell: bash` on GitHub runs `bash --noprofile --norc -eo pipefail {0}`; the default
+    # (no shell key) is `bash -e {0}`, which does NOT set pipefail.
+    return "pipefail" in run or "pipefail" in shell or shell.strip() == "bash"
 
 
 def _never(cond: Any) -> bool:
@@ -249,16 +281,18 @@ def static_checks(root: Path, report: Report | None = None) -> Report:
         where = f"{wf.path}#{name}"
         rep.add("gate-present", "PASS", f"gate runs in job `{name}`", wf.path)
         masked: list[str] = []
-        if job.get("continue-on-error") in (True, "true"):
+        if _maybe_true(job.get("continue-on-error")):
             masked.append("job continue-on-error")
         if _never(job.get("if")):
             masked.append("job `if: false`")
         for s in _steps(job):
             if _is_gate_step(s, local_gate):
-                if s.get("continue-on-error") in (True, "true"):
+                if _maybe_true(s.get("continue-on-error")):
                     masked.append("step continue-on-error")
-                if _MASK.search(str(s.get("run", ""))):
+                run_text = str(s.get("run", ""))
+                if _MASK.search(run_text):
                     masked.append("exit status masked in `run`")
+                masked += _gate_line_hazards(run_text, str(s.get("shell", "")))
                 if _never(s.get("if")):
                     masked.append("step `if: false`")
                 run = str(s.get("run", ""))
@@ -298,7 +332,9 @@ def static_checks(root: Path, report: Report | None = None) -> Report:
                         where,
                     )
         jperm = job.get("permissions")
-        if isinstance(jperm, dict) and any(v == "write" for v in jperm.values()):
+        if jperm == "write-all" or (
+            isinstance(jperm, dict) and any(v == "write" for v in jperm.values())
+        ):
             rep.add("gate-permissions", "FAIL", f"gate job has write permissions {jperm}", where)
 
     # ---- contract
@@ -375,7 +411,7 @@ def default_api() -> Api:
                 },
             )
             try:
-                with urllib.request.urlopen(req, timeout=30) as resp:  # noqa: S310
+                with urllib.request.urlopen(req, timeout=30) as resp:  # noqa: S310 - fixed https host  # nosec B310
                     return resp.status, json.loads(resp.read().decode())
             except urllib.error.HTTPError as exc:
                 return exc.code, None
@@ -450,13 +486,7 @@ def github_checks(
     if rules is None and pstatus != 200:
         return rep
     wanted = [n for n in check_names if n]
-    hit = sorted(
-        {
-            r
-            for r in required
-            if any(w == r or r.endswith(f"/ {w}") or r.endswith(w) for w in wanted)
-        }
-    )
+    hit = sorted({r for r in required if any(w == r or r.endswith(f" / {w}") for w in wanted)})
     if hit:
         rep.add("github-required-check", "PASS", f"gate is a required status check: {hit}")
     else:

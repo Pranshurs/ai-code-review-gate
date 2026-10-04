@@ -19,13 +19,15 @@ proves them pre-existing and the contract says how to treat that.
 
 from __future__ import annotations
 
+import contextlib
+import os
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from aicrg.analysis.context import is_python, is_test_path
+from aicrg.analysis.context import is_production_path, is_python
 from aicrg.evidence.commands import EvidenceRun, filtered_env, ingest_external, run_check
 from aicrg.evidence.differential import DiffClass, classify, severity_for
 from aicrg.evidence.executor import (
@@ -44,7 +46,7 @@ from aicrg.evidence.trusted import (
     overlay_base,
     overlay_bundle,
 )
-from aicrg.evidence.workspace import checkout
+from aicrg.evidence.workspace import checkout, list_files
 from aicrg.git.diff import Patch
 from aicrg.git.repo import Repo
 from aicrg.globmatch import match_any
@@ -59,6 +61,7 @@ class CollectOptions:
     container_image: str | None = None  # image when the operator upgrades to container
     bundles: dict[str, str] = field(default_factory=dict)  # trusted evidence name -> path
     external: dict[str, str] = field(default_factory=dict)  # external evidence name -> path
+    ci_sha: str | None = None  # CI merge commit an external tool may have analysed
 
 
 @dataclass(slots=True)
@@ -107,11 +110,70 @@ def build_executor(contract: ReviewContract, opts: CollectOptions) -> Executor:
     return ContainerExecutor(settings)
 
 
-def changed_production_lines(patch: Patch) -> dict[str, set[int]]:
+@dataclass(slots=True)
+class TrustedScope:
+    """Everything trusted evidence owns inside a workspace, for protection and verification."""
+
+    files: dict[str, tuple[bytes, bool]] = field(default_factory=dict)
+    patterns: list[str] = field(default_factory=list)  # source: base globs
+    mounts: list[str] = field(default_factory=list)  # source: bundle mount points
+
+    def owns(self, rel: str) -> bool:
+        if rel in self.files or match_any(rel, tuple(self.patterns)) is not None:
+            return True
+        return any(rel == m or rel.startswith(m + "/") for m in self.mounts)
+
+    def verify(self, ws: Path) -> list[str]:
+        """Paths whose trusted content changed, disappeared, or were added during a run."""
+        bad: list[str] = []
+        for rel, (data, _exe) in sorted(self.files.items()):
+            p = ws / rel
+            if p.is_symlink() or not p.is_file() or p.read_bytes() != data:
+                bad.append(rel)
+        bad += [rel for rel in list_files(ws) if self.owns(rel) and rel not in self.files]
+        return bad
+
+
+def readonly_paths(scope: TrustedScope) -> tuple[str, ...]:
+    """Directories holding trusted files (or the file itself at the root), minimal set."""
+    cands: set[str] = set(scope.mounts)
+    for rel in scope.files:
+        parent = rel.rsplit("/", 1)[0] if "/" in rel else ""
+        cands.add(parent or rel)
+    out = sorted(cands)
+    return tuple(p for p in out if not any(p.startswith(q + "/") for q in out if q != p))
+
+
+@contextmanager
+def protect_locally(ws: Path, paths: tuple[str, ...], enabled: bool) -> Iterator[None]:
+    """Best-effort a-w on trusted paths for the local executor (same-user code can undo it)."""
+    if not enabled:
+        yield
+        return
+    changed: list[tuple[str, int]] = []
+    try:
+        for rel in paths:
+            root = ws / rel
+            targets = [root] if root.is_file() else [root, *root.rglob("*")]
+            for t in targets:
+                if t.is_symlink():
+                    continue
+                mode = t.stat().st_mode & 0o7777
+                changed.append((str(t), mode))
+                os.chmod(t, mode & ~0o222)
+        yield
+    finally:
+        for path, mode in reversed(changed):
+            with contextlib.suppress(OSError):
+                os.chmod(path, mode)
+
+
+def changed_production_lines(repo: Repo, patch: Patch) -> dict[str, set[int]]:
     out: dict[str, set[int]] = {}
     for fc in patch.files:
-        if fc.new_path and is_python(fc.new_path) and not is_test_path(fc.new_path) and fc.added:
-            out[fc.new_path] = set(fc.added)
+        p = fc.new_path
+        if p and is_python(p) and fc.added and is_production_path(repo, patch.head, p):
+            out[p] = set(fc.added)
     return out
 
 
@@ -123,7 +185,11 @@ class _Collector:
         contract: ReviewContract,
         opts: CollectOptions,
         executor: Executor,
+        *,
+        trusted_commit: str,
     ) -> None:
+        self.trusted_commit = trusted_commit
+        self.ci_sha = opts.ci_sha
         self.repo = repo
         self.patch = patch
         self.c = contract
@@ -154,20 +220,23 @@ class _Collector:
         return runs
 
     def _overlay(
-        self, ws: Path, items: tuple[TrustedEvidence, ...], commit_for_base: str
-    ) -> list[Overlay]:
+        self, ws: Path, items: tuple[TrustedEvidence, ...], trusted_commit: str
+    ) -> tuple[list[Overlay], TrustedScope]:
         overlays: list[Overlay] = []
+        scope = TrustedScope()
         for t in items:
             if t.source == "base":
-                # Trusted content always comes from the merge-base: the side of the patch
-                # the candidate does not control, never from the head.
-                entries = base_entries(self.repo, commit_for_base, t.paths)
+                # Trusted content comes from the base TIP the patch will be merged into:
+                # never from the head, and never from the (candidate-chosen) merge-base.
+                entries = base_entries(self.repo, trusted_commit, t.paths)
                 if not entries:
                     raise TrustedEvidenceError(
                         f"trusted evidence `{t.name}`: no files match {list(t.paths)} at base "
-                        f"{commit_for_base[:12]}"
+                        f"{trusted_commit[:12]}"
                     )
                 overlays.append(overlay_base(ws, t.name, t.paths, entries))
+                scope.files.update(entries)
+                scope.patterns.extend(t.paths)
             else:
                 path = self.opts.bundles.get(t.name) or t.bundle_path
                 if not path:
@@ -175,10 +244,44 @@ class _Collector:
                         f"trusted evidence `{t.name}`: no bundle supplied "
                         f"(pass --bundle {t.name}=PATH)"
                     )
-                assert t.digest is not None and t.mount is not None  # noqa: S101 - parser enforces
+                if t.digest is None or t.mount is None:
+                    raise TrustedEvidenceError(f"trusted evidence `{t.name}`: incomplete bundle")
                 entries = load_bundle(Path(path), t.digest)
                 overlays.append(overlay_bundle(ws, t.name, t.mount, entries, t.digest))
-        return overlays
+                scope.files.update({f"{t.mount}/{k}": v for k, v in entries.items()})
+                scope.mounts.append(t.mount)
+        return overlays, scope
+
+    def _trusted_runs(
+        self, specs: list[RequiredCheck], commit: str, revision: str, trusted_commit: str
+    ) -> dict[str, EvidenceRun]:
+        """Each trusted spec gets its own fresh workspace with the trusted overlay.
+
+        The trusted paths are read-only during the run (enforced by the container
+        executor; best effort locally) and verified afterwards: a run whose trusted
+        content changed is ERROR, whatever its exit status.
+        """
+        runs: dict[str, EvidenceRun] = {}
+        for spec in specs:
+            with self._ws(commit) as ws:
+                overlays, scope = self._overlay(ws, self.c.trusted_evidence, trusted_commit)
+                if revision == "head" and not self.out.overlays:
+                    self.out.overlays = overlays
+                ro = readonly_paths(scope)
+                self.ex.workspace_ready(ws)
+                with protect_locally(ws, ro, self.ex.name == "local"):
+                    run = run_check(
+                        spec, ws, self.env, executor=self.ex, revision=revision, readonly=ro
+                    )
+                changed = scope.verify(ws)
+                if changed:
+                    run.mark_error(
+                        "trusted evidence was modified during its own run: "
+                        + ", ".join(changed[:5])
+                    )
+                runs[spec.name] = run
+                self.out.runs.append(run)
+        return runs
 
     def collect(self) -> EvidenceOutcome:
         c = self.c
@@ -196,19 +299,19 @@ class _Collector:
         if c.trusted_evidence:
             specs = [t.check for t in c.trusted_evidence]
             try:
-                with self._ws(head) as ws:
-                    self.out.overlays = self._overlay(ws, c.trusted_evidence, base)
-                    head_runs.update(self._run_all(specs, ws, "head"))
+                head_runs.update(self._trusted_runs(specs, head, "head", self.trusted_commit))
                 diff = [s for s in specs if s.differential]
                 if diff:
-                    with self._ws(base) as ws:
-                        self._overlay(ws, c.trusted_evidence, base)
-                        base_runs.update(self._run_all(diff, ws, "base"))
+                    base_runs.update(self._trusted_runs(diff, base, "base", self.trusted_commit))
             except TrustedEvidenceError as exc:
                 self.out.errors.append(GateError("trusted_evidence", str(exc)))
-                specs = []
         for spec in c.external_evidence:
-            run = ingest_external(spec, self.opts.external.get(spec.name))
+            run = ingest_external(
+                spec,
+                self.opts.external.get(spec.name),
+                checkout_root=self.repo.root,
+                expected_revisions=frozenset(x for x in (head, self.ci_sha) if x),
+            )
             head_runs[spec.name] = run
             self.out.runs.append(run)
         for spec in [*heads, *[t.check for t in c.trusted_evidence], *c.external_evidence]:
@@ -308,7 +411,7 @@ class _Collector:
 
     def _coverage(self, spec: RequiredCheck, head: EvidenceRun, label: str) -> None:
         assert head.report is not None and spec.min_changed_coverage is not None  # noqa: S101
-        changed = changed_production_lines(self.patch)
+        changed = changed_production_lines(self.repo, self.patch)
         covered, total, missing = changed_line_coverage(head.report, changed)
         if head.report.counts is not None:
             head.report.counts["changed_lines_covered"] = covered
@@ -348,7 +451,11 @@ def _items_text(run: EvidenceRun) -> str | None:
 
 
 def collect_evidence(
-    repo: Repo, patch: Patch, contract: ReviewContract, opts: CollectOptions
+    repo: Repo,
+    patch: Patch,
+    contract: ReviewContract,
+    opts: CollectOptions,
+    trusted_commit: str | None = None,
 ) -> EvidenceOutcome:
     try:
         executor = build_executor(contract, opts)
@@ -358,7 +465,9 @@ def collect_evidence(
         out.errors.append(GateError("execution", str(exc)))
         out.execution = {"executor": opts.executor or contract.executor, "error": str(exc)}
         return out
-    col = _Collector(repo, patch, contract, opts, executor)
+    col = _Collector(
+        repo, patch, contract, opts, executor, trusted_commit=trusted_commit or patch.base
+    )
     out = col.collect()
     out.execution = executor.describe()
     return out

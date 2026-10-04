@@ -61,6 +61,7 @@ class ExecRequest:
     cwd: Path
     env: dict[str, str]
     timeout_seconds: int
+    readonly: tuple[str, ...] = ()  # workspace-relative paths mounted read-only (container)
 
 
 @dataclass(frozen=True, slots=True)
@@ -89,6 +90,25 @@ def _version_probe(argv: tuple[str, ...]) -> list[str]:
     if len(argv) >= 3 and Path(argv[0]).name.startswith("python") and argv[1] == "-m":
         return [*argv[:3], "--version"]
     return [argv[0], "--version"]
+
+
+def _drain(proc: subprocess.Popen[bytes]) -> bytes:
+    """Collect what is left after a kill without waiting forever.
+
+    A descendant that escaped the process group can hold the pipe open; the
+    timeout must still be honoured, so the wait is bounded and the pipe closed.
+    """
+    try:
+        out, _ = proc.communicate(timeout=5)
+        return out or b""
+    except subprocess.TimeoutExpired:
+        with contextlib.suppress(ProcessLookupError):
+            proc.kill()
+        if proc.stdout is not None:
+            proc.stdout.close()
+        with contextlib.suppress(subprocess.TimeoutExpired):
+            proc.wait(timeout=5)
+        return b""
 
 
 def _first_line(out: bytes) -> str | None:
@@ -136,8 +156,7 @@ class LocalExecutor:
         except subprocess.TimeoutExpired:
             with contextlib.suppress(ProcessLookupError):
                 os.killpg(proc.pid, signal.SIGKILL)
-            out, _ = proc.communicate()
-            return ExecOutcome(proc.returncode, out, timed_out=True)
+            return ExecOutcome(proc.returncode, _drain(proc), timed_out=True)
         return ExecOutcome(proc.returncode, out)
 
     def tool_version(self, argv: tuple[str, ...], cwd: Path, env: dict[str, str]) -> str | None:
@@ -190,8 +209,8 @@ class ContainerSettings:
 
 # Variables always set inside the container. Nothing else from the host is inherited.
 _CONTAINER_FIXED_ENV = {
-    "HOME": "/tmp",  # noqa: S108 - the container's private tmpfs
-    "TMPDIR": "/tmp",  # noqa: S108 - the container's private tmpfs
+    "HOME": "/tmp",  # noqa: S108 - container-private tmpfs  # nosec B108
+    "TMPDIR": "/tmp",  # noqa: S108 - container-private tmpfs  # nosec B108
     "PYTHONDONTWRITEBYTECODE": "1",
     "AICRG_EVIDENCE": "1",
     "LC_ALL": "C.UTF-8",
@@ -267,7 +286,7 @@ class ContainerExecutor:
                     mode = 0o777 if os.path.isdir(p) else 0o666 | exe_bits
                     os.chmod(p, mode)  # throwaway workspace; see below
         # The workspace is a throwaway copy inside a 0700 mkdtemp parent.
-        os.chmod(path, 0o777)  # noqa: S103
+        os.chmod(path, 0o777)  # noqa: S103 - throwaway, 0700 parent  # nosec B103
 
     def describe(self) -> dict[str, object]:
         s = self.settings
@@ -321,7 +340,7 @@ class ContainerExecutor:
             "no-new-privileges",
             "--read-only",
             "--tmpfs",
-            f"/tmp:rw,nosuid,nodev,size={s.tmpfs_mb}m",  # noqa: S108 - container tmpfs
+            f"/tmp:rw,nosuid,nodev,size={s.tmpfs_mb}m",  # noqa: S108  # nosec B108
             "--pids-limit",
             str(s.pids_limit),
             "--memory",
@@ -332,6 +351,16 @@ class ContainerExecutor:
             str(s.cpus),
             "--mount",
             f"type=bind,source={ws},target={CONTAINER_WORKDIR}",
+        ]
+        for rel in req.readonly:
+            src = (ws / rel).resolve()
+            if "," in rel or "=" in rel or not src.is_relative_to(ws) or not src.exists():
+                raise ExecutorError(f"read-only path {rel!r} is not inside the workspace")
+            argv += [
+                "--mount",
+                f"type=bind,source={src},target={CONTAINER_WORKDIR}/{rel},readonly",
+            ]
+        argv += [
             "--workdir",
             CONTAINER_WORKDIR,
             "--stop-timeout",
@@ -366,8 +395,7 @@ class ContainerExecutor:
                 self._cli("kill", name, timeout=30)
             with contextlib.suppress(ProcessLookupError):
                 os.killpg(proc.pid, signal.SIGKILL)
-            out, _ = proc.communicate()
-            return ExecOutcome(proc.returncode, out, timed_out=True)
+            return ExecOutcome(proc.returncode, _drain(proc), timed_out=True)
         if proc.returncode in RUNTIME_ERROR_CODES:
             return ExecOutcome(
                 proc.returncode,

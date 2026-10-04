@@ -88,7 +88,16 @@ def _parser() -> argparse.ArgumentParser:
     v = sub.add_parser("verify-receipt", help="check a receipt still authorises the current head")
     v.add_argument("receipt")
     v.add_argument("--head", default="HEAD")
-    v.add_argument("--base", help="also require the base branch/policy to be unchanged")
+    v.add_argument(
+        "--base", help="target branch: binds base staleness, base policy and attestation rules"
+    )
+    v.add_argument(
+        "--no-base",
+        action="store_true",
+        help="explicitly skip base checks (base contract and staleness are NOT verified)",
+    )
+    v.add_argument("--policy", help="policy path at base (default: discovery), or a file")
+    v.add_argument("--policy-from", choices=("base", "file"), default="base")
     v.add_argument(
         "--allow-non-pass",
         action="store_true",
@@ -137,7 +146,7 @@ def _parser() -> argparse.ArgumentParser:
 
     b = sub.add_parser("bundle", help="trusted evidence bundle utilities")
     b_sub = b.add_subparsers(dest="bundle_command", required=True)
-    bd = b_sub.add_parser("digest", help="print the aicrg-tree-v1 digest of a directory or tar")
+    bd = b_sub.add_parser("digest", help="print the aicrg-tree-v2 digest of a directory or tar")
     bd.add_argument("path")
     return p
 
@@ -260,6 +269,9 @@ def _verify(args: argparse.Namespace) -> int:
         base=args.base,
         require_pass=not args.allow_non_pass,
         attestation=att,
+        policy=args.policy,
+        policy_from=args.policy_from,
+        require_base=not args.no_base,
     )
     print(f"INTEGRITY: {v.integrity}")
     print(v.authenticity.line())

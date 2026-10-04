@@ -11,7 +11,7 @@ somewhere the patch cannot write:
                     deleted, added files under them, replaced a directory
                     with a symlink) is discarded before the command runs.
 ``source: bundle``  an immutable directory or tar archive, pinned by an
-                    ``aicrg-tree-v1`` SHA-256 digest in the base contract and
+                    ``aicrg-tree-v2`` SHA-256 digest in the base contract and
                     mounted at ``mount`` inside the workspace. A wrong digest
                     is ERROR; the bundle is never used unverified.
 
@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import hashlib
 import io
+import json
 import os
 import stat
 import tarfile
@@ -38,9 +39,9 @@ from pathlib import Path, PurePosixPath
 
 from aicrg.evidence.workspace import list_files, safe_remove, safe_write
 from aicrg.git.repo import Repo
-from aicrg.globmatch import match_any
+from aicrg.globmatch import has_control_chars, match_any
 
-TREE_DIGEST_VERSION = "aicrg-tree-v1"
+TREE_DIGEST_VERSION = "aicrg-tree-v2"
 MAX_BUNDLE_BYTES = 512 * 1024 * 1024
 
 
@@ -52,6 +53,8 @@ Entries = dict[str, tuple[bytes, bool]]  # path -> (content, executable)
 
 
 def _check_rel(rel: str) -> str:
+    if has_control_chars(rel):
+        raise TrustedEvidenceError(f"control character in trusted evidence path: {rel!r}")
     p = PurePosixPath(rel)
     if p.is_absolute() or not p.parts or any(x in ("..", "") for x in p.parts):
         raise TrustedEvidenceError(f"unsafe path in trusted evidence: {rel!r}")
@@ -61,13 +64,22 @@ def _check_rel(rel: str) -> str:
 
 
 def tree_digest(entries: Entries) -> str:
-    """``sha256:`` over a sorted manifest of (mode, content sha256, path) lines."""
-    h = hashlib.sha256(TREE_DIGEST_VERSION.encode() + b"\n")
-    for rel in sorted(entries):
-        data, exe = entries[rel]
-        mode = "100755" if exe else "100644"
-        h.update(f"{mode} {hashlib.sha256(data).hexdigest()} {rel}\n".encode())
-    return "sha256:" + h.hexdigest()
+    """``sha256:`` over a canonical JSON manifest of [path, mode, content sha256].
+
+    Each entry is JSON-encoded, so no path (even one smuggling a newline) can
+    imitate another entry: the manifest is injective. (v1 used plain
+    ``mode sha path`` lines and was not.)
+    """
+    manifest = [
+        [rel, "100755" if exe else "100644", hashlib.sha256(data).hexdigest()]
+        for rel, (data, exe) in sorted(entries.items())
+    ]
+    blob = json.dumps(
+        {"format": TREE_DIGEST_VERSION, "entries": manifest},
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
+    return "sha256:" + hashlib.sha256(blob.encode()).hexdigest()
 
 
 def _dir_entries(root: Path) -> Entries:

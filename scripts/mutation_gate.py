@@ -35,6 +35,7 @@ EB = "tests/test_execution_boundary.py"
 TP = "tests/test_potency.py"
 AT = "tests/test_attestation.py"
 DR = "tests/test_doctor.py"
+SR = "tests/test_security_review_regressions.py"
 
 
 @dataclass(frozen=True)
@@ -271,8 +272,8 @@ MUTANTS: tuple[Mutant, ...] = (
         "M28",
         "trusted evidence content comes from the base, never the candidate head",
         "src/aicrg/evidence/collect.py",
-        "self.out.overlays = self._overlay(ws, c.trusted_evidence, base)",
-        "self.out.overlays = self._overlay(ws, c.trusted_evidence, head)",
+        'head_runs.update(self._trusted_runs(specs, head, "head", self.trusted_commit))',
+        'head_runs.update(self._trusted_runs(specs, head, "head", head))',
         (f"{TE}::TestTrustedEvidenceDemo",),
     ),
     Mutant(
@@ -329,8 +330,8 @@ MUTANTS: tuple[Mutant, ...] = (
         "M35",
         "a new failure on top of pre-existing ones is a regression",
         "src/aicrg/evidence/differential.py",
-        "    if head_ids - base_ids:\n        return DiffClass.NEW_REGRESSION",
-        "    if False:\n        return DiffClass.NEW_REGRESSION",
+        "    if any(n > base_ids.get(k, 0) for k, n in head_ids.items()):",
+        "    if any(n > base_ids.get(k, 0) and k in base_ids for k, n in head_ids.items()):",
         (PD,),
     ),
     Mutant(
@@ -458,6 +459,137 @@ MUTANTS: tuple[Mutant, ...] = (
         '        if "UNKNOWN" in sts:\n            return "UNKNOWN"',
         '        if False:\n            return "UNKNOWN"',
         (DR,),
+    ),
+    # ---- cold security review fixes (docs/SECURITY_REVIEW.md) -------------------------
+    Mutant(
+        "M51",
+        "F1: the verifier, not the receipt, decides which policy applies",
+        "src/aicrg/receipt/verify.py",
+        '            if policy_rec.get("source") != pol.source:',
+        "            if False:",
+        (AT,),
+    ),
+    Mutant(
+        "M52",
+        "F13: trusted content comes from the base tip, not the merge-base",
+        "src/aicrg/gate.py",
+        'trusted_commit=run.subject.get("base")',
+        "trusted_commit=None",
+        (f"{SR}::test_f13_trusted_content_comes_from_base_tip_not_stale_merge_base",),
+    ),
+    Mutant(
+        "M53",
+        "F3: trusted content changed during its own run is ERROR",
+        "src/aicrg/evidence/collect.py",
+        "                changed = scope.verify(ws)",
+        "                changed: list[str] = []",
+        (f"{SR}::test_f3_trusted_files_rewritten_during_run_is_never_pass_local",),
+    ),
+    Mutant(
+        "M54",
+        "F3: trusted paths are mounted read-only in the container",
+        "src/aicrg/evidence/executor.py",
+        "        for rel in req.readonly:",
+        "        for rel in ():",
+        (EB,),
+    ),
+    Mutant(
+        "M55",
+        "F12: globs match paths containing newlines",
+        "src/aicrg/globmatch.py",
+        "    return re.compile(body, re.DOTALL)",
+        "    return re.compile(body)",
+        (f"{SR}::test_f12_globs_match_paths_with_newlines",),
+    ),
+    Mutant(
+        "M56",
+        "F12: changed paths with control characters block",
+        "src/aicrg/gate.py",
+        "            if has_control_chars(p):",
+        "            if False:",
+        (f"{SR}::test_f12_control_character_paths_block",),
+    ),
+    Mutant(
+        "M57",
+        "F4: exit 1 with a clean (or coverage) report is not PASS",
+        "src/aicrg/evidence/commands.py",
+        "    if pstatus is ProviderStatus.COMPLETE and rc == 1:",
+        "    if False:",
+        (f"{SR}::test_f4_coverage_tool_exit_1_is_not_pass",),
+    ),
+    Mutant(
+        "M58",
+        "F5: differential identities are a multiset",
+        "src/aicrg/evidence/differential.py",
+        "    if any(n > base_ids.get(k, 0) for k, n in head_ids.items()):",
+        "    if any(k not in base_ids for k in head_ids):",
+        (f"{SR}::test_f5_duplicate_identical_finding_is_a_new_regression",),
+    ),
+    Mutant(
+        "M59",
+        "F6a: a killed control mutant makes potency unmeasurable",
+        "src/aicrg/potency/engine.py",
+        "        if cres.start_error or cres.timed_out or cres.returncode != 0:",
+        "        if False:",
+        (f"{SR}::test_f6a_self_hash_test_cannot_fake_potency",),
+    ),
+    Mutant(
+        "M60",
+        "F6b: a truncated mutant sample is not COMPLETE",
+        "src/aicrg/potency/engine.py",
+        "    elif rep.sampled_from > rep.generated:",
+        "    elif False:",
+        (f"{SR}::test_f6b_truncated_sample_is_not_complete",),
+    ),
+    Mutant(
+        "M61",
+        "F7: test-named modules imported by production code are analysed",
+        "src/aicrg/security/regressions.py",
+        "        if fc.new_path is None or not ctx.is_production(fc.new_path):",
+        "        if fc.new_path is None or is_test_path(fc.new_path):",
+        (SR,),
+    ),
+    Mutant(
+        "M62",
+        "F8: doctor sees a gate whose exit status is piped away or ignored",
+        "src/aicrg/doctor.py",
+        '                masked += _gate_line_hazards(run_text, str(s.get("shell", "")))',
+        "                masked += []",
+        (SR,),
+    ),
+    Mutant(
+        "M63",
+        "F11: external evidence inside the evaluated checkout is refused",
+        "src/aicrg/evidence/commands.py",
+        "        if checkout_root is not None and "
+        "p.resolve().is_relative_to(checkout_root.resolve()):",
+        "        if False:",
+        (f"{SR}::test_f11_external_report_inside_checkout_is_refused",),
+    ),
+    Mutant(
+        "M64",
+        "F11: external evidence for another revision is refused",
+        "src/aicrg/evidence/commands.py",
+        "        if report.revisions and expected_revisions and "
+        "not (report.revisions & expected_revisions):",
+        "        if False:",
+        (f"{SR}::test_f11_external_report_for_another_revision_is_refused",),
+    ),
+    Mutant(
+        "M65",
+        "F9: XML must be UTF-8 so the DTD guard sees the text",
+        "src/aicrg/evidence/providers.py",
+        '        raise ReportError("XML report must be UTF-8") from exc',
+        '        text = data.decode("latin-1")',
+        (f"{SR}::test_f9_utf16_xml_with_entities_is_refused",),
+    ),
+    Mutant(
+        "M66",
+        "F1b: without --base the verifier cannot vouch for the base contract",
+        "src/aicrg/receipt/verify.py",
+        "        elif require_base:",
+        "        elif False:",
+        (f"{SR}::test_f1b_verify_without_base_cannot_vouch_for_contract",),
     ),
 )
 

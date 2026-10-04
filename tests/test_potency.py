@@ -113,10 +113,12 @@ class TestGenerator:
         assert {m.operator for m in g.mutants} <= {"constant_number", "return_none"}
         assert not any(m.before == '"""Doc 1."""' for m in g.mutants)
 
-    def test_sampling_is_deterministic(self):
+    def test_sampling_is_reproducible_from_its_recorded_seed(self):
         g = generate("app/price.py", NEW_CODE.encode(), {3, 4, 5})
-        assert sample(g.mutants, 3) == sample(g.mutants, 3)
-        assert len(sample(g.mutants, 3)) == 3
+        assert sample(g.mutants, 3, 1234) == sample(g.mutants, 3, 1234)
+        assert len(sample(g.mutants, 3, 1234)) == 3
+        seen = {tuple(m.id for m in sample(g.mutants, 3, s)) for s in range(20)}
+        assert len(seen) > 1  # not a fixed, predictable subset
 
 
 class TestPotencyGate:

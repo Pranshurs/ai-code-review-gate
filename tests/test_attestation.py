@@ -123,15 +123,38 @@ class TestSsh:
         v = verify_receipt(path, repo.root, base="main", require_pass=False)
         assert v.authenticity.status == "VERIFIED" and v.ok, v.problems
 
+    def test_forged_policy_source_cannot_skip_required_attestation(self, repo, gate, tmp_path):
+        """F1: the receipt's own policy.source must not decide which contract applies."""
+        _, signers = _keypair(tmp_path)
+        policy = (
+            "version: 1\nattestation:\n  required: true\n  method: ssh\n"
+            "  allowed_signers: .aicrg/allowed_signers\n  identity: gate@aicrg\n"
+        )
+        repo.commit(
+            {
+                "review-gate.yaml": policy,
+                ".aicrg/allowed_signers": signers.read_text(),
+                "a.py": "x=1\n",
+            }
+        )
+        repo.git("checkout", "-q", "-b", "agent")
+        repo.commit({"a.py": "x = 2\n"})
+        path = write_receipt(gate().receipt, tmp_path / "r")
+        _reseal_with(path, policy={**json.loads(path.read_text())["policy"], "source": "file:x"})
+        v = verify_receipt(path, repo.root, base="main")
+        assert not v.ok
+        assert any("evaluated under policy" in p for p in v.problems)
+        assert any("attestation required" in p for p in v.problems)
+
     def test_cli_reports_integrity_and_authenticity(
         self, repo, gate, tmp_path, capsys, monkeypatch
     ):
         path, _ = _pass_receipt(repo, gate, tmp_path)
         monkeypatch.chdir(repo.root)
-        assert main(["verify-receipt", str(path)]) == 0
+        assert main(["verify-receipt", str(path), "--base", "main"]) == 0
         out = capsys.readouterr().out
         assert "INTEGRITY: VERIFIED" in out and "AUTHENTICITY: UNATTESTED" in out
-        assert main(["verify-receipt", str(path), "--require-attestation"]) == 5
+        assert main(["verify-receipt", str(path), "--base", "main", "--require-attestation"]) == 5
 
 
 # ----------------------------------------------------------------------------- github
@@ -224,6 +247,8 @@ class TestGithub:
         args = [
             "verify-receipt",
             str(path),
+            "--base",
+            "main",
             "--require-attestation",
             "--attestation",
             "github",

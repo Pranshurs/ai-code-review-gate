@@ -164,6 +164,22 @@ class TestContainerArgv:
         assert "GITHUB_TOKEN" not in names and "AWS_SECRET_ACCESS_KEY" not in names
         assert "MYVAR" in names  # only explicit, contract-approved names
 
+    def test_trusted_paths_are_mounted_read_only(self, tmp_path):
+        (tmp_path / "trusted_tests").mkdir()
+        ex = ContainerExecutor(ContainerSettings(image=IMAGE), host_env={})
+        ex._runtime = lambda: "/usr/bin/docker"  # type: ignore[method-assign]
+        argv = ex.runtime_argv(
+            ExecRequest(("python",), tmp_path, {}, 10, readonly=("trusted_tests",)), "n"
+        )
+        mounts = [argv[i + 1] for i, a in enumerate(argv) if a == "--mount"]
+        assert (
+            f"type=bind,source={(tmp_path / 'trusted_tests').resolve()},"
+            "target=/workspace/trusted_tests,readonly"
+        ) in mounts
+        for bad in ("../x", "a,b", "missing"):
+            with pytest.raises(ExecutorError):
+                ex.runtime_argv(ExecRequest(("python",), tmp_path, {}, 10, readonly=(bad,)), "n")
+
     def test_network_needs_explicit_opt_in(self, tmp_path):
         assert "--network bridge" in " ".join(self._argv(tmp_path, network="enabled"))
 

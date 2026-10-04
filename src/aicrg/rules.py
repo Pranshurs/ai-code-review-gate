@@ -35,6 +35,13 @@ _RULES: tuple[Rule, ...] = (
     # ---- contract ----------------------------------------------------------------
     Rule("path_outside_contract", "contract", DET, "changed file outside allowed_paths", fixed=B),
     Rule(
+        "unsafe_path_name",
+        "contract",
+        DET,
+        "changed path contains control characters (newline etc.); path rules cannot be trusted",
+        fixed=B,
+    ),
+    Rule(
         "protected_path_modified", "contract", DET, "changed file matches protected_paths", fixed=B
     ),
     Rule(

@@ -9,7 +9,7 @@ changed?**
 test_potency:
   command: python -m pytest -q -x -p no:cacheprovider tests
   paths: [app/**]                 # production code eligible for mutation
-  max_mutants: 40                 # deterministic, evenly spread sample above this
+  max_mutants: 40                 # above this: random sample (seed recorded), status SAMPLED
   mutant_timeout_seconds: 120
   total_timeout_seconds: 1800
   on_survivor: review             # review (default) | fail
@@ -18,8 +18,9 @@ test_potency:
 
 ## How it works
 
-1. Changed production lines: lines the patch *added* in non-test `.py` files
-   matching `paths`.
+1. Changed production lines: lines the patch *added* in production `.py`
+   files matching `paths`. A file named like a test (`test_x.py`, `x_test.py`,
+   under `test/`) counts as production when non-test code imports it.
 2. First-order mutants are generated **only on those lines**
    (`src/aicrg/potency/mutators.py`): comparison swaps, `and`/`or`, dropped
    `not`, negated conditions, `True`/`False`, numeric `n → n+1`, strings used
@@ -30,8 +31,12 @@ test_potency:
    construction (e.g. a constant in a branch the compiler removes); it is
    recorded and not run.
 4. In a clean head checkout, through the contract's executor, the unmutated
-   command must pass first (baseline). Then each mutant is written in place,
-   the command runs, and the original is restored.
+   command must pass first (baseline). Then a **control mutant** runs: the
+   original file plus a trailing comment — identical behaviour, different
+   bytes. It must survive; if the tests "kill" it they depend on source text
+   (e.g. a test asserting the file's SHA-256) and kill counts would mean
+   nothing, so potency is ERROR. Then each mutant is written in place, the
+   command runs, and the original is restored.
 5. Mutant outcome: **killed** (command failed), **killed by timeout**,
    **survived** (command passed), **not run** (budget exhausted).
 
@@ -55,8 +60,9 @@ held. It is the example in `tests/test_potency.py`.
 |---|---|---|
 | `COMPLETE` | every relevant mutant killed | none |
 | `SURVIVORS` | ≥1 mutant survived | `test_potency_survivor`: REVIEW (or BLOCK with `on_survivor: fail`) |
+| `SAMPLED` | more mutants than `max_mutants`; a random sample (seed recorded in the receipt) was all killed | `test_potency_unavailable` REVIEW: the unsampled behaviour is unmeasured |
 | `NO_MUTANTS` | no mutation site on changed production lines | none (nothing to measure) |
-| `ERROR` | baseline failed, test command could not start, executor unavailable | `test_potency_unavailable` REVIEW, or ERROR with `on_error: error` |
+| `ERROR` | baseline failed, control mutant killed, a target does not parse, test command could not start, executor unavailable | `test_potency_unavailable` REVIEW, or ERROR with `on_error: error` |
 | `TIMEOUT` | total budget exhausted before every mutant ran | as ERROR |
 
 A surviving mutant does **not** prove the implementation is wrong. It proves

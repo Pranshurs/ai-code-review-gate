@@ -68,14 +68,14 @@ runs:
         IN_POLICY: ${{ inputs.policy }}
         IN_EXECUTOR: ${{ inputs.executor }}
         IN_IMAGE: ${{ inputs.container-image }}
-        PR_BASE: ${{ github.event.pull_request.base.sha }}
-        PR_HEAD: ${{ github.event.pull_request.head.sha }}
+        PR_BASE: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+        PR_HEAD: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
       run: |
         set -u
         base="${IN_BASE:-${PR_BASE:-}}"
         head="${IN_HEAD:-${PR_HEAD:-HEAD}}"
         if [ -z "$base" ]; then
-          echo "::error::no base revision: set the 'base' input or run on pull_request"
+          echo "::error::no base revision: set the 'base' input or run on pull_request/merge_group"
           echo "decision=ERROR" >> "$GITHUB_OUTPUT"
           exit 4
         fi

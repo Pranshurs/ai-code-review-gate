@@ -28,6 +28,7 @@ Policy (``preexisting_failure`` on the check, decided by the base contract):
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from enum import StrEnum
 
 from aicrg.evidence.providers import UNAVAILABLE, ProviderStatus
@@ -47,10 +48,10 @@ class DiffClass(StrEnum):
 def classify(
     base_status: ProviderStatus,
     head_status: ProviderStatus,
-    base_ids: frozenset[str] | None,
-    head_ids: frozenset[str] | None,
+    base_ids: Mapping[str, int] | None,
+    head_ids: Mapping[str, int] | None,
 ) -> DiffClass:
-    """``*_ids`` are failure identities from a structured report, or None if unknown."""
+    """``*_ids`` are failure-identity multisets (identity -> count), or None if unknown."""
     if head_status in UNAVAILABLE:
         return DiffClass.HEAD_UNAVAILABLE
     head_failed = head_status is ProviderStatus.FINDINGS
@@ -63,7 +64,7 @@ def classify(
         return DiffClass.NEW_REGRESSION
     if base_ids is None or head_ids is None or not head_ids:
         return DiffClass.BOTH_FAIL_UNCOMPARED
-    if head_ids - base_ids:
+    if any(n > base_ids.get(k, 0) for k, n in head_ids.items()):
         return DiffClass.NEW_REGRESSION
     return DiffClass.PRE_EXISTING_FAILURE
 

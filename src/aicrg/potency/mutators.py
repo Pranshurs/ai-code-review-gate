@@ -32,6 +32,7 @@ from __future__ import annotations
 import ast
 import copy
 import hashlib
+import random
 from collections.abc import Iterator
 from dataclasses import dataclass
 from types import CodeType
@@ -78,6 +79,7 @@ class Generation:
     equivalent: list[Mutant]
     suppressed_lines: list[int]
     sites: int
+    parse_error: str | None = None
 
 
 def _line_offsets(src: bytes) -> list[int]:
@@ -202,11 +204,11 @@ def _candidates(tree: ast.Module) -> Iterator[tuple[ast.AST, str, str]]:
 
 
 def generate(path: str, src: bytes, changed_lines: set[int]) -> Generation:
-    """Mutants for ``changed_lines`` of one file. Unparseable files yield nothing."""
+    """Mutants for ``changed_lines`` of one file. Unparseable files report ``parse_error``."""
     try:
         tree = ast.parse(src, path)
-    except (SyntaxError, ValueError):
-        return Generation([], [], [], 0)
+    except (SyntaxError, ValueError) as exc:
+        return Generation([], [], [], 0, parse_error=f"{type(exc).__name__}: {exc}")
     offs = _line_offsets(src)
     lines = src.decode("utf-8", "replace").splitlines()
     suppressed = sorted(
@@ -243,9 +245,22 @@ def generate(path: str, src: bytes, changed_lines: set[int]) -> Generation:
     return Generation(mutants, equivalent, suppressed, sites)
 
 
-def sample(mutants: list[Mutant], limit: int) -> list[Mutant]:
-    """Deterministic, evenly spread subset (stable across runs)."""
+def sample(mutants: list[Mutant], limit: int, seed: int) -> list[Mutant]:
+    """Random subset drawn with ``seed`` (recorded in the receipt, so reproducible).
+
+    The seed is chosen per run, so a patch cannot predict which mutants will be
+    run and hide its weak spot outside an evenly spaced, deterministic sample.
+    """
     if len(mutants) <= limit:
         return list(mutants)
-    step = len(mutants) / limit
-    return [mutants[int(i * step)] for i in range(limit)]
+    picked = random.Random(seed).sample(range(len(mutants)), limit)  # noqa: S311 - not crypto
+    return [mutants[i] for i in sorted(picked)]
+
+
+CONTROL_SUFFIX = b"\n# aicrg potency control mutant: behaviour unchanged\n"
+
+
+def control_mutant(path: str, src: bytes) -> Mutant:
+    """Same behaviour, different bytes. It must SURVIVE: if the tests 'kill' it, they
+    depend on source text (a self-hash or line-number test) and kill counts mean nothing."""
+    return Mutant("control", path, 0, "control", "", "", src + CONTROL_SUFFIX)

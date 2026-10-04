@@ -9,8 +9,10 @@
 #  * An attestation made by a workflow running on refs/pull/N/merge is signed
 #    by a workflow file the PR can edit. Verify with a pinned signer workflow
 #    AND ref (attestation.signer_ref, default refs/heads/main): only runs of
-#    this file from a protected ref (e.g. a ruleset "require workflows to
-#    pass" pointing at main, or push/merge_group from main) can satisfy it.
+#    this file from that ref can satisfy it, e.g. a ruleset "require workflows
+#    to pass" pointing at main. merge_group runs are signed from
+#    refs/heads/gh-readonly-queue/... and pull_request runs from
+#    refs/pull/N/merge, so neither satisfies a refs/heads/main pin.
 #  * Make `gate` a required status check and require branches to be up to date.
 #  * Artifact attestations need a public repository or GitHub Enterprise Cloud.
 name: aicrg-gate

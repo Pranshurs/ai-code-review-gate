@@ -36,7 +36,7 @@ trusted_evidence:
 
   - name: release-invariants
     source: bundle                    # an immutable directory or tar archive
-    digest: sha256:9f2c…              # aicrg-tree-v1 digest, pinned in the BASE contract
+    digest: sha256:9f2c…              # aicrg-tree-v2 digest, pinned in the BASE contract
     mount: release_tests              # where it appears in the workspace
     bundle: /opt/evals/release.tar    # default location; --bundle NAME=PATH overrides
     command: python -m pytest -q -p no:cacheprovider --confcutdir release_tests release_tests
@@ -44,9 +44,10 @@ trusted_evidence:
 
 How it runs:
 
-1. A fresh checkout of the **candidate head** is made.
+1. A fresh checkout of the **candidate head** is made — one per trusted spec.
 2. `source: base`: every file matching `paths` is made **identical to the
-   merge-base**: candidate edits are overwritten, candidate deletions are
+   base tip** (the branch the patch is merged into, not the merge-base: a
+   branch cut from an old base must not be judged by old trusted tests): candidate edits are overwritten, candidate deletions are
    restored, files the candidate *added* under those paths (e.g. a
    `conftest.py` that marks failures as passed) are removed, and a directory
    the candidate replaced with a symlink is replaced by a real directory.
@@ -54,7 +55,13 @@ How it runs:
    with the pin; on mismatch the gate reports ERROR and the bundle is never
    used. The `mount` subtree is replaced by the bundle's files.
 3. The trusted command runs against the candidate implementation through
-   the same executor as everything else.
+   the same executor as everything else. With the container executor the
+   directories holding trusted files (and bundle mounts) are bind-mounted
+   **read-only**; with the local executor they are made non-writable on a
+   best-effort basis (same-user code can undo that). After the run, every
+   trusted file is compared with the trusted content and new files under
+   trusted paths are detected; a change makes that run **ERROR**, whatever
+   its exit status.
 4. A failure is `trusted_evidence_failed` (BLOCK). A patch that touches
    trusted paths gets `trusted_evidence_modified` (REVIEW) even though its
    edits were discarded, so the attempt is visible.
@@ -66,13 +73,14 @@ which candidate files were replaced or removed.
 `source: base` path or in a bundle, and the candidate cannot "bless" its own
 regression by regenerating them.
 
-**Bundle digests** (`aicrg-tree-v1`): SHA-256 over a sorted manifest of
-`<mode> <sha256(content)> <path>` lines, where mode is `100644` or `100755`.
-Directories and tar archives with the same files have the same digest.
-Symlinks, special files, absolute paths and `..` are rejected. Compute one
-with `aicrg bundle digest PATH`. No server is needed: a bundle can live on the
-runner, in a cache, or be fetched by an earlier CI step — the digest in the
-base contract is what makes it trusted.
+**Bundle digests** (`aicrg-tree-v2`): SHA-256 over a canonical JSON manifest
+`{"format": "aicrg-tree-v2", "entries": [[path, mode, sha256(content)], ...]}`
+sorted by path, mode `100644` or `100755`. JSON encoding makes the manifest
+injective: no path can imitate another entry (v1's plain-text lines could be
+forged with a newline inside a member name — found in the cold security
+review and fixed before release). Directories and tar archives with the same
+files have the same digest. Symlinks, special files, absolute paths, `..`
+and control characters in names are rejected.
 
 ### Limits — what the candidate still controls
 
@@ -117,6 +125,11 @@ external_evidence:                  # produced elsewhere; --evidence codeql=PATH
   - name: codeql
     format: sarif
 ```
+
+External reports must come from **outside the evaluated checkout** (a file the
+patch committed is refused), and a SARIF report that records
+`versionControlProvenance.revisionId` must name the head (or the CI commit)
+being judged.
 
 | format | typical providers |
 |---|---|
@@ -179,7 +192,8 @@ A differential check also runs on a clean checkout of the **merge-base**.
 
 Failure identities come from the report: JUnit `classname::name`; SARIF
 `ruleId|file|fingerprint` (or message), deliberately without line numbers so
-an unchanged finding that moved is still the same finding.
+an unchanged finding that moved is still the same finding. They are compared
+as **multisets**: a second occurrence of an identical finding is new.
 
 `allow` never means "clean": the receipt keeps both runs, their statuses and
 the classification, and the finding stays in the receipt as advisory.

@@ -1,0 +1,12 @@
+# Secret-scanning configuration for this repository.
+# The adversarial corpora contain deliberately fake, inert credentials: they are
+# the "agent committed a secret" test cases (e.g. corpus/dev/N01-secret-committed).
+# They are excluded from the wheel and sdist. Nothing outside corpus/ is allowlisted.
+title = "aicrg"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "deliberately fake credentials in adversarial corpora"
+paths = ['''^corpus/''']

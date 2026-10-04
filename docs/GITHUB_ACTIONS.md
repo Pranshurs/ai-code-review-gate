@@ -98,8 +98,9 @@ An attestation made by a `pull_request` run is signed by
 `<workflow>@refs/pull/N/merge` — a workflow file the PR itself can edit. It
 proves which run produced the receipt, not that the run was honest. Verify
 with a pinned `--signer-ref` (default `refs/heads/main`) so only runs of the
-workflow from a protected ref count: a ruleset-required workflow, or a
-`push` / `merge_group` run on the protected branch. Artifact attestations need
+workflow from a protected ref count, e.g. a ruleset-required workflow pinned
+to `refs/heads/main`. (`merge_group` runs are signed from
+`refs/heads/gh-readonly-queue/…`; they do not satisfy a `refs/heads/main` pin.) Artifact attestations need
 a public repository or GitHub Enterprise Cloud.
 
 ## `aicrg doctor`
@@ -126,6 +127,11 @@ aicrg doctor --github --branch main [--check-name gate]   # + branch rules via t
 | `github-up-to-date` | | branches need not be up to date |
 | `github-required-workflow` | | the gate runs from a PR-editable workflow (no ruleset-required workflow) |
 | `github-rules` / `github-protection` | | — reported **UNKNOWN** when the token cannot read them |
+
+`doctor` matches required checks by exact context (or `<workflow> / <job>`);
+it does not verify which app reports the check. A PR-added workflow with a
+job of the same name could satisfy a name-only requirement: bind the required
+check to its source app in the ruleset, or use a required workflow.
 
 UNKNOWN is never PASS: exit 4 if anything is UNKNOWN and nothing FAILs, 1 on
 FAIL, 0 otherwise (`--strict` also fails on WARN). The static mode needs no

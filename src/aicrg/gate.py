@@ -28,7 +28,7 @@ from aicrg.evidence.collect import (
 )
 from aicrg.git.diff import FileChange, Patch, extract_patch
 from aicrg.git.repo import Repo
-from aicrg.globmatch import match_any
+from aicrg.globmatch import has_control_chars, match_any
 from aicrg.llm.reviewer import ReviewerResult, run_reviewer
 from aicrg.model import CheckResult, Decision, Finding, GateError, Severity
 from aicrg.policy.contract import ReviewContract
@@ -286,6 +286,15 @@ def _contract_findings(ctx: PatchContext, run: _Run) -> list[Finding]:
     policy_path = run.policy.repo_path if run.policy else None
     for fc in ctx.patch.files:
         for p in fc.paths:
+            if has_control_chars(p):
+                out.append(
+                    finding(
+                        "unsafe_path_name",
+                        c,
+                        f"{fc.status_word()} path contains control characters: {p!r}",
+                        file=p.encode("unicode_escape").decode("ascii"),
+                    )
+                )
             if c.allowed_paths and match_any(p, c.allowed_paths) is None:
                 out.append(
                     finding(
@@ -372,8 +381,9 @@ def _evidence(run: _Run, repo: Repo, patch: Patch, contract: ReviewContract) -> 
         container_image=run.opts.container_image,
         bundles=dict(run.opts.bundles),
         external=dict(run.opts.external_evidence),
+        ci_sha=(run.subject.get("ci") or {}).get("sha"),
     )
-    out = collect_evidence(repo, patch, c, opts)
+    out = collect_evidence(repo, patch, c, opts, trusted_commit=run.subject.get("base"))
     run.evidence = out
     run.env_info["env_vars_withheld_from_checks"] = out.env_withheld
     run.checks.extend(r.result for r in out.runs)

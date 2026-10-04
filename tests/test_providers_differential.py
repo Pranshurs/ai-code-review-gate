@@ -121,7 +121,9 @@ class TestParsers:
 
 class TestClassify:
     def test_matrix(self):
-        f = frozenset
+        from collections import Counter
+
+        f = Counter
         assert classify(P.COMPLETE, P.COMPLETE, None, None) is DiffClass.UNCHANGED_PASS
         assert classify(P.FINDINGS, P.COMPLETE, None, None) is DiffClass.FIXED_FAILURE
         assert classify(P.COMPLETE, P.FINDINGS, None, None) is DiffClass.NEW_REGRESSION

@@ -160,7 +160,7 @@ def safe_write(root: Path, rel: str, data: bytes, executable: bool = False) -> N
     with os.fdopen(fd, "wb") as fh:
         fh.write(data)
     if executable:
-        os.chmod(target, 0o755)  # noqa: S103 - keeps the trusted file executable
+        os.chmod(target, 0o755)  # noqa: S103 - trusted file's exec bit  # nosec B103
 
 
 def safe_remove(root: Path, rel: str) -> bool:

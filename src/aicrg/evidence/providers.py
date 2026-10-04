@@ -33,6 +33,7 @@ rejected, and parsing failures are ERROR rather than "no findings".
 from __future__ import annotations
 
 import json
+import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from enum import StrEnum
@@ -90,6 +91,7 @@ class ParsedReport:
     coverage: dict[str, set[int]] | None = None  # file -> covered lines
     instrumented: dict[str, set[int]] | None = None  # file -> instrumented lines
     reason: str = ""
+    revisions: set[str] = field(default_factory=set)  # SARIF versionControlProvenance
 
     def identities(self) -> frozenset[str]:
         return frozenset(i.identity for i in self.items)
@@ -119,11 +121,19 @@ def _guard(data: bytes) -> None:
 
 def _xml(data: bytes) -> ET.Element:
     _guard(data)
-    head = data[:4096].lower()
-    if b"<!doctype" in head or b"<!entity" in data.lower():
-        raise ReportError("XML report declares a DTD or entities; refusing to parse")
+    # Decode first: a byte-level scan misses "<!DOCTYPE" written in UTF-16.
     try:
-        return ET.fromstring(data)  # noqa: S314 - DTD/entities rejected above
+        text = data.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise ReportError("XML report must be UTF-8") from exc
+    low = text.lower()
+    if "\x00" in text or "<!doctype" in low or "<!entity" in low:
+        raise ReportError("XML report declares a DTD or entities; refusing to parse")
+    decl = re.match(r"\s*<\?xml[^>]*encoding\s*=\s*[\"']([^\"']+)", text)
+    if decl and decl.group(1).lower().replace("_", "-") not in ("utf-8", "utf8", "us-ascii"):
+        raise ReportError(f"XML report declares encoding {decl.group(1)!r}; only UTF-8")
+    try:
+        return ET.fromstring(data)  # noqa: S314 - DTD/entities rejected above  # nosec B314
     except ET.ParseError as exc:
         raise ReportError(f"report is not well-formed XML: {exc}") from exc
 
@@ -161,6 +171,7 @@ def parse_sarif(data: bytes, prefixes: tuple[str, ...] = ()) -> ParsedReport:
     if not doc["runs"]:
         return ParsedReport("sarif", ProviderStatus.SKIPPED, reason="SARIF contains no runs")
     items: list[EvidenceItem] = []
+    revisions: set[str] = set()
     counts: dict[str, int] = {"suppressed": 0}
     for run in doc["runs"]:
         if not isinstance(run, dict):
@@ -172,6 +183,9 @@ def parse_sarif(data: bytes, prefixes: tuple[str, ...] = ()) -> ParsedReport:
                     ProviderStatus.ERROR,
                     reason="SARIF invocation reports executionSuccessful=false",
                 )
+        for vcp in run.get("versionControlProvenance") or []:
+            if isinstance(vcp, dict) and isinstance(vcp.get("revisionId"), str):
+                revisions.add(vcp["revisionId"])
         rule_levels: dict[str, str] = {}
         driver = ((run.get("tool") or {}).get("driver")) or {}
         for rule in driver.get("rules") or []:
@@ -212,7 +226,7 @@ def parse_sarif(data: bytes, prefixes: tuple[str, ...] = ()) -> ParsedReport:
             items.append(EvidenceItem(identity, level, msg, rule, file, line))
             counts[level] = counts.get(level, 0) + 1
     status = ProviderStatus.FINDINGS if items else ProviderStatus.COMPLETE
-    return ParsedReport("sarif", status, items, counts)
+    return ParsedReport("sarif", status, items, counts, revisions=revisions)
 
 
 # --------------------------------------------------------------------------- JUnit

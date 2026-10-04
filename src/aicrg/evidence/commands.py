@@ -22,8 +22,9 @@ import os
 import re
 import stat
 import time
+from collections import Counter
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -92,13 +93,27 @@ class EvidenceRun:
     status: ProviderStatus
     report: ParsedReport | None = None
 
+    def mark_error(self, reason: str) -> None:
+        """Evidence that cannot be trusted is ERROR, whatever the command reported."""
+        self.status = ProviderStatus.ERROR
+        self.report = None
+        self.result = replace(
+            self.result,
+            status=CheckStatus.ERROR,
+            provider_status=ProviderStatus.ERROR.value,
+            reason=reason,
+        )
+
     def failure_identities(
         self, block_levels: tuple[str, ...] | None = None
-    ) -> frozenset[str] | None:
-        """Identities of blocking failures, or None when the evidence has no structure."""
+    ) -> Counter[str] | None:
+        """Multiset of blocking failure identities, or None when the evidence has no structure.
+
+        A multiset, not a set: a second occurrence of an identical finding is new.
+        """
         if self.report is None:
             return None
-        return frozenset(i.identity for i in self.blocking_items(block_levels))
+        return Counter(i.identity for i in self.blocking_items(block_levels))
 
     def blocking_items(self, block_levels: tuple[str, ...] | None = None) -> list[EvidenceItem]:
         if self.report is None:
@@ -140,6 +155,7 @@ def run_check(
     *,
     executor: Executor | None = None,
     revision: str = "head",
+    readonly: tuple[str, ...] = (),
     clock: Callable[[], float] = time.monotonic,
 ) -> EvidenceRun:
     executor = executor or LocalExecutor()
@@ -156,7 +172,7 @@ def run_check(
                 check, started, t0, clock, f"bad report path: {exc}", revision=revision
             )
     version = executor.tool_version(argv, cwd, env)
-    outcome = executor.run(ExecRequest(argv, cwd, env, check.timeout_seconds))
+    outcome = executor.run(ExecRequest(argv, cwd, env, check.timeout_seconds, readonly))
     duration = round((clock() - t0) * 1000, 3)
     out = outcome.output
     digest = "sha256:" + hashlib.sha256(out).hexdigest()
@@ -229,8 +245,9 @@ def _judge_report(
         return str(exc), ProviderStatus.ERROR, None, None
     rdigest = "sha256:" + hashlib.sha256(data).hexdigest()
     pstatus = report.status
-    if pstatus is ProviderStatus.COMPLETE and rc == 1 and report.coverage is None:
-        # The tool says "failed" but its report shows nothing: do not trust the report.
+    if pstatus is ProviderStatus.COMPLETE and rc == 1:
+        # The tool says "failed" but its report shows nothing wrong (including a coverage
+        # report written by a failing test run): do not trust the report.
         report.items.append(
             EvidenceItem(f"<exit status {rc}>", "error", "exit status 1, clean report")
         )
@@ -269,8 +286,19 @@ def _error_run(
     return EvidenceRun(check, res, pstatus)
 
 
-def ingest_external(check: RequiredCheck, path: str | None) -> EvidenceRun:
-    """Evidence produced elsewhere (e.g. a CodeQL job) and handed to the gate."""
+def ingest_external(
+    check: RequiredCheck,
+    path: str | None,
+    *,
+    checkout_root: Path | None = None,
+    expected_revisions: frozenset[str] = frozenset(),
+) -> EvidenceRun:
+    """Evidence produced elsewhere (e.g. a CodeQL job) and handed to the gate.
+
+    The report must not live inside the evaluated checkout (the patch could have
+    committed a clean one), and a SARIF report that names the revision it
+    analysed must name the head (or the CI commit) being judged.
+    """
     started = _now()
     t0 = time.monotonic()
     if path is None:
@@ -287,9 +315,20 @@ def ingest_external(check: RequiredCheck, path: str | None) -> EvidenceRun:
     try:
         if p.is_symlink() or not p.is_file():
             raise ReportError(f"{path} is not a regular file")
+        if checkout_root is not None and p.resolve().is_relative_to(checkout_root.resolve()):
+            raise ReportError(
+                f"{path} is inside the evaluated checkout; external evidence must come from "
+                "outside the tree the patch controls"
+            )
         data = p.read_bytes()
-        assert check.report_format  # noqa: S101 - contract requires a format
+        if not check.report_format:
+            raise ReportError("external evidence has no format")
         report = parse_report(check.report_format, data)
+        if report.revisions and expected_revisions and not (report.revisions & expected_revisions):
+            raise ReportError(
+                f"report analysed revision(s) {sorted(report.revisions)}, not the evaluated "
+                f"head {sorted(expected_revisions)}"
+            )
     except (OSError, ReportError) as exc:
         return _error_run(check, started, t0, time.monotonic, str(exc), revision="head")
     res = CheckResult(
