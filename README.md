@@ -1,32 +1,54 @@
 # AI Code Review Gate
 
-**Independent acceptance evidence for AI-generated code.**
+**Independent acceptance evidence for AI-generated patches.**
 
-Your coding agent says the patch is done. AICRG checks the patch, the tests, the
-security-sensitive changes and the evidence before you merge it.
+Your coding agent says the patch is finished. AICRG verifies the exact patch,
+its tests, trusted evidence the patch cannot touch, security-sensitive changes
+and the required checks — before you accept it.
 
 ```
-Agent:
-  "Fixed the auth bug. All tests pass."
+Agent:                  "Fixed the authorization bug. Tests pass."
 
-What actually changed:
-  ✓ implementation changed
-  ✓ tests pass                      (27 passed)
-  ✗ security assertion weakened     assert response.status == 401
-                                 →  assert response.status != 500
+Candidate tests:        PASS
+What changed:           implementation changed
+                        authorization test weakened   is False  ->  in (True, False)
+Trusted base test:      FAIL   (owned by the base branch, run against the candidate code)
+Changed-code mutants:   6 of 6 survive the submitted tests
 
-AICRG:
-  MERGE BLOCKED
+AICRG:                  MERGE BLOCKED
 ```
 
-Existing tools each answer one question about a patch: is there a known
-vulnerability pattern, do types check, does lint pass, did tests exit 0. AICRG
-asks whether **the evidence package as a whole** is enough to accept the patch,
-and treats the parts a patch can tamper with (its tests, its CI config, its
-policy file, its claims) as untrusted inputs, not as proof.
+That is real output, reproducible with `python scripts/demo.py`.
 
-It works the same whether the patch came from Claude Code, Codex, Cursor,
-Copilot, another agent, a human, or nobody knows.
+The core question is not "did the tests pass?" but:
+
+> **Can a coding agent manipulate the tests, evaluator, CI or evidence used to
+> judge its own patch?**
+
+AICRG makes that materially harder by moving critical acceptance evidence
+outside the patch's authority:
+
+* the **review contract** is read from the base commit, never the patch;
+* **trusted evidence** (base-owned tests, or an immutable digest-pinned bundle)
+  runs against the candidate code whatever the patch did to its own tests;
+* evidence runs in a **clean checkout** of the exact commit, optionally inside
+  an **isolated container**, never the developer's working tree;
+* **differential** base/head runs separate new regressions from pre-existing
+  failures without calling either "clean";
+* **test potency** checks whether the submitted tests would notice wrong
+  versions of the changed code;
+* results from **specialist scanners** (CodeQL, Semgrep, Bandit, secret
+  scanners, test runners, coverage) are ingested, and a required one that is
+  skipped or fails is ERROR, never PASS;
+* a versioned **receipt** binds decision, commits, patch, policy and evidence;
+  verification rejects stale receipts and, when required, unsigned ones
+  (GitHub artifact attestations / Sigstore, or SSH signatures);
+* **`aicrg doctor`** checks whether a pull request could disable its own gate.
+
+It is not "AI that reviews AI code". An optional reviewer model can raise
+hypotheses (at most REVIEW_REQUIRED); it can never turn a deterministic FAIL or
+ERROR into PASS. It works the same whether the patch came from Claude Code,
+Codex, Cursor, Copilot, another agent, or a human.
 
 > Status: **pre-release, private**. Python-first. Not published to PyPI.
 > Read [what a PASS means](docs/THREAT_MODEL.md#what-a-pass-means) and the
@@ -109,49 +131,75 @@ PATCH → PROVENANCE → CONTRACT → RISK SURFACE → EVIDENCE EXECUTED → ADV
 | Provenance | base/head resolved to SHAs once; merge-base, head tree, patch digest, repo identity |
 | Contract | typed, fail-closed policy read from the base commit; unknown keys or bad types are ERROR |
 | Risk surface | auth, crypto, CI, dependencies, migrations, subprocess, filesystem, network, secrets, tests, validation, concurrency; from paths and the AST of the touched functions |
-| Evidence | `required_checks` run in a fresh worktree of the exact head commit, with credential-looking env vars withheld; exit status, timing, output digest recorded |
+| Evidence | `required_checks` run in a clean checkout of the exact head commit through an executor (`local` = trusted-code mode; `container` = unprivileged, no network, no host env, resource-limited); exit status, timing, output digest, provider status recorded ([execution security](docs/EXECUTION_SECURITY.md)) |
+| Trusted evidence | base-owned paths or a digest-pinned bundle overlaid on the head; candidate edits, deletions, additions and symlink tricks under those paths are discarded ([evidence](docs/EVIDENCE.md#trusted-evidence)) |
+| Providers | SARIF / JUnit / Cobertura / LCOV / JSON reports from CodeQL, Semgrep, Bandit, Ruff, secret scanners, pytest, coverage; external reports via `--evidence`; required + SKIPPED/ERROR/TIMEOUT ⇒ ERROR |
+| Differential | checks marked `differential` also run on the merge-base: NEW_REGRESSION vs PRE_EXISTING_FAILURE (proven by failure identities) vs FIXED_FAILURE |
+| Test potency | diff-scoped mutants of changed production lines; surviving mutants ⇒ REVIEW ([details](docs/TEST_POTENCY.md)) |
 | Test integrity | removed or weakened assertions, broadened `pytest.raises`, vacuous asserts, new skips/xfail, shrunk `parametrize`, deleted tests, golden-file edits, pytest/coverage/mypy/ruff config loosening ([details](docs/TEST_INTEGRITY.md)) |
 | CI integrity | test steps removed, `\|\| true` / `--exit-zero` / `continue-on-error`, disabled jobs, removed scanners, `pull_request_target` added |
 | Security regressions | auth checks or decorators removed, `verify=False`, `shell=True` with dynamic input, `pickle`/`eval`, `compare_digest` removed, broad `except: pass`, fail-open handlers, security defaults flipped, secrets |
 | Dependencies | new runtime deps vs policy, URL/VCS deps, near-miss names, index changes, lockfile drift |
 | Reviewer model | optional, off by default; can only add cited **hypotheses**, at most REVIEW_REQUIRED |
-| Receipt | versioned JSON bound to SHAs, patch digest and policy digest; `aicrg verify-receipt` rejects stale or edited receipts |
+| Receipt | versioned JSON bound to SHAs, patch digest, policy digest and evidence; `aicrg verify-receipt` reports INTEGRITY and AUTHENTICITY separately, rejects stale/edited receipts, and unsigned ones when attestation is required ([receipts](docs/RECEIPTS.md)) |
+| Doctor | `aicrg doctor [--github]`: missing or masked gate, pwn-request patterns, broad tokens, unpinned actions, secrets in the gate job, gate not a required check; UNKNOWN is never PASS |
 
-Linters, type checkers, Bandit, Semgrep, pip-audit and your tests are evidence
-providers: list them in `required_checks`. AICRG does not reimplement them.
+Linters, type checkers, Bandit, Semgrep, CodeQL, secret scanners, pip-audit
+and your tests are evidence providers. AICRG does not reimplement them.
 
 ## Does it work?
 
 Measured on adversarial patch corpora where each bad patch keeps the project's
-tests **green** (full method and every miss: [docs/EVALUATION.md](docs/EVALUATION.md)):
+tests **green**, plus a real-world track (full method and every miss:
+[docs/EVALUATION.md](docs/EVALUATION.md)):
 
 | corpus | bad patches blocked | legitimate patches accepted |
 |---|---|---|
 | held-out v2 (blind, not tuned on) | **28 / 36** (78%) | **11 / 13** |
 | held-out v1 (blind, first run) | **25 / 35** (71%) | **10 / 11** |
+| real-world: 37 pinned upstream patches, static layer only | **18 / 25** | **12 / 12** |
 | dev (written with the detectors; tuning only) | 37 / 37 | 7 / 7 |
+
+The real-world track reverses 16 real security fixes and 4 CI-hardening
+commits, and includes real test removals and 12 ordinary upstream commits. Most
+of its detections come from the reversal also deleting the fix's regression
+test; reversed CI hardening (removed `permissions:`, unpinned actions) was
+missed 0/4. Against tampercheck 0.1.1 and tamperguard 0.2.0 on identical diffs
+(verification-tampering scope): held-out v2 17/21 vs 4/21 and 5/21 (7/21 with
+tamperguard's review verdicts); real-world 4/10 vs 2/10 and 0/10 (2/10).
 
 **What it misses:** semantic changes with no syntactic trace (a constant
 changed from 8 to 6, `startswith` used for path containment, a permission string
 swapped), checks missing from *new* code, encoded secrets, narrow exception
-suppression, assertions behind environment guards. **False positives:** checks
-moved into helpers in other modules, tests consolidated into a parametrized test.
+suppression, assertions behind environment guards. These are the cases the
+structural layers target instead of more pattern rules: in a post-hoc
+experiment, test potency turned 3 of the 8 held-out v2 misses into
+REVIEW_REQUIRED; trusted evidence and a secret scanner as a required provider
+cover others. **False positives:** checks moved into helpers in other modules,
+tests consolidated into a parametrized test (both still FAIL rather than
+REVIEW_REQUIRED; an open design decision).
 
-The held-out corpora were written by AI sub-agents working blind to the
-implementation. That is weaker independence than human red-teaming.
+All corpora were written or labelled by AI agents (the real-world patches are
+human-authored upstream code, the labels are not). A human-labelled held-out
+corpus is still pending.
 
 ## The gate checks itself
 
-* **Mutation gate** ([scripts/mutation_gate.py](scripts/mutation_gate.py)): 27
-  targeted mutants, each breaking one security-critical invariant (stale HEAD
-  accepted, failed command treated as PASS, malformed policy allowed, policy read
-  from head, errors becoming PASS, secrets unredacted...). All 27 are killed by
-  the test suite.
-* **Self-review** ([docs/self-review/](docs/self-review/)): AICRG runs on its own
-  changes under its own [review-gate.yaml](review-gate.yaml), then is handed a
-  mutant of itself that weakens one of its own invariant tests ("fix flaky
-  test"). It blocks the mutant, and the script verifies the repository is
-  restored exactly.
+* **Mutation gate** ([scripts/mutation_gate.py](scripts/mutation_gate.py)): 50
+  targeted mutants, each breaking one security-critical invariant: stale HEAD
+  accepted, failed command treated as PASS, policy read from head, trusted
+  evidence read from the candidate, bundle digest ignored, surviving mutant
+  treated as PASS, provider SKIPPED/ERROR treated as PASS, new regression
+  hidden as pre-existing, container downgraded to local, network or host env
+  leaking into the container, unsigned receipt accepted when attestation is
+  required, attestation for the wrong commit or from a PR-ref workflow,
+  doctor missing a disabled gate... All 50 are killed.
+* **Self-review** ([docs/self-review/](docs/self-review/)): AICRG reviews its own
+  changes under its own [review-gate.yaml](review-gate.yaml), then is handed
+  adversarial copies of itself (weakened test, deleted trusted evidence, wrong
+  bundle digest, manipulated or unsigned receipt, skipped/erroring provider,
+  moved head, weakened gate config). Each is blocked, and the repository is
+  verified to be restored exactly.
 
 ## Overhead
 
@@ -183,24 +231,32 @@ jobs:
         with: { policy: review-gate.yaml }
 ```
 
-Make the job a **required status check**. The receipt is uploaded as an
-artifact, and a summary is written to the job page. Read the
-[threat boundary](docs/GITHUB_ACTIONS.md#threat-boundary) before running it on
-fork PRs.
+Make the job a **required status check**, preferably from a ruleset-required
+workflow the PR cannot edit. The receipt is uploaded as an artifact. Sign it in
+a **separate job** that runs no candidate code
+([example](docs/examples/aicrg-gate-attested.yml)), and run `aicrg doctor`.
+Read the [threat boundary](docs/GITHUB_ACTIONS.md#threat-boundary) before
+running it on fork PRs.
 
 ## What it is not
 
-Not an LLM review bot, not a scanner, not a sandbox, not a merge bot. A PASS
-**does not** mean the patch is correct or secure. It means the evidence the
-contract requires exists, ran against the exact commit, and was not visibly
-weakened by the patch. The receipt digest is tamper-evident, **not signed**.
+Not an LLM review bot, not a scanner, not a merge bot. The container executor
+is isolation, not a guarantee against kernel or runtime escape. A PASS **does
+not** mean the patch is correct or secure, and AICRG does not catch all AI bugs.
+It means the evidence the contract requires exists, ran against the exact
+commit (trusted parts of it outside the patch's control), and was not visibly
+weakened by the patch. Receipts are tamper-evident by digest; they are
+authentic only when attested and verified with a pinned signer.
 
 ## Documentation
 
 * [Architecture](docs/ARCHITECTURE.md)
 * [Review contract](docs/REVIEW_CONTRACT.md)
 * [Test integrity](docs/TEST_INTEGRITY.md)
-* [Receipts](docs/RECEIPTS.md)
+* [Evidence: trusted evidence, providers, differential runs](docs/EVIDENCE.md)
+* [Test potency](docs/TEST_POTENCY.md)
+* [Execution security](docs/EXECUTION_SECURITY.md)
+* [Receipts and attestations](docs/RECEIPTS.md)
 * [Threat model](docs/THREAT_MODEL.md)
 * [Evaluation](docs/EVALUATION.md)
 * [GitHub Actions](docs/GITHUB_ACTIONS.md)

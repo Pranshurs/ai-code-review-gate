@@ -86,6 +86,15 @@ The trusted command imports the candidate's code. Candidate code can:
   discovery above it — tested in `test_root_conftest_cannot_reach_trusted_run`),
   `-p no:<plugin>`, and by listing runner configuration in `paths`.
 
+**Make sure the trusted command imports the code under review.** With
+`pytest -c <ini>`, the ini's `pythonpath` is resolved relative to the ini
+file, not the repository root. If the project is also installed in the
+environment (an editable install is common), a wrong `pythonpath` makes the
+trusted tests import the *installed* copy and silently judge the wrong code.
+AICRG's own `tests/trusted.ini` hit exactly this during development and uses
+`pythonpath = ../src ..` for that reason. Check once with a test that asserts
+`yourpkg.__file__` is inside the workspace.
+
 Patch-level analysis still reports conftest, collection-hook and test
 configuration changes. Trusted evidence moves the *assertions* out of the
 patch's reach; it does not make the code under test honest.
