@@ -140,6 +140,36 @@ def test_f3_trusted_files_rewritten_during_run_is_never_pass_local(repo, gate):
     assert res.decision is not Decision.PASS
 
 
+TAMPER_IMPL_DETERMINED = textwrap.dedent(
+    """
+    import os, pathlib, stat
+    p = pathlib.Path(__file__).parent / "trusted_tests" / "test_z.py"
+    # Locally, read-only trusted files are best effort: their owner (the
+    # candidate's own user) can make them writable again.
+    os.chmod(p.parent, stat.S_IRWXU)
+    os.chmod(p, stat.S_IRUSR | stat.S_IWUSR)
+    p.write_text("def test_z():\\n    pass\\n")
+
+    def ok(x):
+        return True
+    """
+)
+
+
+def test_f3_owner_restoring_write_permission_is_detected_local(repo, gate):
+    """The local executor cannot *prevent* a same-user rewrite (a-w is undone by
+    chmod); post-run verification must *detect* it. Independent of running as
+    root (where a-w never blocks) or not (where the naive tamper is blocked and
+    the real trusted test fails instead): here the rewrite always succeeds, so
+    only verification stands between it and PASS."""
+    _tamper_repo(repo, TRUSTED_POLICY)
+    repo.commit({"impl.py": TAMPER_IMPL_DETERMINED})
+    res = gate()
+    assert res.decision is Decision.ERROR
+    run = next(c for c in res.checks if c.name == "contract")
+    assert "modified during its own run" in str(run.to_json()), run.to_json()
+
+
 @pytest.mark.skipif(not DOCKER, reason="docker unavailable")
 def test_f3_trusted_paths_are_read_only_in_container(repo, gate):
     pol = (

@@ -484,7 +484,7 @@ MUTANTS: tuple[Mutant, ...] = (
         "src/aicrg/evidence/collect.py",
         "                changed = scope.verify(ws)",
         "                changed: list[str] = []",
-        (f"{SR}::test_f3_trusted_files_rewritten_during_run_is_never_pass_local",),
+        (f"{SR}::test_f3_owner_restoring_write_permission_is_detected_local",),
     ),
     Mutant(
         "M54",

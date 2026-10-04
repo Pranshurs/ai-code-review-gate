@@ -141,3 +141,23 @@ tests fail on `7290835`; `tests/test_attestation.py::TestCiProvenance`
 mutants M72-M76. `tests/conftest.py` now clears ambient `GITHUB_*`/`GH_TOKEN`
 so the suite is hermetic; CI-context behaviour is tested by setting it
 explicitly.
+
+### Run 18: mutant M53 survived on the CI runner (root vs non-root)
+
+Run 18 (`6a79373`) was green for lint, all three test jobs, package, security
+and corpus, but `mutation` failed: **75/76, M53 survived** (M53 removes the
+post-run check that makes trusted content changed during its own run an
+ERROR). Locally, as root, the same gate killed 76/76. Cause: the killing test's
+candidate code was a *naive* tamper that gives up on `OSError`. As root the
+best-effort `a-w` protection never blocks the rewrite, so only the post-run
+check prevented PASS (mutant killed). On the non-root CI runner `a-w` blocked
+the rewrite, the real trusted test failed, and the test (which accepted
+"ERROR or FAIL") passed with or without the check: the invariant was not
+isolated where CI runs. A local non-root reproduction was not performed; the
+CI log is that reproduction.
+
+Fix: `test_f3_owner_restoring_write_permission_is_detected_local` uses a
+determined tamper that restores its own write permission (as the files' owner
+can) and requires ERROR naming the modification; M53 now targets it. This
+matches the documented limit: locally, trusted files are protected by
+detection, not prevention.
