@@ -16,9 +16,11 @@ allowed_paths:
   - CODE_OF_CONDUCT.md
   - .gitignore
 
+# Leading ./ anchors at the root: the corpora contain fixture policies with the
+# same file name, which must stay editable.
 protected_paths:
-  - review-gate.yaml
-  - LICENSE
+  - ./review-gate.yaml
+  - ./LICENSE
 
 # The adversarial corpora contain deliberately bad code and fake credentials.
 exclude_from_analysis:
