@@ -190,6 +190,17 @@ class TestReceipt:
         path.write_text(json.dumps(data))
         assert not verify_receipt(path, repo.root).ok
 
+    def test_resealed_receipt_with_forged_patch_digest_rejected(self, repo, gate, tmp_path):
+        from aicrg.receipt.receipt import seal
+
+        path, res = self._receipt(repo, gate, tmp_path)
+        forged = dict(res.receipt)
+        forged["subject"] = {**forged["subject"], "patch_digest": "sha256:" + "0" * 64}
+        path.write_text(json.dumps(seal(forged)))
+        v = verify_receipt(path, repo.root)
+        assert not v.ok
+        assert any("patch digest" in p for p in v.problems)
+
     def test_non_pass_receipt_does_not_authorise(self, repo, gate, tmp_path):
         _base(repo)
         repo.commit({"src/m.py": "def add(a, b):\n    return a - b\n"})

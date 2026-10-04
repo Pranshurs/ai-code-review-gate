@@ -1,0 +1,191 @@
+[
+  {
+    "id": "M01",
+    "invariant": "receipt is bound to the patch digest",
+    "killed": true,
+    "seconds": 7.6,
+    "detail": "FAILED tests/test_gate_invariants.py::TestReceipt::test_resealed_receipt_with_forged_patch_digest_rejected"
+  },
+  {
+    "id": "M02",
+    "invariant": "a changed HEAD invalidates a receipt",
+    "killed": true,
+    "seconds": 7.2,
+    "detail": "FAILED tests/test_gate_invariants.py::TestReceipt::test_new_commit_makes_receipt_stale"
+  },
+  {
+    "id": "M03",
+    "invariant": "a failed command is FAIL, never PASS",
+    "killed": true,
+    "seconds": 2.0,
+    "detail": "FAILED tests/test_gate_invariants.py::TestEvidence::test_failed_command_is_fail_not_pass"
+  },
+  {
+    "id": "M04",
+    "invariant": "deleted assertions are reported",
+    "killed": true,
+    "seconds": 1.1,
+    "detail": "FAILED tests/test_test_integrity.py::test_removed_assertion_in_security_test_blocks"
+  },
+  {
+    "id": "M05",
+    "invariant": "protected-path modification blocks",
+    "killed": true,
+    "seconds": 5.6,
+    "detail": "FAILED tests/test_gate_invariants.py::TestContractAndPolicy::test_patch_cannot_relax_its_own_policy"
+  },
+  {
+    "id": "M06",
+    "invariant": "malformed policy fails closed (unknown keys)",
+    "killed": true,
+    "seconds": 0.5,
+    "detail": "FAILED tests/test_policy.py::TestContractParsing::test_malformed_policy_fails_closed[version: 1\\nunknown_key: 1\\n]"
+  },
+  {
+    "id": "M07",
+    "invariant": "duplicate YAML keys are rejected",
+    "killed": true,
+    "seconds": 0.3,
+    "detail": "FAILED tests/test_policy.py::TestContractParsing::test_malformed_policy_fails_closed[version: 1\\nversion: 1\\n]"
+  },
+  {
+    "id": "M08",
+    "invariant": "gate errors never become PASS",
+    "killed": true,
+    "seconds": 0.4,
+    "detail": "FAILED tests/test_gate_invariants.py::TestDecision::test_error_never_passes"
+  },
+  {
+    "id": "M09",
+    "invariant": "an analyser exception is recorded as a gate error",
+    "killed": true,
+    "seconds": 5.5,
+    "detail": "FAILED tests/test_gate_invariants.py::TestContractAndPolicy::test_malformed_policy_is_error"
+  },
+  {
+    "id": "M10",
+    "invariant": "a check timeout is ERROR",
+    "killed": true,
+    "seconds": 3.5,
+    "detail": "FAILED tests/test_gate_invariants.py::TestEvidence::test_timeout_is_error - A..."
+  },
+  {
+    "id": "M11",
+    "invariant": "a missing check executable is ERROR",
+    "killed": true,
+    "seconds": 2.4,
+    "detail": "FAILED tests/test_gate_invariants.py::TestEvidence::test_missing_executable_is_error"
+  },
+  {
+    "id": "M12",
+    "invariant": "new runtime dependencies are evaluated",
+    "killed": true,
+    "seconds": 6.8,
+    "detail": "FAILED tests/test_security_ci_deps.py::test_dependency_policy[\"requests==2.31.0\"]-\"requests==2.31.0\", \"leftpad-py>=1\"]-new_runtime_dependency-FAIL]"
+  },
+  {
+    "id": "M13",
+    "invariant": "a tampered receipt is rejected",
+    "killed": true,
+    "seconds": 7.7,
+    "detail": "FAILED tests/test_gate_invariants.py::TestReceipt::test_tampered_receipt_rejected"
+  },
+  {
+    "id": "M14",
+    "invariant": "a non-PASS receipt does not authorise a merge",
+    "killed": true,
+    "seconds": 8.6,
+    "detail": "FAILED tests/test_gate_invariants.py::TestReceipt::test_non_pass_receipt_does_not_authorise"
+  },
+  {
+    "id": "M15",
+    "invariant": "a moved base branch makes the receipt stale",
+    "killed": true,
+    "seconds": 8.5,
+    "detail": "FAILED tests/test_gate_invariants.py::TestReceipt::test_base_moved_or_policy_changed_is_stale"
+  },
+  {
+    "id": "M16",
+    "invariant": "policy is read from base, not head",
+    "killed": true,
+    "seconds": 5.8,
+    "detail": "FAILED tests/test_gate_invariants.py::TestContractAndPolicy::test_patch_cannot_relax_its_own_policy"
+  },
+  {
+    "id": "M17",
+    "invariant": "inequality is weaker than equality",
+    "killed": true,
+    "seconds": 0.3,
+    "detail": "FAILED tests/test_test_integrity.py::test_assertion_strength[assert r.status != 500-1]"
+  },
+  {
+    "id": "M18",
+    "invariant": "new unconditional skips are reported",
+    "killed": true,
+    "seconds": 1.9,
+    "detail": "FAILED tests/test_test_integrity.py::test_unconditional_skip_blocks - Asserti..."
+  },
+  {
+    "id": "M19",
+    "invariant": "CI failure masking is reported",
+    "killed": true,
+    "seconds": 4.9,
+    "detail": "FAILED tests/test_security_ci_deps.py::test_ci_bypass[python -m pytest -q-python -m pytest -q || true-ci_failure_masked]"
+  },
+  {
+    "id": "M20",
+    "invariant": "removed authorization checks are reported",
+    "killed": true,
+    "seconds": 0.9,
+    "detail": "FAILED tests/test_security_ci_deps.py::test_security_regressions_block[    require_admin(user)\\n    return target-    return target-auth_check_removed]"
+  },
+  {
+    "id": "M21",
+    "invariant": "secrets are redacted in findings",
+    "killed": true,
+    "seconds": 3.7,
+    "detail": "FAILED tests/test_security_ci_deps.py::test_secret_is_detected_and_redacted"
+  },
+  {
+    "id": "M22",
+    "invariant": "credential env vars are withheld from checks",
+    "killed": true,
+    "seconds": 5.4,
+    "detail": "FAILED tests/test_gate_invariants.py::TestEvidence::test_secret_env_vars_are_withheld_from_checks"
+  },
+  {
+    "id": "M23",
+    "invariant": "reviewer hypotheses must cite an added line",
+    "killed": true,
+    "seconds": 1.0,
+    "detail": "FAILED tests/test_llm_reviewer.py::test_hypotheses_must_cite_added_lines_and_are_capped_at_review"
+  },
+  {
+    "id": "M24",
+    "invariant": "reviewer findings are capped at REVIEW",
+    "killed": true,
+    "seconds": 1.1,
+    "detail": "FAILED tests/test_llm_reviewer.py::test_hypotheses_must_cite_added_lines_and_are_capped_at_review"
+  },
+  {
+    "id": "M25",
+    "invariant": "evidence comes from the head commit, not the working tree",
+    "killed": true,
+    "seconds": 4.9,
+    "detail": "FAILED tests/test_gate_invariants.py::TestEvidence::test_evidence_comes_from_head_commit_not_working_tree"
+  },
+  {
+    "id": "M26",
+    "invariant": "an internal CLI crash exits as ERROR",
+    "killed": true,
+    "seconds": 10.8,
+    "detail": "FAILED tests/test_gate_invariants.py::TestCli::test_internal_crash_is_error_exit"
+  },
+  {
+    "id": "M27",
+    "invariant": "a blocking finding is FAIL",
+    "killed": true,
+    "seconds": 0.4,
+    "detail": "FAILED tests/test_gate_invariants.py::TestDecision::test_matrix - AssertionEr..."
+  }
+]
