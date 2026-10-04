@@ -13,7 +13,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-SCHEMA = "aicrg.receipt/v1"
+SCHEMA = "aicrg.receipt/v2"
 SUPPORTED_SCHEMAS = (SCHEMA,)
 
 

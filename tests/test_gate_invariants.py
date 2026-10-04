@@ -167,7 +167,7 @@ class TestReceipt:
     def test_receipt_binds_exact_inputs(self, repo, gate, tmp_path):
         path, res = self._receipt(repo, gate, tmp_path)
         r = res.receipt
-        assert r["schema"] == "aicrg.receipt/v1"
+        assert r["schema"] == "aicrg.receipt/v2"
         assert r["subject"]["head"] == repo.git("rev-parse", "HEAD")
         assert r["subject"]["merge_base"] == repo.git("rev-parse", "main")
         assert r["subject"]["patch_digest"].startswith("sha256:")

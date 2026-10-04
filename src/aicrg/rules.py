@@ -59,6 +59,69 @@ _RULES: tuple[Rule, ...] = (
         fixed=R,
     ),
     Rule("required_check_failed", "evidence", DET, "a required check command failed", fixed=B),
+    Rule(
+        "evidence_provider_findings",
+        "evidence",
+        DET,
+        "an evidence provider (SARIF/JSON/external) reported findings: BLOCK at the check's "
+        "block_levels, REVIEW below them",
+    ),
+    Rule(
+        "preexisting_failure",
+        "evidence",
+        DET,
+        "a differential check fails on base and head; severity from preexisting_failure "
+        "(fail/review/allow; allow needs proven-identical failures)",
+    ),
+    Rule(
+        "optional_evidence_unavailable",
+        "evidence",
+        DET,
+        "an optional (required: false) evidence item was skipped, errored or timed out",
+        fixed=A,
+    ),
+    Rule(
+        "changed_code_coverage_low",
+        "evidence",
+        DET,
+        "changed production lines executed by tests below min_changed_coverage",
+        fixed=R,
+    ),
+    Rule(
+        "trusted_evidence_failed",
+        "trusted_evidence",
+        DET,
+        "evidence owned by the base or a pinned bundle failed against the candidate code",
+        fixed=B,
+    ),
+    Rule(
+        "trusted_evidence_modified",
+        "trusted_evidence",
+        DET,
+        "patch changes paths that trusted evidence owns (the candidate's version was discarded)",
+        fixed=R,
+    ),
+    Rule(
+        "test_potency_survivor",
+        "test_potency",
+        HEU,
+        "a mutant of changed production code survived the submitted tests (on_survivor)",
+    ),
+    Rule(
+        "test_potency_unavailable",
+        "test_potency",
+        DET,
+        "test potency could not be measured (baseline failure, tool error, timeout); "
+        "REVIEW, or ERROR when on_error: error",
+        fixed=R,
+    ),
+    Rule(
+        "test_potency_suppressed",
+        "test_potency",
+        DET,
+        "the patch adds no-mutate pragmas to changed production code",
+        fixed=R,
+    ),
     # ---- test integrity ----------------------------------------------------------
     Rule(
         "test_file_deleted",

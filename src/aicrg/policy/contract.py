@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import shlex
 from dataclasses import asdict, dataclass, field
 from typing import Any
@@ -76,15 +77,106 @@ class PolicyError(ValueError):
     """The contract is malformed. Always maps to decision ERROR."""
 
 
+EVIDENCE_SOURCES = ("head", "base", "bundle", "external")
+REPORT_FORMATS = ("sarif", "junit", "cobertura", "lcov", "json")
+PREEXISTING_FAILURE_MODES = ("fail", "review", "allow")
+BLOCK_LEVELS = ("error", "warning", "note")
+
+
 @dataclass(frozen=True, slots=True)
 class RequiredCheck:
+    """One piece of executed (or externally supplied) evidence.
+
+    ``source`` says who controls the evidence content: ``head`` (the candidate),
+    ``base``/``bundle`` (trusted evidence) or ``external`` (a report produced
+    elsewhere and handed to the gate by the operator).
+    """
+
     name: str
     argv: tuple[str, ...]
     timeout_seconds: int = 900
+    source: str = "head"
+    required: bool = True
+    differential: bool = False
+    preexisting_failure: str = "review"
+    report_format: str | None = None
+    report_path: str | None = None
+    block_levels: tuple[str, ...] = ("error",)
+    min_changed_coverage: float | None = None
 
     @property
     def command(self) -> str:
         return shlex.join(self.argv)
+
+    def canonical(self) -> dict[str, Any]:
+        return {
+            "name": self.name,
+            "argv": list(self.argv),
+            "timeout_seconds": self.timeout_seconds,
+            "source": self.source,
+            "required": self.required,
+            "differential": self.differential,
+            "preexisting_failure": self.preexisting_failure,
+            "report_format": self.report_format,
+            "report_path": self.report_path,
+            "block_levels": list(self.block_levels),
+            "min_changed_coverage": self.min_changed_coverage,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class TrustedEvidence:
+    name: str
+    source: str  # "base" or "bundle"
+    check: RequiredCheck
+    paths: tuple[str, ...] = ()  # source: base
+    bundle_path: str | None = None  # source: bundle (operator may override on the CLI)
+    digest: str | None = None  # source: bundle
+    mount: str | None = None  # source: bundle
+
+    def canonical(self) -> dict[str, Any]:
+        return {
+            "name": self.name,
+            "source": self.source,
+            "paths": list(self.paths),
+            "bundle_path": self.bundle_path,
+            "digest": self.digest,
+            "mount": self.mount,
+            "check": self.check.canonical(),
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class ContainerPolicy:
+    image: str
+    runtime: str = "docker"
+    network: str = "none"
+    cpus: float = 2.0
+    memory_mb: int = 2048
+    pids_limit: int = 512
+    tmpfs_mb: int = 512
+    user: str = "65534:65534"
+
+
+@dataclass(frozen=True, slots=True)
+class TestPotencyPolicy:
+    command: tuple[str, ...]
+    paths: tuple[str, ...] = ("**/*.py",)
+    max_mutants: int = 40
+    mutant_timeout_seconds: int = 120
+    total_timeout_seconds: int = 1800
+    on_survivor: str = "review"  # review | fail
+    on_error: str = "review"  # review | error
+
+
+@dataclass(frozen=True, slots=True)
+class AttestationPolicy:
+    required: bool = False
+    method: str = "github"  # github | ssh
+    repository: str | None = None  # github: owner/repo
+    signer_workflow: str | None = None  # github: e.g. owner/repo/.github/workflows/gate.yml
+    allowed_signers: str | None = None  # ssh: repo-relative path at base
+    identity: str | None = None  # ssh: principal expected in allowed_signers
 
 
 @dataclass(frozen=True, slots=True)
@@ -129,6 +221,12 @@ class ReviewContract:
     exclude_from_analysis: tuple[str, ...] = ()
     env_passthrough: tuple[str, ...] = ()
     llm_reviewer: LLMReviewerPolicy | None = None
+    executor: str = "local"  # local | container
+    container: ContainerPolicy | None = None
+    trusted_evidence: tuple[TrustedEvidence, ...] = ()
+    external_evidence: tuple[RequiredCheck, ...] = ()
+    test_potency: TestPotencyPolicy | None = None
+    attestation: AttestationPolicy = field(default_factory=AttestationPolicy)
 
     def forbids(self, change_class: str) -> bool:
         if change_class not in FORBIDDEN_CHANGE_CLASSES:
@@ -138,10 +236,9 @@ class ReviewContract:
     def canonical(self) -> dict[str, Any]:
         data = asdict(self)
         data["forbidden_changes"] = sorted(self.forbidden_changes)
-        data["required_checks"] = [
-            {"name": c.name, "argv": list(c.argv), "timeout_seconds": c.timeout_seconds}
-            for c in self.required_checks
-        ]
+        data["required_checks"] = [c.canonical() for c in self.required_checks]
+        data["trusted_evidence"] = [t.canonical() for t in self.trusted_evidence]
+        data["external_evidence"] = [c.canonical() for c in self.external_evidence]
         return data
 
     def digest(self) -> str:
@@ -218,31 +315,249 @@ def _argv(where: str, command: Any) -> tuple[str, ...]:
     return argv
 
 
+_CHECK_KEYS = {
+    "name",
+    "command",
+    "timeout_seconds",
+    "required",
+    "differential",
+    "preexisting_failure",
+    "report",
+    "block_levels",
+    "min_changed_coverage",
+}
+
+
+def _rel_path(where: str, value: Any) -> str:
+    if not isinstance(value, str) or not value:
+        raise PolicyError(f"{where}: expected a non-empty relative path")
+    parts = value.replace("\\", "/").split("/")
+    if value.startswith("/") or ".." in parts or parts[0] == ".git":
+        raise PolicyError(f"{where}: path must be relative, without '..' or .git: {value!r}")
+    return "/".join(p for p in parts if p not in ("", "."))
+
+
+def _check(where: str, item: Any, source: str, *, need_command: bool = True) -> RequiredCheck:
+    if isinstance(item, str) and need_command:
+        return RequiredCheck(name=item.strip(), argv=_argv(where, item), source=source)
+    if not isinstance(item, dict):
+        raise PolicyError(f"{where}: expected a string or a mapping")
+    _expect_keys(where, item, _CHECK_KEYS | ({"format"} if not need_command else set()))
+    if "name" not in item:
+        raise PolicyError(f"{where}: 'name' is required")
+    if need_command and "command" not in item:
+        raise PolicyError(f"{where}: 'command' is required")
+    if not need_command and "command" in item:
+        raise PolicyError(f"{where}: external evidence has no command (it is supplied)")
+    name = item["name"]
+    if not isinstance(name, str) or not name.strip():
+        raise PolicyError(f"{where}.name: expected a non-empty string")
+    kw: dict[str, Any] = {"name": name.strip(), "source": source}
+    kw["argv"] = _argv(f"{where}.command", item["command"]) if need_command else ()
+    kw["timeout_seconds"] = _int(
+        f"{where}.timeout_seconds", item.get("timeout_seconds", 900), 1, 86400
+    )
+    kw["required"] = _bool(f"{where}.required", item.get("required", True))
+    kw["differential"] = _bool(f"{where}.differential", item.get("differential", False))
+    if not need_command and kw["differential"]:
+        raise PolicyError(f"{where}: external evidence cannot be differential")
+    mode = item.get("preexisting_failure", "review")
+    if mode not in PREEXISTING_FAILURE_MODES:
+        raise PolicyError(
+            f"{where}.preexisting_failure: expected one of {list(PREEXISTING_FAILURE_MODES)}"
+        )
+    kw["preexisting_failure"] = mode
+    if need_command and "report" in item:
+        rep = _section(f"{where}.report", item["report"])
+        _expect_keys(f"{where}.report", rep, {"format", "path"})
+        if "format" not in rep or "path" not in rep:
+            raise PolicyError(f"{where}.report: 'format' and 'path' are required")
+        kw["report_format"] = rep["format"]
+        kw["report_path"] = _rel_path(f"{where}.report.path", rep["path"])
+    elif not need_command:
+        if "report" in item:
+            raise PolicyError(f"{where}: external evidence takes 'format', not 'report'")
+        if "format" not in item:
+            raise PolicyError(f"{where}: 'format' is required")
+        kw["report_format"] = item["format"]
+    if kw.get("report_format") is not None and kw["report_format"] not in REPORT_FORMATS:
+        raise PolicyError(f"{where}: report format must be one of {list(REPORT_FORMATS)}")
+    if "block_levels" in item:
+        levels = _str_list(f"{where}.block_levels", item["block_levels"])
+        bad = sorted(set(levels) - set(BLOCK_LEVELS))
+        if bad:
+            raise PolicyError(f"{where}.block_levels: unknown level(s) {bad}")
+        kw["block_levels"] = levels
+    if "min_changed_coverage" in item:
+        v = item["min_changed_coverage"]
+        if isinstance(v, bool) or not isinstance(v, int | float) or not 0 <= v <= 1:
+            raise PolicyError(f"{where}.min_changed_coverage: expected a number in [0, 1]")
+        if kw.get("report_format") not in ("cobertura", "lcov"):
+            raise PolicyError(f"{where}.min_changed_coverage needs a cobertura or lcov report")
+        kw["min_changed_coverage"] = float(v)
+    return RequiredCheck(**kw)
+
+
+def _unique(where: str, names: list[str]) -> None:
+    dupes = sorted({n for n in names if names.count(n) > 1})
+    if dupes:
+        raise PolicyError(f"{where}: duplicate evidence names {dupes}")
+
+
 def _checks(value: Any) -> tuple[RequiredCheck, ...]:
     if not isinstance(value, list):
         raise PolicyError("required_checks: expected a list")
-    out: list[RequiredCheck] = []
-    for i, item in enumerate(value):
-        where = f"required_checks[{i}]"
-        if isinstance(item, str):
-            argv = _argv(where, item)
-            out.append(RequiredCheck(name=item.strip(), argv=argv))
-            continue
-        if not isinstance(item, dict):
-            raise PolicyError(f"{where}: expected a string or a mapping")
-        _expect_keys(where, item, {"name", "command", "timeout_seconds"})
-        if "name" not in item or "command" not in item:
-            raise PolicyError(f"{where}: 'name' and 'command' are required")
-        name = item["name"]
-        if not isinstance(name, str) or not name.strip():
-            raise PolicyError(f"{where}.name: expected a non-empty string")
-        timeout = _int(f"{where}.timeout_seconds", item.get("timeout_seconds", 900), 1, 86400)
-        out.append(RequiredCheck(name.strip(), _argv(f"{where}.command", item["command"]), timeout))
-    names = [c.name for c in out]
-    dupes = sorted({n for n in names if names.count(n) > 1})
-    if dupes:
-        raise PolicyError(f"required_checks: duplicate check names {dupes}")
+    out = [_check(f"required_checks[{i}]", item, "head") for i, item in enumerate(value)]
+    _unique("required_checks", [c.name for c in out])
     return tuple(out)
+
+
+_DIGEST_RE_TEXT = r"^sha256:[0-9a-f]{64}$"
+
+
+def _trusted(value: Any) -> tuple[TrustedEvidence, ...]:
+    if not isinstance(value, list) or not value:
+        raise PolicyError("trusted_evidence: expected a non-empty list")
+    out: list[TrustedEvidence] = []
+    for i, item in enumerate(value):
+        where = f"trusted_evidence[{i}]"
+        sec = _section(where, item)
+        source = sec.get("source")
+        if source not in ("base", "bundle"):
+            raise PolicyError(f"{where}.source: expected 'base' or 'bundle'")
+        extra = {"source", "paths"} if source == "base" else {"source", "bundle", "digest", "mount"}
+        _expect_keys(where, sec, _CHECK_KEYS | extra)
+        check_item = {k: v for k, v in sec.items() if k in _CHECK_KEYS}
+        check = _check(where, check_item, source)
+        if source == "base":
+            if "paths" not in sec:
+                raise PolicyError(f"{where}: source 'base' needs 'paths'")
+            paths = _globs(f"{where}.paths", sec["paths"])
+            if not paths:
+                raise PolicyError(f"{where}.paths: must not be empty")
+            out.append(TrustedEvidence(check.name, "base", check, paths=paths))
+        else:
+            for k in ("digest", "mount"):
+                if k not in sec:
+                    raise PolicyError(f"{where}: source 'bundle' needs '{k}'")
+            digest = sec["digest"]
+            if not isinstance(digest, str) or not re.match(_DIGEST_RE_TEXT, digest):
+                raise PolicyError(f"{where}.digest: expected 'sha256:<64 hex>'")
+            bundle = sec.get("bundle")
+            if bundle is not None and (not isinstance(bundle, str) or not bundle):
+                raise PolicyError(f"{where}.bundle: expected a path")
+            out.append(
+                TrustedEvidence(
+                    check.name,
+                    "bundle",
+                    check,
+                    bundle_path=bundle,
+                    digest=digest,
+                    mount=_rel_path(f"{where}.mount", sec["mount"]),
+                )
+            )
+    _unique("trusted_evidence", [t.name for t in out])
+    return tuple(out)
+
+
+def _external(value: Any) -> tuple[RequiredCheck, ...]:
+    if not isinstance(value, list) or not value:
+        raise PolicyError("external_evidence: expected a non-empty list")
+    out = [
+        _check(f"external_evidence[{i}]", item, "external", need_command=False)
+        for i, item in enumerate(value)
+    ]
+    _unique("external_evidence", [c.name for c in out])
+    return tuple(out)
+
+
+def _execution(sec: dict[str, Any], kwargs: dict[str, Any]) -> None:
+    _expect_keys("execution", sec, {"env_passthrough", "executor", "container"})
+    if "env_passthrough" in sec:
+        kwargs["env_passthrough"] = _str_list("execution.env_passthrough", sec["env_passthrough"])
+    executor = sec.get("executor", "local")
+    if executor not in ("local", "container"):
+        raise PolicyError("execution.executor: expected 'local' or 'container'")
+    kwargs["executor"] = executor
+    if "container" in sec:
+        c = _section("execution.container", sec["container"])
+        _expect_keys("execution.container", c, set(ContainerPolicy.__dataclass_fields__))
+        if "image" not in c or not isinstance(c["image"], str) or not c["image"]:
+            raise PolicyError("execution.container.image: required")
+        ck: dict[str, Any] = {"image": c["image"]}
+        if "runtime" in c:
+            if c["runtime"] not in ("docker", "podman"):
+                raise PolicyError("execution.container.runtime: expected docker or podman")
+            ck["runtime"] = c["runtime"]
+        if "network" in c:
+            if c["network"] not in ("none", "enabled"):
+                raise PolicyError("execution.container.network: expected 'none' or 'enabled'")
+            ck["network"] = c["network"]
+        if "cpus" in c:
+            v = c["cpus"]
+            if isinstance(v, bool) or not isinstance(v, int | float) or not 0 < v <= 256:
+                raise PolicyError("execution.container.cpus: expected a number in (0, 256]")
+            ck["cpus"] = float(v)
+        for k, lo, hi in (
+            ("memory_mb", 64, 1_048_576),
+            ("pids_limit", 16, 65536),
+            ("tmpfs_mb", 1, 65536),
+        ):
+            if k in c:
+                ck[k] = _int(f"execution.container.{k}", c[k], lo, hi)
+        if "user" in c:
+            u = c["user"]
+            if not isinstance(u, str) or not u.replace(":", "").isdigit() or u.split(":")[0] == "0":
+                raise PolicyError("execution.container.user: numeric non-root uid[:gid] required")
+            ck["user"] = u
+        kwargs["container"] = ContainerPolicy(**ck)
+    if executor == "container" and "container" not in kwargs:
+        raise PolicyError("execution.executor 'container' needs an execution.container section")
+
+
+def _potency(sec: dict[str, Any]) -> TestPotencyPolicy:
+    _expect_keys("test_potency", sec, set(TestPotencyPolicy.__dataclass_fields__))
+    if "command" not in sec:
+        raise PolicyError("test_potency: 'command' is required")
+    kw: dict[str, Any] = {"command": _argv("test_potency.command", sec["command"])}
+    if "paths" in sec:
+        kw["paths"] = _globs("test_potency.paths", sec["paths"])
+    for k, lo, hi in (
+        ("max_mutants", 1, 10_000),
+        ("mutant_timeout_seconds", 1, 86400),
+        ("total_timeout_seconds", 1, 86400),
+    ):
+        if k in sec:
+            kw[k] = _int(f"test_potency.{k}", sec[k], lo, hi)
+    if sec.get("on_survivor", "review") not in ("review", "fail"):
+        raise PolicyError("test_potency.on_survivor: expected 'review' or 'fail'")
+    if sec.get("on_error", "review") not in ("review", "error"):
+        raise PolicyError("test_potency.on_error: expected 'review' or 'error'")
+    kw["on_survivor"] = sec.get("on_survivor", "review")
+    kw["on_error"] = sec.get("on_error", "review")
+    return TestPotencyPolicy(**kw)
+
+
+def _attestation(sec: dict[str, Any]) -> AttestationPolicy:
+    _expect_keys("attestation", sec, set(AttestationPolicy.__dataclass_fields__))
+    kw: dict[str, Any] = {"required": _bool("attestation.required", sec.get("required", False))}
+    method = sec.get("method", "github")
+    if method not in ("github", "ssh"):
+        raise PolicyError("attestation.method: expected 'github' or 'ssh'")
+    kw["method"] = method
+    for k in ("repository", "signer_workflow", "allowed_signers", "identity"):
+        if k in sec:
+            v = sec[k]
+            if not isinstance(v, str) or not v:
+                raise PolicyError(f"attestation.{k}: expected a non-empty string")
+            kw[k] = v
+    if method == "ssh" and kw["required"]:
+        if "allowed_signers" not in kw or "identity" not in kw:
+            raise PolicyError("attestation (ssh): 'allowed_signers' and 'identity' are required")
+        kw["allowed_signers"] = _rel_path("attestation.allowed_signers", kw["allowed_signers"])
+    if method == "github" and kw["required"] and "repository" not in kw:
+        raise PolicyError("attestation (github): 'repository' is required")
+    return AttestationPolicy(**kw)
 
 
 def _section(where: str, value: Any) -> dict[str, Any]:
@@ -281,6 +596,10 @@ def contract_from_mapping(data: dict[str, Any]) -> ReviewContract:
         "exclude_from_analysis",
         "execution",
         "llm_reviewer",
+        "trusted_evidence",
+        "external_evidence",
+        "test_potency",
+        "attestation",
     }
     _expect_keys("policy", data, top)
     if "version" not in data:
@@ -341,12 +660,19 @@ def contract_from_mapping(data: dict[str, Any]) -> ReviewContract:
             "exclude_from_analysis", data["exclude_from_analysis"]
         )
     if "execution" in data:
-        sec = _section("execution", data["execution"])
-        _expect_keys("execution", sec, {"env_passthrough"})
-        if "env_passthrough" in sec:
-            kwargs["env_passthrough"] = _str_list(
-                "execution.env_passthrough", sec["env_passthrough"]
-            )
+        _execution(_section("execution", data["execution"]), kwargs)
+    if "trusted_evidence" in data:
+        kwargs["trusted_evidence"] = _trusted(data["trusted_evidence"])
+    if "external_evidence" in data:
+        kwargs["external_evidence"] = _external(data["external_evidence"])
+    if "test_potency" in data:
+        kwargs["test_potency"] = _potency(_section("test_potency", data["test_potency"]))
+    if "attestation" in data:
+        kwargs["attestation"] = _attestation(_section("attestation", data["attestation"]))
+    names = [c.name for c in kwargs.get("required_checks", ())]
+    names += [t.name for t in kwargs.get("trusted_evidence", ())]
+    names += [c.name for c in kwargs.get("external_evidence", ())]
+    _unique("evidence", names)
     if "llm_reviewer" in data:
         sec = _section("llm_reviewer", data["llm_reviewer"])
         _expect_keys(

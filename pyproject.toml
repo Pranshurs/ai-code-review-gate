@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ai-code-review-gate"
-version = "0.1.0.dev0"
+version = "0.2.0.dev0"
 description = "Independent acceptance evidence for AI-generated code: a deterministic merge gate that binds patch, policy and evidence into a receipt."
 readme = "README.md"
 requires-python = ">=3.11"

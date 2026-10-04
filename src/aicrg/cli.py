@@ -53,6 +53,33 @@ def _parser() -> argparse.ArgumentParser:
         action="store_true",
         help="do not execute required checks (decision becomes ERROR if any exist)",
     )
+    c.add_argument(
+        "--executor",
+        choices=("local", "container"),
+        help="evidence executor; may upgrade 'local' to 'container', never downgrade",
+    )
+    c.add_argument(
+        "--container-image", help="image for --executor container (if the contract has none)"
+    )
+    c.add_argument(
+        "--bundle",
+        action="append",
+        default=[],
+        metavar="NAME=PATH",
+        help="location of a trusted evidence bundle (its digest is pinned by the base contract)",
+    )
+    c.add_argument(
+        "--evidence",
+        action="append",
+        default=[],
+        metavar="NAME=PATH",
+        help="report file for an external_evidence entry (e.g. a CodeQL SARIF)",
+    )
+    c.add_argument(
+        "--no-potency",
+        action="store_true",
+        help="skip test potency (decision becomes ERROR if the contract requires it)",
+    )
     c.add_argument("--format", choices=("text", "json", "markdown"), default="text")
     c.add_argument(
         "--summary-file", help="also append a Markdown summary here (e.g. $GITHUB_STEP_SUMMARY)"
@@ -75,6 +102,11 @@ def _parser() -> argparse.ArgumentParser:
     pv_sub.add_parser("show-default", help="print the built-in default contract")
 
     sub.add_parser("rules", help="list every finding code and how its severity is chosen")
+
+    b = sub.add_parser("bundle", help="trusted evidence bundle utilities")
+    b_sub = b.add_subparsers(dest="bundle_command", required=True)
+    bd = b_sub.add_parser("digest", help="print the aicrg-tree-v1 digest of a directory or tar")
+    bd.add_argument("path")
     return p
 
 
@@ -89,6 +121,8 @@ def main(argv: list[str] | None = None) -> int:
             return _policy(args)
         if args.command == "rules":
             return _rules()
+        if args.command == "bundle":
+            return _bundle(args)
     except KeyboardInterrupt:
         print("interrupted", file=sys.stderr)
         return EXIT[Decision.ERROR]
@@ -109,6 +143,11 @@ def _check(args: argparse.Namespace) -> int:
         policy=args.policy,
         policy_from=args.policy_from,
         run_checks=not args.no_run,
+        executor=args.executor,
+        container_image=args.container_image,
+        bundles=_pairs(args.bundle, "--bundle"),
+        external_evidence=_pairs(args.evidence, "--evidence"),
+        run_potency=not args.no_potency,
     )
     result = run_gate(opts)
     try:
@@ -137,6 +176,28 @@ def _check(args: argparse.Namespace) -> int:
         with open(args.summary_file, "a", encoding="utf-8") as fh:
             fh.write(render_markdown(result))
     return EXIT[result.decision]
+
+
+def _pairs(values: list[str], flag: str) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for v in values:
+        name, sep, path = v.partition("=")
+        if not sep or not name or not path:
+            raise SystemExit(f"aicrg: {flag} expects NAME=PATH, got {v!r}")
+        out[name] = path
+    return out
+
+
+def _bundle(args: argparse.Namespace) -> int:
+    from aicrg.evidence.trusted import TrustedEvidenceError, read_bundle, tree_digest
+
+    try:
+        entries = read_bundle(Path(args.path))
+    except TrustedEvidenceError as exc:
+        print(f"bundle INVALID: {exc}")
+        return EXIT[Decision.ERROR]
+    print(tree_digest(entries))
+    return 0
 
 
 def _verify(args: argparse.Namespace) -> int:

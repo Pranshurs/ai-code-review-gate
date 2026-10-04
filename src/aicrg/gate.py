@@ -19,15 +19,20 @@ from typing import Any, TypeVar
 from aicrg import GATE_NAME, __version__
 from aicrg.analysis.context import PatchContext
 from aicrg.dependencies.delta import DependencyReport, analyze_dependencies
-from aicrg.evidence.commands import filtered_env, run_check
-from aicrg.evidence.workspace import head_worktree
+from aicrg.evidence.collect import (
+    CollectOptions,
+    EvidenceOutcome,
+    collect_evidence,
+    trusted_paths_touched,
+)
 from aicrg.git.diff import FileChange, Patch, extract_patch
 from aicrg.git.repo import Repo
 from aicrg.globmatch import match_any
 from aicrg.llm.reviewer import ReviewerResult, run_reviewer
-from aicrg.model import CheckResult, CheckStatus, Decision, Finding, GateError, Severity
+from aicrg.model import CheckResult, Decision, Finding, GateError, Severity
 from aicrg.policy.contract import ReviewContract
 from aicrg.policy.loader import LoadedPolicy, load_policy
+from aicrg.potency.engine import PotencyReport, run_potency
 from aicrg.receipt.receipt import SCHEMA, seal
 from aicrg.risk.surfaces import RiskAssessment, RiskLevel, assess
 from aicrg.rules import finding
@@ -42,6 +47,8 @@ T = TypeVar("T")
 SECTIONS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("Change contract", ("contract",)),
     ("Required checks", ("evidence",)),
+    ("Trusted evidence", ("trusted_evidence",)),
+    ("Test potency", ("test_potency",)),
     ("Test integrity", ("test_integrity",)),
     ("CI integrity", ("ci_integrity",)),
     ("Security regressions", ("security",)),
@@ -52,6 +59,9 @@ SECTIONS: tuple[tuple[str, tuple[str, ...]], ...] = (
 STAGE_SECTION = {
     "contract": "Change contract",
     "evidence": "Required checks",
+    "execution": "Required checks",
+    "trusted_evidence": "Trusted evidence",
+    "test_potency": "Test potency",
     "test_integrity": "Test integrity",
     "ci_integrity": "CI integrity",
     "config": "Test integrity",
@@ -71,6 +81,11 @@ class GateOptions:
     policy_from: str = "base"
     run_checks: bool = True
     receipt_dir: Path | None = None
+    executor: str | None = None  # operator override; may upgrade local -> container only
+    container_image: str | None = None
+    bundles: dict[str, str] = field(default_factory=dict)
+    external_evidence: dict[str, str] = field(default_factory=dict)
+    run_potency: bool = True
 
 
 @dataclass(slots=True)
@@ -112,6 +127,8 @@ class _Run:
         self.ti: TestIntegrityReport | None = None
         self.deps: DependencyReport | None = None
         self.reviewer: ReviewerResult | None = None
+        self.evidence: EvidenceOutcome | None = None
+        self.potency: PotencyReport | None = None
         self.env_info: dict[str, Any] = {
             "python": sys.version.split()[0],
             "platform": platform.platform(),
@@ -231,6 +248,8 @@ def _analyse(run: _Run, repo: Repo, patch: Patch, contract: ReviewContract) -> N
         run.deps = deps
         run.findings.extend(deps.findings)
     run.stage("evidence", lambda: _evidence(run, repo, patch, contract))
+    if contract.test_potency is not None:
+        run.stage("test_potency", lambda: _potency(run, repo, patch, contract))
     reviewer = run.stage("llm_review", lambda: run_reviewer(contract.llm_reviewer, patch, contract))
     if reviewer is not None:
         run.reviewer = reviewer
@@ -275,6 +294,19 @@ def _contract_findings(ctx: PatchContext, run: _Run) -> list[Finding]:
                         file=p,
                     )
                 )
+    touched: dict[str, list[str]] = {}
+    for path, name in trusted_paths_touched(ctx.patch, c):
+        touched.setdefault(name, []).append(path)
+    for name, paths in sorted(touched.items()):
+        out.append(
+            finding(
+                "trusted_evidence_modified",
+                c,
+                f"patch changes {len(paths)} path(s) owned by trusted evidence `{name}`; the "
+                "candidate's version was discarded and the trusted version was used",
+                file=sorted(paths)[0],
+            )
+        )
     if run.risk is not None:
         for surface in c.review_required_surfaces:
             files = sorted({h.file for h in run.risk.hits if h.surface == surface})
@@ -292,7 +324,8 @@ def _contract_findings(ctx: PatchContext, run: _Run) -> list[Finding]:
 
 def _evidence(run: _Run, repo: Repo, patch: Patch, contract: ReviewContract) -> None:
     c = contract
-    if not c.required_checks:
+    executes = bool(c.required_checks or c.trusted_evidence)
+    if not (executes or c.external_evidence):
         if run.risk is not None and run.risk.level >= RiskLevel.HIGH:
             run.findings.append(
                 finding(
@@ -303,7 +336,7 @@ def _evidence(run: _Run, repo: Repo, patch: Patch, contract: ReviewContract) -> 
                 )
             )
         return
-    if not run.opts.run_checks:
+    if executes and not run.opts.run_checks:
         run.errors.append(
             GateError(
                 "evidence",
@@ -313,29 +346,38 @@ def _evidence(run: _Run, repo: Repo, patch: Patch, contract: ReviewContract) -> 
         )
         run.errored_stages.add("evidence")
         return
-    env, dropped = filtered_env(c.env_passthrough)
-    run.env_info["env_vars_withheld_from_checks"] = len(dropped)
-    with head_worktree(repo, patch.head) as wt:
-        for check in c.required_checks:
-            res = run_check(check, wt, env)
-            run.checks.append(res)
-            if res.status is CheckStatus.FAIL:
-                run.findings.append(
-                    finding(
-                        "required_check_failed",
-                        c,
-                        f"required check `{check.name}` failed: {res.reason}",
-                        after=res.output_tail[-300:] or None,
-                    )
-                )
-            elif res.status is CheckStatus.ERROR:
-                run.errors.append(
-                    GateError(
-                        "evidence",
-                        f"required check `{check.name}` could not complete: {res.reason}",
-                    )
-                )
-                run.errored_stages.add("evidence")
+    opts = CollectOptions(
+        executor=run.opts.executor,
+        container_image=run.opts.container_image,
+        bundles=dict(run.opts.bundles),
+        external=dict(run.opts.external_evidence),
+    )
+    out = collect_evidence(repo, patch, c, opts)
+    run.evidence = out
+    run.env_info["env_vars_withheld_from_checks"] = out.env_withheld
+    run.checks.extend(r.result for r in out.runs)
+    run.findings.extend(out.findings)
+    for err in out.errors:
+        run.errors.append(err)
+        run.errored_stages.add(err.stage)
+
+
+def _potency(run: _Run, repo: Repo, patch: Patch, contract: ReviewContract) -> None:
+    pol = contract.test_potency
+    assert pol is not None  # noqa: S101 - caller checked
+    if not run.opts.run_checks or not run.opts.run_potency:
+        run.errors.append(
+            GateError("test_potency", "test potency is required by the contract but was not run")
+        )
+        run.errored_stages.add("test_potency")
+        return
+    opts = CollectOptions(executor=run.opts.executor, container_image=run.opts.container_image)
+    report = run_potency(repo, patch, contract, opts)
+    run.potency = report
+    run.findings.extend(report.findings)
+    for err in report.errors:
+        run.errors.append(err)
+        run.errored_stages.add(err.stage)
 
 
 def _sections(run: _Run, findings: list[Finding]) -> dict[str, str]:
@@ -354,8 +396,12 @@ def _sections(run: _Run, findings: list[Finding]) -> dict[str, str]:
     if run.policy is None:
         return {t: "ERROR" for t in out}
     c = run.policy.contract
-    if not c.required_checks and out["Required checks"] == "PASS":
+    if not (c.required_checks or c.external_evidence) and out["Required checks"] == "PASS":
         out["Required checks"] = "NONE"
+    if not c.trusted_evidence and out["Trusted evidence"] == "PASS":
+        out["Trusted evidence"] = "NONE"
+    if c.test_potency is None and out["Test potency"] == "PASS":
+        out["Test potency"] = "OFF"
     if c.llm_reviewer is None:
         out["Reviewer model (advisory)"] = "OFF"
     return out
@@ -382,6 +428,10 @@ def _receipt(
         "risk": run.risk.to_json() if run.risk else None,
         "sections": sections,
         "checks": [c.to_json() for c in run.checks],
+        "execution": run.evidence.execution if run.evidence else None,
+        "evidence": run.evidence.summary if run.evidence else [],
+        "trusted_evidence": [o.to_json() for o in run.evidence.overlays] if run.evidence else [],
+        "test_potency": run.potency.to_json() if run.potency else {"status": "not_run"},
         "findings": [f.to_json() for f in findings],
         "summary": {
             "blocking": len(blocking),
