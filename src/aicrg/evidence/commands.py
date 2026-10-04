@@ -164,18 +164,17 @@ def run_check(
     report: ParsedReport | None = None
     report_digest: str | None = None
     if outcome.start_error is not None:
-        status, reason = CheckStatus.ERROR, outcome.start_error
+        reason = outcome.start_error
         pstatus = ProviderStatus.ERROR
     elif outcome.timed_out:
-        status, reason = CheckStatus.ERROR, f"timed out after {check.timeout_seconds}s; killed"
+        reason = f"timed out after {check.timeout_seconds}s; killed"
         pstatus = ProviderStatus.TIMEOUT
     elif check.report_format and check.report_path:
-        status, reason, pstatus, report, report_digest = _judge_report(check, cwd, rc)
+        reason, pstatus, report, report_digest = _judge_report(check, cwd, rc)
     elif rc == 0:
-        status, reason = CheckStatus.PASS, ""
+        reason = ""
         pstatus = ProviderStatus.COMPLETE
     else:
-        status = CheckStatus.FAIL
         reason = (
             f"exit status {rc}"
             if rc is not None and rc > 0
@@ -185,9 +184,11 @@ def run_check(
             reason += " (pytest: no tests collected)"
         pstatus = ProviderStatus.FINDINGS
     if preplanted:
-        reason = (
-            reason + "; " if reason else ""
-        ) + "a report file at the report path was committed by the patch and discarded"
+        reason = (reason + "; " if reason else "") + (
+            "a report file at the report path was committed by the patch and discarded"
+        )
+    # One authoritative status: the legacy PASS/FAIL/ERROR word is derived, never set apart.
+    status = _status_word(pstatus)
     res = CheckResult(
         check.name,
         argv,
@@ -211,11 +212,10 @@ def run_check(
 
 def _judge_report(
     check: RequiredCheck, ws: Path, rc: int | None
-) -> tuple[CheckStatus, str, ProviderStatus, ParsedReport | None, str | None]:
+) -> tuple[str, ProviderStatus, ParsedReport | None, str | None]:
     assert check.report_format and check.report_path  # noqa: S101 - caller checked
     if rc not in REPORT_OK_EXIT:
         return (
-            CheckStatus.ERROR,
             f"tool exited {rc}; a report-producing tool must exit 0 or 1",
             ProviderStatus.ERROR,
             None,
@@ -226,7 +226,7 @@ def _judge_report(
         prefixes = (str(ws), os.path.realpath(ws), "/workspace")
         report = parse_report(check.report_format, data, prefixes)
     except ReportError as exc:
-        return CheckStatus.ERROR, str(exc), ProviderStatus.ERROR, None, None
+        return str(exc), ProviderStatus.ERROR, None, None
     rdigest = "sha256:" + hashlib.sha256(data).hexdigest()
     pstatus = report.status
     if pstatus is ProviderStatus.COMPLETE and rc == 1 and report.coverage is None:
@@ -238,7 +238,7 @@ def _judge_report(
     reason = report.reason or (
         f"{len(report.items)} finding(s)" if pstatus is ProviderStatus.FINDINGS else ""
     )
-    return _status_word(pstatus), reason, pstatus, report, rdigest
+    return reason, pstatus, report, rdigest
 
 
 def _error_run(

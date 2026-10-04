@@ -29,6 +29,12 @@ TI = "tests/test_test_integrity.py"
 SC = "tests/test_security_ci_deps.py"
 LL = "tests/test_llm_reviewer.py"
 PO = "tests/test_policy.py"
+TE = "tests/test_trusted_evidence.py"
+PD = "tests/test_providers_differential.py"
+EB = "tests/test_execution_boundary.py"
+TP = "tests/test_potency.py"
+AT = "tests/test_attestation.py"
+DR = "tests/test_doctor.py"
 
 
 @dataclass(frozen=True)
@@ -62,8 +68,8 @@ MUTANTS: tuple[Mutant, ...] = (
         "M03",
         "a failed command is FAIL, never PASS",
         "src/aicrg/evidence/commands.py",
-        "        status = CheckStatus.FAIL\n",
-        "        status = CheckStatus.PASS\n",
+        "        pstatus = ProviderStatus.FINDINGS\n    if preplanted:",
+        "        pstatus = ProviderStatus.COMPLETE\n    if preplanted:",
         (GI,),
     ),
     Mutant(
@@ -118,24 +124,16 @@ MUTANTS: tuple[Mutant, ...] = (
         "M10",
         "a check timeout is ERROR",
         "src/aicrg/evidence/commands.py",
-        'status, reason = CheckStatus.ERROR, f"timed out',
-        'status, reason = CheckStatus.PASS, f"timed out',
+        "        pstatus = ProviderStatus.TIMEOUT\n",
+        "        pstatus = ProviderStatus.COMPLETE\n",
         (GI,),
     ),
     Mutant(
         "M11",
         "a missing check executable is ERROR",
-        "src/aicrg/evidence/commands.py",
-        "            CheckStatus.ERROR,\n            None,\n"
-        "            started,\n            _now(),\n"
-        "            round((clock() - t0) * 1000, 3),\n"
-        '            "sha256:" + hashlib.sha256().hexdigest(),\n            "",\n'
-        '            reason=f"executable not found',
-        "            CheckStatus.PASS,\n            None,\n"
-        "            started,\n            _now(),\n"
-        "            round((clock() - t0) * 1000, 3),\n"
-        '            "sha256:" + hashlib.sha256().hexdigest(),\n            "",\n'
-        '            reason=f"executable not found',
+        "src/aicrg/evidence/executor.py",
+        'return ExecOutcome(None, b"", start_error=f"executable not found: {argv[0]}")',
+        'return ExecOutcome(0, b"")',
         (GI,),
     ),
     Mutant(
@@ -245,9 +243,9 @@ MUTANTS: tuple[Mutant, ...] = (
     Mutant(
         "M25",
         "evidence comes from the head commit, not the working tree",
-        "src/aicrg/gate.py",
-        "res = run_check(check, wt, env)",
-        "res = run_check(check, repo.root, env)",
+        "src/aicrg/evidence/collect.py",
+        'head_runs.update(self._run_all(heads, ws, "head"))',
+        'head_runs.update(self._run_all(heads, self.repo.root, "head"))',
         (GI,),
     ),
     Mutant(
@@ -267,6 +265,199 @@ MUTANTS: tuple[Mutant, ...] = (
         "        return Decision.FAIL\n",
         "        return Decision.PASS\n",
         (GI,),
+    ),
+    # ---- trusted evidence ------------------------------------------------------------
+    Mutant(
+        "M28",
+        "trusted evidence content comes from the base, never the candidate head",
+        "src/aicrg/evidence/collect.py",
+        "self.out.overlays = self._overlay(ws, c.trusted_evidence, base)",
+        "self.out.overlays = self._overlay(ws, c.trusted_evidence, head)",
+        (f"{TE}::TestTrustedEvidenceDemo",),
+    ),
+    Mutant(
+        "M29",
+        "a trusted bundle whose digest differs is never used",
+        "src/aicrg/evidence/trusted.py",
+        "    if actual != expected_digest:",
+        "    if False:",
+        (f"{TE}::TestBundles",),
+    ),
+    Mutant(
+        "M30",
+        "candidate files under trusted paths are removed before the trusted run",
+        "src/aicrg/evidence/trusted.py",
+        "        if match_any(rel, patterns) is not None and rel not in entries:",
+        "        if False:",
+        (f"{TE}::TestTrustedEvidenceDemo",),
+    ),
+    Mutant(
+        "M31",
+        "a trusted overlay never writes through a symlink planted by the patch",
+        "src/aicrg/evidence/workspace.py",
+        "        if stat.S_ISLNK(st.st_mode) or not stat.S_ISDIR(st.st_mode):",
+        "        if False:",
+        (EB,),
+    ),
+    # ---- test potency ----------------------------------------------------------------
+    Mutant(
+        "M32",
+        "a surviving changed-code mutant is not treated as PASS",
+        "src/aicrg/potency/engine.py",
+        '    survivors = [r for r in rep.results if r.outcome == "survived"]',
+        "    survivors: list[MutantResult] = []",
+        (f"{TP}::TestPotencyGate",),
+    ),
+    Mutant(
+        "M33",
+        "a mutation engine error/timeout is never clean",
+        "src/aicrg/potency/engine.py",
+        '    if rep.status in ("ERROR", "TIMEOUT"):',
+        "    if False:",
+        (f"{TP}::TestPotencyGate",),
+    ),
+    Mutant(
+        "M34",
+        "a mutant is killed only when the tests fail",
+        "src/aicrg/potency/engine.py",
+        'outcome = "survived" if res.returncode == 0 else "killed"',
+        'outcome = "killed"',
+        (f"{TP}::TestPotencyGate",),
+    ),
+    # ---- differential evidence -------------------------------------------------------
+    Mutant(
+        "M35",
+        "a new failure on top of pre-existing ones is a regression",
+        "src/aicrg/evidence/differential.py",
+        "    if head_ids - base_ids:\n        return DiffClass.NEW_REGRESSION",
+        "    if False:\n        return DiffClass.NEW_REGRESSION",
+        (PD,),
+    ),
+    Mutant(
+        "M36",
+        "base PASS -> head FAIL is a new regression, never pre-existing",
+        "src/aicrg/evidence/differential.py",
+        "    if not base_failed:\n        return DiffClass.NEW_REGRESSION",
+        "    if not base_failed:\n        return DiffClass.PRE_EXISTING_FAILURE",
+        (PD,),
+    ),
+    Mutant(
+        "M37",
+        "'allow' covers only failures proven identical",
+        "src/aicrg/evidence/differential.py",
+        '    if cls is DiffClass.PRE_EXISTING_FAILURE and mode == "allow":',
+        '    if mode == "allow":',
+        (PD,),
+    ),
+    # ---- evidence providers ----------------------------------------------------------
+    Mutant(
+        "M38",
+        "a required provider that is SKIPPED is not PASS",
+        "src/aicrg/evidence/providers.py",
+        "UNAVAILABLE = frozenset("
+        "{ProviderStatus.SKIPPED, ProviderStatus.ERROR, ProviderStatus.TIMEOUT})",
+        "UNAVAILABLE = frozenset({ProviderStatus.ERROR, ProviderStatus.TIMEOUT})",
+        (PD,),
+    ),
+    Mutant(
+        "M39",
+        "a required provider that errors is not PASS",
+        "src/aicrg/evidence/collect.py",
+        "        if head.status in UNAVAILABLE:\n            msg",
+        "        if False:\n            msg",
+        (PD,),
+    ),
+    Mutant(
+        "M40",
+        "a report committed by the patch is discarded before the tool runs",
+        "src/aicrg/evidence/commands.py",
+        "            preplanted = safe_remove(cwd, check.report_path)",
+        "            preplanted = False",
+        (PD,),
+    ),
+    # ---- execution boundary ----------------------------------------------------------
+    Mutant(
+        "M41",
+        "an operator cannot downgrade container execution to local",
+        "src/aicrg/evidence/collect.py",
+        '        if want == "container" and opts.executor == "local":',
+        "        if False:",
+        (EB,),
+    ),
+    Mutant(
+        "M42",
+        "container network is disabled unless the contract opts in",
+        "src/aicrg/evidence/executor.py",
+        '"none" if s.network == "none" else "bridge",',
+        '"bridge",',
+        (EB,),
+    ),
+    Mutant(
+        "M43",
+        "the host environment is not inherited by the container",
+        "src/aicrg/evidence/executor.py",
+        "            if name in self._host_env and name not in env:",
+        "            if True:\n                env.update(self._host_env)\n"
+        "            if name in self._host_env and name not in env:",
+        (EB,),
+    ),
+    # ---- receipts / attestation ------------------------------------------------------
+    Mutant(
+        "M44",
+        "an unsigned receipt is rejected when attestation is required",
+        "src/aicrg/receipt/verify.py",
+        '    if required and auth.status != "VERIFIED":',
+        "    if False:",
+        (AT,),
+    ),
+    Mutant(
+        "M45",
+        "an attestation for a different commit is rejected",
+        "src/aicrg/receipt/attest.py",
+        '    if expected_commit is None or cert.get("sourceRepositoryDigest") != expected_commit:',
+        "    if False:",
+        (AT,),
+    ),
+    Mutant(
+        "M46",
+        "a PR-ref signer workflow does not satisfy a protected-ref pin",
+        "src/aicrg/receipt/attest.py",
+        '        if cert.get("buildSignerURI") != want_signer:',
+        "        if False:",
+        (AT,),
+    ),
+    Mutant(
+        "M47",
+        "re-signing never leaves a stale signature in place",
+        "src/aicrg/receipt/attest.py",
+        "    sig.unlink(missing_ok=True)",
+        "    pass",
+        (AT,),
+    ),
+    # ---- doctor ----------------------------------------------------------------------
+    Mutant(
+        "M48",
+        "doctor detects a missing gate workflow",
+        "src/aicrg/doctor.py",
+        "    if not gate_jobs:",
+        "    if False:",
+        (DR,),
+    ),
+    Mutant(
+        "M49",
+        "doctor detects a masked/disabled gate",
+        "src/aicrg/doctor.py",
+        "        if masked:",
+        "        if False:",
+        (DR,),
+    ),
+    Mutant(
+        "M50",
+        "doctor never reports unverifiable enforcement as PASS",
+        "src/aicrg/doctor.py",
+        '        if "UNKNOWN" in sts:\n            return "UNKNOWN"',
+        '        if False:\n            return "UNKNOWN"',
+        (DR,),
     ),
 )
 

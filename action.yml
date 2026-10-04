@@ -19,6 +19,14 @@ inputs:
     description: "Review contract path, read from the BASE commit (default review-gate.yaml if present)."
     required: false
     default: ""
+  executor:
+    description: "Evidence executor: '' (use the contract), 'local' or 'container'. Can only make the base contract stricter."
+    required: false
+    default: ""
+  container-image:
+    description: "Image for executor 'container' when the contract names none (pin by digest)."
+    required: false
+    default: ""
   python-version:
     description: "Python used to run the gate."
     required: false
@@ -32,6 +40,9 @@ outputs:
   decision:
     description: "PASS, FAIL, REVIEW_REQUIRED or ERROR."
     value: ${{ steps.gate.outputs.decision }}
+  receipt:
+    description: "Path of the receipt file on the runner."
+    value: ${{ steps.gate.outputs.receipt }}
 
 runs:
   using: composite
@@ -55,6 +66,8 @@ runs:
         IN_BASE: ${{ inputs.base }}
         IN_HEAD: ${{ inputs.head }}
         IN_POLICY: ${{ inputs.policy }}
+        IN_EXECUTOR: ${{ inputs.executor }}
+        IN_IMAGE: ${{ inputs.container-image }}
         PR_BASE: ${{ github.event.pull_request.base.sha }}
         PR_HEAD: ${{ github.event.pull_request.head.sha }}
       run: |
@@ -69,6 +82,9 @@ runs:
         args=(check --base "$base" --head "$head" --receipt "$RUNNER_TEMP/aicrg/review-receipt.json"
               --summary-file "$GITHUB_STEP_SUMMARY")
         if [ -n "$IN_POLICY" ]; then args+=(--policy "$IN_POLICY"); fi
+        if [ -n "$IN_EXECUTOR" ]; then args+=(--executor "$IN_EXECUTOR"); fi
+        if [ -n "$IN_IMAGE" ]; then args+=(--container-image "$IN_IMAGE"); fi
+        echo "receipt=$RUNNER_TEMP/aicrg/review-receipt.json" >> "$GITHUB_OUTPUT"
         status=0
         aicrg "${args[@]}" || status=$?
         decision=$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["decision"])' \
