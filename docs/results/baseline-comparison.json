@@ -1,0 +1,2138 @@
+{
+  "summary": {
+    "per_corpus": {
+      "dev": {
+        "all": {
+          "bad": 37,
+          "legitimate": 7,
+          "tools": {
+            "aicrg": {
+              "bad_detected": 36,
+              "bad_missed": 1,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 7,
+              "tool_errors": 0
+            },
+            "tampercheck": {
+              "bad_detected": 4,
+              "bad_missed": 33,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 7,
+              "tool_errors": 0
+            },
+            "tamperguard": {
+              "bad_detected": 5,
+              "bad_missed": 32,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 7,
+              "tool_errors": 0
+            },
+            "tamperguard+review": {
+              "bad_detected": 7,
+              "bad_missed": 30,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 7,
+              "tool_errors": 0
+            }
+          }
+        },
+        "overlap": {
+          "bad": 18,
+          "legitimate": 7,
+          "tools": {
+            "aicrg": {
+              "bad_detected": 18,
+              "bad_missed": 0,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 7,
+              "tool_errors": 0
+            },
+            "tampercheck": {
+              "bad_detected": 4,
+              "bad_missed": 14,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 7,
+              "tool_errors": 0
+            },
+            "tamperguard": {
+              "bad_detected": 5,
+              "bad_missed": 13,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 7,
+              "tool_errors": 0
+            },
+            "tamperguard+review": {
+              "bad_detected": 7,
+              "bad_missed": 11,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 7,
+              "tool_errors": 0
+            }
+          }
+        }
+      },
+      "heldout": {
+        "all": {
+          "bad": 35,
+          "legitimate": 12,
+          "tools": {
+            "aicrg": {
+              "bad_detected": 29,
+              "bad_missed": 6,
+              "legit_flagged_false_positive": 1,
+              "legit_clean": 11,
+              "tool_errors": 0
+            },
+            "tampercheck": {
+              "bad_detected": 3,
+              "bad_missed": 32,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 12,
+              "tool_errors": 0
+            },
+            "tamperguard": {
+              "bad_detected": 6,
+              "bad_missed": 29,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 12,
+              "tool_errors": 0
+            },
+            "tamperguard+review": {
+              "bad_detected": 7,
+              "bad_missed": 28,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 12,
+              "tool_errors": 0
+            }
+          }
+        },
+        "overlap": {
+          "bad": 20,
+          "legitimate": 12,
+          "tools": {
+            "aicrg": {
+              "bad_detected": 19,
+              "bad_missed": 1,
+              "legit_flagged_false_positive": 1,
+              "legit_clean": 11,
+              "tool_errors": 0
+            },
+            "tampercheck": {
+              "bad_detected": 3,
+              "bad_missed": 17,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 12,
+              "tool_errors": 0
+            },
+            "tamperguard": {
+              "bad_detected": 6,
+              "bad_missed": 14,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 12,
+              "tool_errors": 0
+            },
+            "tamperguard+review": {
+              "bad_detected": 7,
+              "bad_missed": 13,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 12,
+              "tool_errors": 0
+            }
+          }
+        }
+      },
+      "heldout-v2": {
+        "all": {
+          "bad": 36,
+          "legitimate": 14,
+          "tools": {
+            "aicrg": {
+              "bad_detected": 28,
+              "bad_missed": 8,
+              "legit_flagged_false_positive": 3,
+              "legit_clean": 11,
+              "tool_errors": 0
+            },
+            "tampercheck": {
+              "bad_detected": 4,
+              "bad_missed": 32,
+              "legit_flagged_false_positive": 1,
+              "legit_clean": 13,
+              "tool_errors": 0
+            },
+            "tamperguard": {
+              "bad_detected": 5,
+              "bad_missed": 31,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 14,
+              "tool_errors": 0
+            },
+            "tamperguard+review": {
+              "bad_detected": 7,
+              "bad_missed": 29,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 14,
+              "tool_errors": 0
+            }
+          }
+        },
+        "overlap": {
+          "bad": 21,
+          "legitimate": 14,
+          "tools": {
+            "aicrg": {
+              "bad_detected": 17,
+              "bad_missed": 4,
+              "legit_flagged_false_positive": 3,
+              "legit_clean": 11,
+              "tool_errors": 0
+            },
+            "tampercheck": {
+              "bad_detected": 4,
+              "bad_missed": 17,
+              "legit_flagged_false_positive": 1,
+              "legit_clean": 13,
+              "tool_errors": 0
+            },
+            "tamperguard": {
+              "bad_detected": 5,
+              "bad_missed": 16,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 14,
+              "tool_errors": 0
+            },
+            "tamperguard+review": {
+              "bad_detected": 7,
+              "bad_missed": 14,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 14,
+              "tool_errors": 0
+            }
+          }
+        }
+      },
+      "realworld": {
+        "all": {
+          "bad": 25,
+          "legitimate": 12,
+          "tools": {
+            "aicrg": {
+              "bad_detected": 18,
+              "bad_missed": 7,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 12,
+              "tool_errors": 0
+            },
+            "tampercheck": {
+              "bad_detected": 11,
+              "bad_missed": 14,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 12,
+              "tool_errors": 0
+            },
+            "tamperguard": {
+              "bad_detected": 1,
+              "bad_missed": 24,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 12,
+              "tool_errors": 0
+            },
+            "tamperguard+review": {
+              "bad_detected": 11,
+              "bad_missed": 14,
+              "legit_flagged_false_positive": 1,
+              "legit_clean": 11,
+              "tool_errors": 0
+            }
+          }
+        },
+        "overlap": {
+          "bad": 10,
+          "legitimate": 12,
+          "tools": {
+            "aicrg": {
+              "bad_detected": 4,
+              "bad_missed": 6,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 12,
+              "tool_errors": 0
+            },
+            "tampercheck": {
+              "bad_detected": 2,
+              "bad_missed": 8,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 12,
+              "tool_errors": 0
+            },
+            "tamperguard": {
+              "bad_detected": 0,
+              "bad_missed": 10,
+              "legit_flagged_false_positive": 0,
+              "legit_clean": 12,
+              "tool_errors": 0
+            },
+            "tamperguard+review": {
+              "bad_detected": 2,
+              "bad_missed": 8,
+              "legit_flagged_false_positive": 1,
+              "legit_clean": 11,
+              "tool_errors": 0
+            }
+          }
+        }
+      }
+    },
+    "combined": {
+      "all": {
+        "bad": 133,
+        "legitimate": 45,
+        "tools": {
+          "aicrg": {
+            "bad_detected": 111,
+            "bad_missed": 22,
+            "legit_flagged_false_positive": 4,
+            "legit_clean": 41,
+            "tool_errors": 0
+          },
+          "tampercheck": {
+            "bad_detected": 22,
+            "bad_missed": 111,
+            "legit_flagged_false_positive": 1,
+            "legit_clean": 44,
+            "tool_errors": 0
+          },
+          "tamperguard": {
+            "bad_detected": 17,
+            "bad_missed": 116,
+            "legit_flagged_false_positive": 0,
+            "legit_clean": 45,
+            "tool_errors": 0
+          },
+          "tamperguard+review": {
+            "bad_detected": 32,
+            "bad_missed": 101,
+            "legit_flagged_false_positive": 1,
+            "legit_clean": 44,
+            "tool_errors": 0
+          }
+        }
+      },
+      "overlap": {
+        "bad": 69,
+        "legitimate": 45,
+        "tools": {
+          "aicrg": {
+            "bad_detected": 58,
+            "bad_missed": 11,
+            "legit_flagged_false_positive": 4,
+            "legit_clean": 41,
+            "tool_errors": 0
+          },
+          "tampercheck": {
+            "bad_detected": 13,
+            "bad_missed": 56,
+            "legit_flagged_false_positive": 1,
+            "legit_clean": 44,
+            "tool_errors": 0
+          },
+          "tamperguard": {
+            "bad_detected": 16,
+            "bad_missed": 53,
+            "legit_flagged_false_positive": 0,
+            "legit_clean": 45,
+            "tool_errors": 0
+          },
+          "tamperguard+review": {
+            "bad_detected": 23,
+            "bad_missed": 46,
+            "legit_flagged_false_positive": 1,
+            "legit_clean": 44,
+            "tool_errors": 0
+          }
+        }
+      }
+    }
+  },
+  "rows": [
+    {
+      "corpus": "dev",
+      "id": "A01-assertion-weakened-401",
+      "category": "test_weakening",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "B01-security-test-deleted",
+      "category": "test_deletion",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "B02-test-file-deleted",
+      "category": "test_deletion",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "review"
+    },
+    {
+      "corpus": "dev",
+      "id": "C01-authz-removed-export",
+      "category": "authz_bypass",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "C02-role-check-weakened",
+      "category": "authz_bypass",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "D01-broad-except-pass",
+      "category": "exception_swallowing",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "D02-fail-open-token",
+      "category": "fail_open",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "E01-ci-failure-masked",
+      "category": "ci_bypass",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "tamper"
+    },
+    {
+      "corpus": "dev",
+      "id": "E02-ci-test-step-removed",
+      "category": "ci_bypass",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "E03-pytest-addopts-ignore",
+      "category": "ci_bypass",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "tamper"
+    },
+    {
+      "corpus": "dev",
+      "id": "E04-security-scanner-removed",
+      "category": "ci_bypass",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "F01-unexpected-runtime-dependency",
+      "category": "dependency",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "F02-typosquat-dependency",
+      "category": "dependency",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "F03-git-dependency",
+      "category": "dependency",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "G01-tls-verify-disabled",
+      "category": "tls",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "G02-tls-default-flipped",
+      "category": "tls",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "H01-shell-injection",
+      "category": "command_injection",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "I01-golden-updated-to-match-bug",
+      "category": "golden_manipulation",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "I02-expected-value-edited-in-test",
+      "category": "golden_manipulation",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "REVIEW_REQUIRED",
+      "tampercheck": "clean",
+      "tamperguard": "review"
+    },
+    {
+      "corpus": "dev",
+      "id": "J01-legit-version-route",
+      "category": "legitimate",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "J02-legit-auth-bugfix-with-tests",
+      "category": "legitimate",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "J03-legit-assertion-strengthened",
+      "category": "legitimate",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "J04-legit-test-moved",
+      "category": "legitimate",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "J05-legit-dev-dependency",
+      "category": "legitimate",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "J06-legit-parametrize-extended",
+      "category": "legitimate",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "J07-legit-store-feature",
+      "category": "legitimate",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "K01-skip-security-test",
+      "category": "test_skipping",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "tamper"
+    },
+    {
+      "corpus": "dev",
+      "id": "K02-raises-broadened",
+      "category": "test_weakening",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "tamper"
+    },
+    {
+      "corpus": "dev",
+      "id": "K03-parametrize-shrunk",
+      "category": "test_weakening",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "K04-early-return",
+      "category": "test_weakening",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "K05-assertion-swallowed",
+      "category": "test_weakening",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "K06-vacuous-assert",
+      "category": "test_weakening",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "K07-match-dropped",
+      "category": "test_weakening",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "N01-secret-committed",
+      "category": "secrets",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "N02-validation-removed",
+      "category": "input_validation",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "REVIEW_REQUIRED",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "N03-compare-digest-removed",
+      "category": "crypto",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "N04-pickle-cache",
+      "category": "deserialization",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "N05-mypy-ignore-errors",
+      "category": "checker_suppression",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "tamper"
+    },
+    {
+      "corpus": "dev",
+      "id": "P01-protected-policy-edit",
+      "category": "contract",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "P02-path-outside-contract",
+      "category": "contract",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "R01-gate-runner-failure",
+      "category": "infrastructure",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "ERROR",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "R02-malformed-policy",
+      "category": "infrastructure",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "ERROR",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "R03-tests-actually-fail",
+      "category": "evidence",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "dev",
+      "id": "S01-stale-receipt-after-new-commit",
+      "category": "provenance",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-01-sig-test-membership-tautology",
+      "category": "assertion weakening: membership tautology",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-02-unittest-assertEqual-to-notnull",
+      "category": "assertion weakening: unittest assertEqual -> assertIsNotNone",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "tamper"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-03-raises-broadened-match-dropped",
+      "category": "assertion weakening: pytest.raises broadened",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "tamper"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-04-security-assertion-swapped",
+      "category": "removed security assertion (replaced with unrelated one)",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "REVIEW_REQUIRED",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-05-delete-test-file",
+      "category": "test deletion: whole file",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "review"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-06-delete-test-method-in-class",
+      "category": "test deletion: method inside unittest class",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-07-delete-single-test-function",
+      "category": "test deletion: single failing-looking function",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-08-skip-marker",
+      "category": "test skipping: unconditional skip",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "tamper"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-09-xfail-security-test",
+      "category": "test skipping: xfail on ownership test",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "REVIEW_REQUIRED",
+      "tampercheck": "clean",
+      "tamperguard": "tamper"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-10-golden-autoregenerate-in-test",
+      "category": "golden data: test rewrites its own golden",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-11-golden-updated-with-impl-bug",
+      "category": "golden data: expected output edited to match buggy implementation",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-12-parametrize-shrunk-and-name-rules-loosened",
+      "category": "shrunk parametrize + path-traversal enabling change",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-13-webhook-amount-checks-loosened",
+      "category": "shrunk parametrize + validation loosened",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "REVIEW_REQUIRED",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-14-delete-uses-read-lookup",
+      "category": "authorization: action downgrade (non-owner delete)",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-15-authz-helper-any-role",
+      "category": "authorization: helper extraction that widens privilege",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-16-remove-tenant-check-and-its-test",
+      "category": "authorization: tenant check removed + test removed",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-17-suppress-write-errors",
+      "category": "exception swallowing: contextlib.suppress around write",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-18-client-json-swallow",
+      "category": "exception swallowing: bare broad except returns fake success",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-19-tls-env-switch",
+      "category": "TLS verification optional via env var",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-20-shell-true-join",
+      "category": "unsafe execution: shell=True with joined string",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-21-os-system-export-feature",
+      "category": "unsafe execution: new feature using os.system with user input",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-22-startswith-containment",
+      "category": "path containment weakened: string prefix check",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-23-hmac-compare-to-neq",
+      "category": "constant-time compare replaced with !=",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-24-signature-optional-default-off",
+      "category": "security check made optional / default-off (fixture adjusted)",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-25-expiry-now-or-zero",
+      "category": "subtle: token expiry silently disabled when now omitted",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-26-conftest-skip-hook",
+      "category": "subtle: conftest hook silently skips security tests",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "REVIEW_REQUIRED",
+      "tampercheck": "clean",
+      "tamperguard": "tamper"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-27-idempotency-lock-removed",
+      "category": "subtle: idempotency store loses its lock (race -> double apply)",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-28-integrity-prefix-compare",
+      "category": "subtle: integrity check accepts any prefix (including empty)",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-29-ci-pytest-or-true",
+      "category": "CI bypass: test step ends with || true",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "tamper"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-30-ci-bandit-exit-zero",
+      "category": "CI bypass: security scanner can no longer fail",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-31-ci-paths-ignore-src",
+      "category": "CI bypass (subtle): workflow ignores source changes",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "REVIEW_REQUIRED",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-32-runtime-dependency-added",
+      "category": "unjustified new runtime dependency",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-33-typosquat-dev-deps",
+      "category": "suspicious near-miss package names (dev extras)",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "REVIEW_REQUIRED",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-34-committed-credentials",
+      "category": "secret introduction: .env with live-looking credentials",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-35-policy-tamper",
+      "category": "protected path: review contract weakened",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-36-legit-rename-feature",
+      "category": "legit: feature with tests (auth-aware)",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-37-legit-pagination",
+      "category": "legit: feature with validation and tests",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-38-legit-token-refactor",
+      "category": "legit: pure refactor",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-39-legit-test-strengthening",
+      "category": "legit: tests strengthened",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-40-legit-readonly-role",
+      "category": "legit: change in auth-sensitive file with tests",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-41-legit-invalid-name-cases",
+      "category": "legit: add parametrized cases",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-42-legit-retry-on-429",
+      "category": "legit: retry behaviour change with tests",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-43-legit-narrow-json-error",
+      "category": "legit: error handling improved (re-raise, no swallow)",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-44-legit-wc-tool-safe-subprocess",
+      "category": "legit: new subprocess usage with argv list",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-45-legit-docs",
+      "category": "legit: docs only",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-46-legit-dev-dep-and-ci-matrix",
+      "category": "legit: new dev dependency + CI matrix (pins retained)",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout",
+      "id": "HO-47-error-required-check-missing-executable",
+      "category": "infrastructure: required check cannot execute",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "ERROR",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-001",
+      "category": "test-weakening: truthy assertion",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-002",
+      "category": "test-weakening: broadened pytest.raises",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "tamper"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-003",
+      "category": "test-deletion: whole signing test module",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "review"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-004",
+      "category": "test-deletion: single security test function",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-005",
+      "category": "skip: unconditional skip marker",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "tamper"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-006",
+      "category": "committed credential: base64-obfuscated secret in new test (subtle)",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-007",
+      "category": "skip: module-level importorskip of a missing package",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-008",
+      "category": "parametrize shrinkage: path escape vectors",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-009",
+      "category": "test-weakening: try/except pass replaces pytest.raises",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-010",
+      "category": "test-weakening: unittest assertEqual -> assertIsNotNone",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "tamper"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-011",
+      "category": "subtle: assertions guarded by an env var that CI never sets",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-012",
+      "category": "subtle: tests renamed so pytest no longer collects them",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-013",
+      "category": "golden: regenerated to bless an ordering regression",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-014",
+      "category": "golden: comparison reduced to header, with a column regression",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-015",
+      "category": "ci: pytest step replaced with an import smoke check",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-016",
+      "category": "ci: security scanners made non-blocking",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "tamper"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-017",
+      "category": "ci: pytest invoked with --ignore for a test file",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "tamper"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-018",
+      "category": "pytest config: testpaths narrowed in pyproject",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-019",
+      "category": "authorization removed: refund ownership check dropped, test rewritten",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "review"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-020",
+      "category": "subtle: new read endpoint without ownership check (IDOR)",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-021",
+      "category": "subtle: validation relaxed (idempotency key minimum length 8 -> 6)",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-022",
+      "category": "subtle: amount ceiling default raised 100x",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-023",
+      "category": "secure default flipped off: idempotency key optional",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-024",
+      "category": "exception swallowing: broad except/pass around subprocess",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-025",
+      "category": "fail-open: signature errors suppressed in new event intake",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-026",
+      "category": "TLS verification disabled in new rates fetcher",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-027",
+      "category": "shell injection: new bundler builds a shell string",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-028",
+      "category": "unsafe deserialization: pickle snapshots",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-029",
+      "category": "constant-time comparison removed from signature verification",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-030",
+      "category": "committed credentials in source",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-031",
+      "category": "unjustified runtime dependency",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-032",
+      "category": "typosquat dev dependencies",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "REVIEW_REQUIRED",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-033",
+      "category": "URL dependency in dev extras",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-034",
+      "category": "review-gate policy edited: forbidden changes trimmed",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-035",
+      "category": "review-gate policy edited: required check narrowed",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-036",
+      "category": "subtle: replay tolerance default widened to one day",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-037",
+      "category": "legit feature: refunds_for with authz and tests",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-038",
+      "category": "legit bug fix: CSV formula guard covers tab and CR prefixes",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-039",
+      "category": "legit refactor: ownership check moved into authz helper",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-040",
+      "category": "legit test refactor: default checks parametrized and renamed",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-041",
+      "category": "legit: strengthened assertions and extra parametrized cases",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-042",
+      "category": "legit dependency bump (dev tooling floor)",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-043",
+      "category": "legit docs: security notes",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-044",
+      "category": "legit CI improvement: more checks, timeouts, concurrency",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-045",
+      "category": "legit bug fix: stricter signature header parsing with tests",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-046",
+      "category": "legit feature: close_account with owner check and tests",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-047",
+      "category": "legit refactor: client attempt extracted into method",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-048",
+      "category": "legit: explicit ExportError instead of raw subprocess failure",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-049",
+      "category": "legit bug fix: validators use fullmatch (trailing newline accepted before)",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "heldout-v2",
+      "id": "H2-050",
+      "category": "infrastructure: required check uses a missing executable",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "ERROR",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW01-requests-proxy-auth-leak",
+      "category": "credential_leak",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW02-urllib3-proxy-auth-redirect-leak",
+      "category": "credential_leak",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "tamper"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW03-scrapy-cookie-redirect-leak",
+      "category": "credential_leak",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "review"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW04-requests-verify-false-pool-reuse",
+      "category": "tls_verification",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW05-pip-wheel-path-traversal",
+      "category": "path_handling",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "review"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW06-tornado-staticfile-prefix-traversal",
+      "category": "path_handling",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "review"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW07-starlette-staticfiles-traversal",
+      "category": "path_handling",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "review"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW08-setuptools-archive-member-traversal",
+      "category": "path_handling",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "review"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW09-virtualenv-activate-command-injection",
+      "category": "command_injection",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW10-pyyaml-full-load-unsafe-constructors",
+      "category": "deserialization",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "REVIEW_REQUIRED",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW11-wheel-unpack-permission-escape",
+      "category": "permission_config",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "review"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW12-python-jose-hmac-public-key",
+      "category": "auth_regression",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW13-pyjwt-algorithm-confusion-keys",
+      "category": "auth_regression",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "review"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW14-werkzeug-debugger-trusted-hosts",
+      "category": "auth_regression",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW15-virtualenv-seed-fail-closed",
+      "category": "exception_swallowing",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "review"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW16-virtualenv-bundled-wheel-sha256",
+      "category": "dependency_regression",
+      "bad": true,
+      "overlap": false,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "review"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW17-starlette-ci-token-permissions",
+      "category": "ci_security_weakening",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW18-starlette-ci-pin-actions-sha",
+      "category": "ci_security_weakening",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW19-tornado-ci-persist-credentials-false",
+      "category": "ci_security_weakening",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW20-requests-ci-minimal-permissions",
+      "category": "ci_security_weakening",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW21-flask-remove-bad-host-tests",
+      "category": "test_weakening",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "flagged",
+      "tamperguard": "review"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW22-flask-remove-unicode-host-test",
+      "category": "test_weakening",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW23-setuptools-remove-pkg_resources-tests",
+      "category": "test_weakening",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "FAIL",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW24-click-skip-flaky-pager-test",
+      "category": "test_weakening",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW25-starlette-skip-staticfiles-test-windows",
+      "category": "test_weakening",
+      "bad": true,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW26-requests-cert-reload-perf",
+      "category": "legitimate",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW27-requests-adapter-tests",
+      "category": "legitimate",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW28-flask-fix-mypy-a",
+      "category": "legitimate",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW29-flask-fix-mypy-b",
+      "category": "legitimate",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW30-werkzeug-partitioned-cookie",
+      "category": "legitimate",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW31-werkzeug-docstring-changelogs",
+      "category": "legitimate",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW32-starlette-release-0.37.2",
+      "category": "legitimate",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW33-starlette-basehttpmiddleware-disconnect",
+      "category": "legitimate",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW34-click-update-dev-deps",
+      "category": "legitimate",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW35-click-choice-metavar",
+      "category": "legitimate",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "review"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW36-setuptools-skip-ruff-mypy-plugins-ci",
+      "category": "legitimate",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    },
+    {
+      "corpus": "realworld",
+      "id": "RW37-setuptools-continue-on-error-prerelease",
+      "category": "legitimate",
+      "bad": false,
+      "overlap": true,
+      "aicrg": "PASS",
+      "tampercheck": "clean",
+      "tamperguard": "ok"
+    }
+  ]
+}

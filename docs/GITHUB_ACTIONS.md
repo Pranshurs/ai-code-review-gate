@@ -25,7 +25,14 @@ jobs:
       - uses: Pranshurs/ai-code-review-gate@<commit-sha>
         with:
           policy: review-gate.yaml     # read from the PR's BASE commit
+          executor: container          # optional; may only make the contract stricter
+          container-image: python:3.12-slim@sha256:<digest>
 ```
+
+For trusted evidence bundles or external reports, call the CLI directly
+(`aicrg check ... --bundle NAME=PATH --evidence NAME=PATH`) after an earlier
+step has fetched them; the digest pinned in the base contract is what makes a
+bundle trusted, not where it was downloaded from.
 
 The Action:
 
@@ -79,10 +86,65 @@ Posting PR comments or check annotations is not implemented. It would need
 * **Stale results.** Enable "require branches to be up to date before merging",
   or run `aicrg verify-receipt --base origin/main` in the merge pipeline.
 
+## Signing receipts
+
+Attest the receipt in a **separate job that never checks out or executes
+candidate code**. An `id-token: write` permission in the job that runs the
+gate would let candidate code mint an OIDC token and sign anything as your
+workflow. See [examples/aicrg-gate-attested.yml](examples/aicrg-gate-attested.yml)
+and [RECEIPTS.md](RECEIPTS.md#github-artifact-attestations-sigstore).
+
+An attestation made by a `pull_request` run is signed by
+`<workflow>@refs/pull/N/merge` — a workflow file the PR itself can edit. It
+proves which run produced the receipt, not that the run was honest. Verify
+with a pinned `--signer-ref` (default `refs/heads/main`) so only runs of the
+workflow from a protected ref count, e.g. a ruleset-required workflow pinned
+to `refs/heads/main`. (`merge_group` runs are signed from
+`refs/heads/gh-readonly-queue/…`; they do not satisfy a `refs/heads/main` pin.) Artifact attestations need
+a public repository or GitHub Enterprise Cloud.
+
+## `aicrg doctor`
+
+```
+aicrg doctor                 # static: workflows + review contract in this checkout
+aicrg doctor --github --branch main [--check-name gate]   # + branch rules via the API
+```
+
+| check | FAIL when | WARN when |
+|---|---|---|
+| `gate-present` | no workflow runs `aicrg check` / the AICRG action | |
+| `gate-not-masked` | `continue-on-error`, `\|\| true`, `set +e`, `if: false`, `--policy-from file` on the gate | |
+| `gate-trigger` | gate runs under `pull_request_target` | |
+| `gate-secrets` | the gate job references `secrets.*` (other than `GITHUB_TOKEN`) | |
+| `gate-permissions` | the gate job has write permissions | |
+| `dangerous-trigger` | `pull_request_target`/`workflow_run` that checks out PR code | such a trigger exists at all |
+| `token-permissions` | workflow-wide write on PR-triggered workflows | no top-level `permissions:` |
+| `action-pinning` | | actions not pinned to a commit SHA |
+| `checkout-credentials` | | gate checkout persists the token |
+| `policy` / `policy-protected` / `acceptance-config` | invalid contract | policy not protected; workflow changes neither protected nor routed to review |
+| `executor` / `attestation` | | local executor; receipts not required to be attested |
+| `github-required-check` | the gate is not a required status check on the branch | |
+| `github-up-to-date` | | branches need not be up to date |
+| `github-required-workflow` | | the gate runs from a PR-editable workflow (no ruleset-required workflow) |
+| `github-rules` / `github-protection` | | — reported **UNKNOWN** when the token cannot read them |
+
+`doctor` matches required checks by exact context (or `<workflow> / <job>`);
+it does not verify which app reports the check. A PR-added workflow with a
+job of the same name could satisfy a name-only requirement: bind the required
+check to its source app in the ruleset, or use a required workflow.
+
+UNKNOWN is never PASS: exit 4 if anything is UNKNOWN and nothing FAILs, 1 on
+FAIL, 0 otherwise (`--strict` also fails on WARN). The static mode needs no
+GitHub access; `--github` uses `GH_TOKEN`/`GITHUB_TOKEN` or the `gh` CLI.
+Reading branch protection needs admin rights; reading effective branch rules
+does not, but private repositories still need an authorised token.
+
 ## This repository's own CI
 
 `.github/workflows/ci.yml` runs lint, types, tests (3.11 to 3.13), the dev corpus
 (all expectations must hold), the held-out corpora as ratchets (v1: at most the 6 recorded post-hoc misses;
 v2: at most the 10 recorded mismatches), the mutation gate, a wheel build with a clean-venv
-install, Bandit and pip-audit, and on pull requests the gate itself
+install, Bandit and pip-audit, the container-isolation tests against a real
+Docker daemon (`AICRG_REQUIRE_DOCKER=1`, so a missing runtime fails rather than
+skips), `aicrg doctor` on itself, and on pull requests the gate itself
 (`uses: ./`) against this repository's `review-gate.yaml`.

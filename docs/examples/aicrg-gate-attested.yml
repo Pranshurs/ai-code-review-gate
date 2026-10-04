@@ -1,0 +1,61 @@
+# Example: AICRG as an enforced, attested merge gate.
+#
+# Copy to .github/workflows/ and adapt. Design rules (docs/GITHUB_ACTIONS.md):
+#  * `pull_request`, never `pull_request_target`: fork code gets no secrets.
+#  * The job that executes candidate code (`gate`) has a read-only token, no
+#    secrets, no OIDC token, and runs evidence in a container.
+#  * The job that signs (`attest`) never checks out or executes candidate
+#    code. It only downloads the receipt artifact and attests it.
+#  * An attestation made by a workflow running on refs/pull/N/merge is signed
+#    by a workflow file the PR can edit. Verify with a pinned signer workflow
+#    AND ref (attestation.signer_ref, default refs/heads/main): only runs of
+#    this file from that ref can satisfy it, e.g. a ruleset "require workflows
+#    to pass" pointing at main. merge_group runs are signed from
+#    refs/heads/gh-readonly-queue/... and pull_request runs from
+#    refs/pull/N/merge, so neither satisfies a refs/heads/main pin.
+#  * Make `gate` a required status check and require branches to be up to date.
+#  * Artifact attestations need a public repository or GitHub Enterprise Cloud.
+name: aicrg-gate
+
+on:
+  pull_request:
+  merge_group:
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      decision: ${{ steps.aicrg.outputs.decision }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: aicrg
+        uses: Pranshurs/ai-code-review-gate@<pinned-commit-sha>
+        with:
+          executor: container  # stricter than the contract is allowed; weaker is refused
+
+  attest:
+    needs: gate
+    if: needs.gate.outputs.decision == 'PASS'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write      # OIDC for Sigstore keyless signing; this job runs no candidate code
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: aicrg-receipt
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: review-receipt.json
+
+# Verify before merging (or in a merge-queue job):
+#   aicrg verify-receipt review-receipt.json --base origin/main \
+#     --require-attestation --attestation github --repo OWNER/REPO \
+#     --signer-workflow OWNER/REPO/.github/workflows/aicrg-gate.yml --signer-ref refs/heads/main

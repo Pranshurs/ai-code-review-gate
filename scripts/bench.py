@@ -9,6 +9,19 @@ required checks, so the numbers are pure gate overhead (git, parsing, analysis,
 receipt). Project test execution is measured separately (small scenario only)
 because it belongs to the target repository, not to the gate.
 
+Additional measurements (each reported separately, never folded into the
+gate-overhead numbers):
+
+  evidence_*        small scenario with ONE trivial check (python -c pass):
+                    head checkout + run (local), the same as trusted evidence
+                    (checkout + base overlay + run), and through the container
+                    executor (if docker is available)
+  provider_*        a required external SARIF report (bound to the head) ingested
+                    and judged: empty, and with 1000 results
+  receipt_*         ssh-keygen sign / verify-receipt with signature check
+  potency           changed-code mutation on the small scenario with the
+                    fixture's own pytest suite; cost scales with mutants x suite
+
 Usage: python scripts/bench.py [-n 100] [--json docs/results/bench.json]
 """
 
@@ -136,12 +149,175 @@ def bench(repo: Path, base: str, head: str, policy: Path, n: int) -> dict[str, o
     }
 
 
+def _timed_gate(repo: Path, policy: Path, n: int, **opts: object) -> dict[str, object]:
+    o = GateOptions(base="main", head="HEAD", policy=str(policy), policy_from="file")
+    for k, v in opts.items():
+        setattr(o, k, v)
+    first = run_gate(o, cwd=repo)
+    if first.decision.value == "ERROR":
+        return {"error": [e.message for e in first.errors]}
+    wall, ev = [], []
+    for _ in range(n):
+        t0 = time.perf_counter()
+        res = run_gate(o, cwd=repo)
+        wall.append((time.perf_counter() - t0) * 1000)
+        ev.append(res.receipt["timings_ms"].get("evidence", 0.0))
+    return {"wall_ms": summarise(wall), "evidence_stage_ms": summarise(ev)}
+
+
+def evidence_overheads(repo: Path, tmp: Path, n: int) -> dict[str, object]:
+    py = sys.executable
+    trivial = f"[{py!r}, -c, pass]"
+    head_pol = tmp / "head.yaml"
+    head_pol.write_text(f"version: 1\nrequired_checks:\n  - name: t\n    command: {trivial}\n")
+    trusted_pol = tmp / "trusted.yaml"
+    trusted_pol.write_text(
+        "version: 1\ntrusted_evidence:\n  - name: t\n    source: base\n"
+        f"    paths: [tests/**]\n    command: {trivial}\n"
+    )
+    out: dict[str, object] = {
+        "evidence_head_trivial_check_local": _timed_gate(repo, head_pol, n),
+        "evidence_trusted_trivial_check_local": _timed_gate(repo, trusted_pol, n),
+    }
+    if (
+        shutil.which("docker")
+        and subprocess.run(
+            ["docker", "image", "inspect", "python:3.12-slim"], capture_output=True, check=False
+        ).returncode
+        == 0
+    ):
+        cont = tmp / "container.yaml"
+        cont.write_text(
+            "version: 1\nexecution:\n  executor: container\n  container:\n"
+            "    image: python:3.12-slim\nrequired_checks:\n  - name: t\n"
+            "    command: [python, -c, pass]\n"
+        )
+        out["evidence_head_trivial_check_container"] = _timed_gate(repo, cont, max(5, n // 5))
+    else:
+        out["evidence_head_trivial_check_container"] = "skipped: docker/image unavailable"
+    head = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=repo, capture_output=True, text=True, check=True
+    ).stdout.strip()
+    ext = tmp / "external.yaml"
+    ext.write_text("version: 1\nexternal_evidence:\n  - name: codeql\n    format: sarif\n")
+    for label, k in (("empty", 0), ("1000_results", 1000)):
+        results = [
+            {
+                "ruleId": f"r{i % 20}",
+                "level": "note",
+                "message": {"text": f"finding {i}"},
+                "locations": [
+                    {
+                        "physicalLocation": {
+                            "artifactLocation": {"uri": "src/webapp/api.py"},
+                            "region": {"startLine": 1 + i % 50},
+                        }
+                    }
+                ],
+            }
+            for i in range(k)
+        ]
+        report = tmp / f"codeql-{label}.sarif"
+        report.write_text(
+            json.dumps(
+                {
+                    "version": "2.1.0",
+                    "runs": [
+                        {
+                            "tool": {"driver": {"name": "CodeQL"}},
+                            "results": results,
+                            "versionControlProvenance": [
+                                {"repositoryUri": "u", "revisionId": head}
+                            ],
+                        }
+                    ],
+                }
+            )
+        )
+        r = _timed_gate(repo, ext, n, external_evidence={"codeql": str(report)})
+        r["report_bytes"] = report.stat().st_size
+        out[f"provider_sarif_{label}"] = r
+    return out
+
+
+def receipt_overheads(repo: Path, tmp: Path, n: int) -> dict[str, object]:
+    from aicrg.receipt.attest import ssh_sign
+    from aicrg.receipt.verify import AttestationOptions, verify_receipt
+
+    pol = tmp / "none.yaml"
+    pol.write_text("version: 1\n")
+    res = run_gate(GateOptions("main", "HEAD", str(pol), "file"), cwd=repo)
+    path = write_receipt(res.receipt, tmp / "rc")
+    out: dict[str, object] = {}
+    plain = []
+    for _ in range(n):
+        t0 = time.perf_counter()
+        verify_receipt(path, repo, require_pass=False)
+        plain.append((time.perf_counter() - t0) * 1000)
+    out["verify_receipt_ms"] = summarise(plain)
+    if shutil.which("ssh-keygen") is None:
+        out["ssh"] = "skipped: ssh-keygen unavailable"
+        return out
+    key = tmp / "k"
+    subprocess.run(["ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-f", str(key)], check=True)
+    signers = tmp / "allowed"
+    signers.write_text("gate " + (tmp / "k.pub").read_text())
+    sign, ver = [], []
+    opts = AttestationOptions(require=True, allowed_signers=signers, identity="gate")
+    for _ in range(n):
+        t0 = time.perf_counter()
+        ssh_sign(path, key)
+        sign.append((time.perf_counter() - t0) * 1000)
+        t0 = time.perf_counter()
+        v = verify_receipt(path, repo, require_pass=False, attestation=opts)
+        ver.append((time.perf_counter() - t0) * 1000)
+        if v.authenticity.status != "VERIFIED":
+            raise SystemExit(f"benchmark ssh verify failed: {v.problems}")
+    out["ssh_sign_ms"] = summarise(sign)
+    out["verify_receipt_with_ssh_signature_ms"] = summarise(ver)
+    return out
+
+
+def potency(repo: Path, tmp: Path, runs: int) -> dict[str, object]:
+    pol = tmp / "potency.yaml"
+    pol.write_text(
+        "version: 1\ntest_potency:\n"
+        f"  command: [{sys.executable!r}, -m, pytest, -q, -x, -p, no:cacheprovider]\n"
+        "  max_mutants: 40\n"
+    )
+    walls, last = [], None
+    for _ in range(runs):
+        t0 = time.perf_counter()
+        last = run_gate(GateOptions("main", "HEAD", str(pol), "file"), cwd=repo)
+        walls.append((time.perf_counter() - t0) * 1000)
+    assert last is not None
+    tp = last.receipt["test_potency"]
+    n_run = tp["killed"] + tp["killed_by_timeout"] + tp["survived"]
+    return {
+        "wall_ms": summarise(walls),
+        "status": tp["status"],
+        "changed_production_lines": tp["changed_production_lines"],
+        "mutants_run": n_run,
+        "equivalent": tp["equivalent"],
+        "survived": tp["survived"],
+        "ms_per_mutant_approx": round(statistics.fmean(walls) / max(1, n_run + 1), 1),
+    }
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("-n", type=int, default=100)
     ap.add_argument("--json", type=Path)
     args = ap.parse_args()
+    git_out = [
+        subprocess.run(
+            ["git", *a], cwd=ROOT, capture_output=True, text=True, check=True
+        ).stdout.strip()
+        for a in (("rev-parse", "HEAD"), ("status", "--porcelain"))
+    ]
     out: dict[str, object] = {
+        "aicrg_commit": git_out[0],
+        "aicrg_tree_clean": git_out[1] == "",
         "hardware": {
             "platform": platform.platform(),
             "machine": platform.machine(),
@@ -173,6 +349,9 @@ def main() -> int:
             )
             tests.append((time.perf_counter() - t0) * 1000)
         out["small_project_tests_ms"] = summarise(tests)
+        out.update(evidence_overheads(repo, tmp, max(10, args.n // 5)))
+        out.update(receipt_overheads(repo, tmp, max(10, args.n // 5)))
+        out["potency"] = potency(repo, tmp, 3)
         root_commit = subprocess.run(
             ["git", "rev-list", "--max-parents=0", "HEAD"],
             cwd=ROOT,

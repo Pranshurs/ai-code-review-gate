@@ -1,0 +1,40 @@
+{
+  "base": "53d7d73f61ed059e81c96c3953d1d9cbba66de46",
+  "head": "0acae1cb93ad37f5918445ef3102065abb000b87",
+  "self_review": {
+    "exit_code": 1,
+    "decision": "FAIL",
+    "reasons": [
+      "protected_path_modified: corpus/fixtures/ledger/review-gate.yaml: added protected path (review-gate.yaml)",
+      "protected_path_modified: corpus/heldout-v2/H2-034/files/review-gate.yaml: added protected path (review-gate.yaml)",
+      "protected_path_modified: corpus/heldout-v2/H2-035/files/review-gate.yaml: added protected path (review-gate.yaml)",
+      "protected_path_modified: corpus/heldout-v2/H2-050/base_files/review-gate.yaml: added protected path (review-gate.yaml)",
+      "review_required_surface: contract requires human review for `ci` changes (.github/workflows/ci.yml)"
+    ],
+    "receipt_digest": "sha256:aaa85939c911751ead69167255981802497dca0d16eada91714a0d4413c85aa5"
+  },
+  "mutant": {
+    "commit": "5190e53c9553aff65755973b3fe15b0b7a257eea",
+    "exit_code": 1,
+    "decision": "FAIL",
+    "blocking": [
+      "assertion_weakened"
+    ]
+  },
+  "restoration": {
+    "exact": true,
+    "before": {
+      "head": "0acae1cb93ad37f5918445ef3102065abb000b87",
+      "status": "",
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktrees": "worktree /home/user/ai-code-review-gate\nHEAD 0acae1cb93ad37f5918445ef3102065abb000b87\nbranch refs/heads/claude/friendly-ride-x3c5ob"
+    },
+    "after": {
+      "head": "0acae1cb93ad37f5918445ef3102065abb000b87",
+      "status": "",
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktrees": "worktree /home/user/ai-code-review-gate\nHEAD 0acae1cb93ad37f5918445ef3102065abb000b87\nbranch refs/heads/claude/friendly-ride-x3c5ob"
+    },
+    "mutant_reachable_from_branches": ""
+  }
+}

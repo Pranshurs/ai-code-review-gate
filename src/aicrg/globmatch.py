@@ -61,11 +61,21 @@ def compile_glob(pattern: str) -> re.Pattern[str]:
     body = "".join(out)
     if not anchored:
         body = "(?:[^/]+/)*" + body
-    return re.compile("^" + body + "$")
+    # DOTALL + fullmatch: a path containing a newline (git allows it) must not slip
+    # past `.*` or the `$`-before-trailing-newline rule.
+    return re.compile(body, re.DOTALL)
 
 
 def match(path: str, pattern: str) -> bool:
-    return compile_glob(pattern).match(path) is not None
+    return compile_glob(pattern).fullmatch(path) is not None
+
+
+_CONTROL = re.compile(r"[\x00-\x1f\x7f]")
+
+
+def has_control_chars(path: str) -> bool:
+    """Tracked paths with control characters are refused by the gate (``unsafe_path_name``)."""
+    return _CONTROL.search(path) is not None
 
 
 def match_any(path: str, patterns: tuple[str, ...] | list[str]) -> str | None:

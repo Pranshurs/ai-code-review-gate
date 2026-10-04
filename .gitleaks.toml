@@ -1,0 +1,20 @@
+# Secret-scanning configuration for this repository.
+# The adversarial corpora contain deliberately fake, inert credentials: they are
+# the "agent committed a secret" test cases. Only the exact files that hold them
+# are allowlisted (5 findings in 4 files with the default rules), so a secret added
+# anywhere else, including elsewhere under corpus/, is still reported. corpus/ is
+# also excluded from AICRG's own analysis, so a directory-wide allowlist would
+# leave it unscanned. A new fake credential needs its own entry here.
+title = "aicrg"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "deliberately fake credentials in adversarial corpora (exact files)"
+paths = [
+  '''^corpus/dev/N01-secret-committed/files/config/billing\.py$''',
+  '''^corpus/heldout/HO-34-committed-credentials/files/\.env$''',
+  '''^corpus/heldout-v2/H2-006/files/tests/test_smoke\.py$''',
+  '''^corpus/heldout-v2/H2-049/files/tests/test_validation_newline\.py$''',
+]

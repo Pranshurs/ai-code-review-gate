@@ -95,11 +95,20 @@ class CheckResult:
     output_tail: str
     reason: str = ""
     tool_version: str | None = None
+    source: str = "head"  # who controls the evidence content: head | base | bundle | external
+    revision: str = "head"  # which code it ran against: head | base (differential)
+    provider_status: str = ""  # COMPLETE | FINDINGS | SKIPPED | ERROR | TIMEOUT
+    report: dict[str, Any] | None = None
+    report_digest: str | None = None
 
     def to_json(self) -> dict[str, Any]:
         data = asdict(self)
         data["argv"] = list(self.argv)
         data["status"] = self.status.value
+        if data["report"] is None:
+            del data["report"]
+        if data["report_digest"] is None:
+            del data["report_digest"]
         return data
 
 

@@ -42,12 +42,51 @@ allowed_paths: [src/**, tests/**]
 # Any change to these paths blocks.
 protected_paths: [.github/**, review-gate.yaml]
 
-# Commands executed in a fresh worktree of the head commit.
+# Commands executed in a clean checkout of the head commit (source: head).
 required_checks:
   - pytest                       # string form: name == command
   - name: types
     command: mypy src            # shlex-split; never run through a shell
     timeout_seconds: 600         # default 900; timeout => ERROR
+  - name: lint
+    command: ruff check --output-format sarif -o out/ruff.sarif .
+    report: {format: sarif, path: out/ruff.sarif}   # sarif|junit|cobertura|lcov|json
+    block_levels: [error]          # SARIF/JSON levels that BLOCK; lower levels => REVIEW
+    differential: true             # also run on the merge-base (docs/EVIDENCE.md)
+    preexisting_failure: review    # fail | review (default) | allow (proven-identical only)
+    required: true                 # false => SKIPPED/ERROR/TIMEOUT is advisory, not ERROR
+  - name: coverage
+    command: python -m pytest -q --cov=app --cov-report=xml:out/cov.xml
+    report: {format: cobertura, path: out/cov.xml}
+    min_changed_coverage: 0.8      # added production lines executed; below => REVIEW
+
+# Evidence the candidate cannot write (docs/EVIDENCE.md#trusted-evidence).
+trusted_evidence:
+  - name: auth-contract
+    source: base                   # files matching `paths` come from the merge-base
+    paths: [trusted_tests/**]
+    command: python -m pytest -q -c trusted_tests/pytest.ini --rootdir . --confcutdir trusted_tests trusted_tests
+  - name: release-evals
+    source: bundle                 # immutable dir/tar; wrong digest => ERROR
+    digest: sha256:<64 hex>        # `aicrg bundle digest PATH`
+    mount: release_evals
+    bundle: /opt/evals/release.tar # default location; --bundle NAME=PATH overrides
+    command: python -m pytest -q --confcutdir release_evals release_evals
+
+# Reports produced elsewhere, supplied with --evidence NAME=PATH.
+external_evidence:
+  - name: codeql
+    format: sarif                  # missing report => SKIPPED => ERROR (required by default)
+
+# Changed-code mutation (docs/TEST_POTENCY.md).
+test_potency:
+  command: python -m pytest -q -x -p no:cacheprovider tests
+  paths: [app/**]
+  max_mutants: 40
+  mutant_timeout_seconds: 120
+  total_timeout_seconds: 1800
+  on_survivor: review              # review | fail
+  on_error: review                 # review | error  (never PASS)
 
 # Change classes that BLOCK. Not listed => REVIEW_REQUIRED (never silent).
 # Omit the key to forbid all of them (the default).
@@ -86,6 +125,24 @@ exclude_from_analysis: [corpus/**]
 
 execution:
   env_passthrough: [DATABASE_URL]   # credential-looking env vars are withheld otherwise
+  executor: container               # local (default, trusted-code mode) | container
+  container:                        # docs/EXECUTION_SECURITY.md
+    image: python:3.12-slim@sha256:<digest>
+    runtime: docker                 # docker | podman
+    network: none                   # none (default) | enabled
+    cpus: 2
+    memory_mb: 2048
+    pids_limit: 512
+    tmpfs_mb: 512
+    user: "65534:65534"             # numeric, never 0
+
+# Receipt authenticity required at verify time (docs/RECEIPTS.md).
+attestation:
+  required: true
+  method: github                    # github | ssh
+  repository: OWNER/REPO
+  signer_workflow: OWNER/REPO/.github/workflows/aicrg-gate.yml
+  signer_ref: refs/heads/main
 
 llm_reviewer:                        # optional; see docs/RECEIPTS.md#llm_review
   command: [python, tools/reviewer.py]
@@ -108,6 +165,10 @@ llm_reviewer:                        # optional; see docs/RECEIPTS.md#llm_review
 * **High-risk patches need evidence.** If the patch touches a HIGH or CRITICAL
   surface and the contract has no `required_checks`, the gate returns
   REVIEW_REQUIRED (`insufficient_evidence`).
+* **The base contract is a floor for execution too.** `execution.executor:
+  container` cannot be downgraded from the CLI; an unavailable runtime is ERROR.
+* **Evidence names are unique** across `required_checks`, `trusted_evidence`
+  and `external_evidence`; report paths must be relative, without `..` or `.git`.
 * **Commands run head's code.** If your project is installed in editable mode,
   make sure the check imports from the working directory: for pytest set
   `pythonpath = ["src"]`, or install inside the check command.

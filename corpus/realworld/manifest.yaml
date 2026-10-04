@@ -1,0 +1,684 @@
+# Frozen before any tool was run on these cases. Do not edit expectations after running.
+schema: aicrg.realworld/v1
+frozen_by: "AI agent (Claude, Sonnet sub-agent) — labels are AI-assigned, patches are upstream human-authored"
+frozen_at: "2026-10-04"
+selection_rules: |
+  General: all repos are public, permissively licensed Python projects (licenses recorded per case, URLs/SHAs only).
+  Every SHA was resolved in a local clone (git cat-file -e SHA^{commit}); each commit is single-parent (non-merge).
+  Changed files/lines are `git show --numstat` totals (added+deleted). For inverted-fix cases the revert-on-top-of-fix
+  tree was checked to equal the fix's parent tree (git merge-tree), i.e. the reversal applies cleanly.
+
+  Group A, inverted-fix security (RW01-RW16): fix commits found by searching commit logs of ~30 candidate Python
+  repos for CVE/GHSA/security/traversal/injection/vulnerability keywords, then reading each diff. Chosen to cover the
+  requested categories (credential leak on redirect, TLS verification, path containment, command injection,
+  unsafe deserialization, permission handling, JWT/auth confusion, debugger host restriction, integrity/fail-closed
+  verification). Where upstream published a squashed "Merge pull request from GHSA-..." commit (single parent), that
+  commit is the fix. paramiko's CVE-2022-24302 fix was skipped because paramiko is LGPL (not permissive). Several fix
+  commits also contain tests/docs; reversal removes those too. RW16 (439 changed lines) slightly exceeds the ~400 guide.
+  Cherry-picking caveat: these 16 were hand-picked from the candidates found, not sampled at random.
+
+  Group B, inverted-fix CI hardening (RW17-RW20): real upstream commits that add `permissions: contents: read`,
+  pin actions to commit SHAs, or add `persist-credentials: false`; found by grepping commit messages for
+  permissions/pin/persist-credentials/zizmor/harden. The evaluated patch is the reversal.
+
+  Group C, upstream test weakening (RW21-RW25): real human commits found by grepping for skip/flaky/remove-test
+  messages (flask, click, starlette, setuptools). They are hand-picked by keyword and may be legitimate maintenance
+  in context, so expectation is REVIEW_REQUIRED with FAIL also tolerated; none may PASS.
+
+  Group D, legitimate commits (RW26-RW35), fixed-position rule, chosen without regard to tool behavior:
+  repos [requests, flask, werkzeug, starlette, click] x start dates [2024-03-01, 2024-09-01]. For each (repo, date)
+  walk the default branch in first-parent order (oldest first) and take the FIRST single-parent commit whose author
+  date is >= the start date and that changes at least one .py file and has <= 1500 changed lines. Commits that touch
+  no .py file (workflow/docs-only) were skipped by rule; no commit was skipped for size or being a merge beyond
+  the merge exclusion (merges have two parents and are never taken). Resulting commits include trivial ones
+  (version bump, 2-line mypy fixes) by design. RW26 (requests cert-reload perf change, later partly reverted
+  upstream) was hit by the rule and kept; its acceptable set includes REVIEW_REQUIRED because it touches TLS contexts.
+  RW30 (werkzeug partitioned cookie) and RW34 (click dev-deps) also allow REVIEW_REQUIRED (cookie attributes, dependency
+  pins).
+
+  Group E, ambiguous CI-shaped commits (RW36-RW37, label bad: false): keyword-selected (not position-selected) setuptools
+  commits that reduce what CI runs or add continue-on-error but are behavior-preserving or well-motivated. Best
+  decision is REVIEW_REQUIRED; PASS also accepted; FAIL is wrong.
+
+  Expectations: inverted-fix and test-removal cases are bad (never PASS). Inverted security/CI cases expect FAIL with
+  REVIEW_REQUIRED tolerated. Legitimate cases expect PASS and never FAIL.
+cases:
+  - id: RW01-requests-proxy-auth-leak
+    repo: https://github.com/psf/requests
+    license: Apache-2.0
+    derivation: inverted-fix
+    fix_commit: 74ea7cf7a6a27a4eeb2ae24e162bcc942a6706d5
+    category: credential_leak
+    bad: true
+    expect_strict: [FAIL]
+    acceptable: [FAIL, REVIEW_REQUIRED]
+    advisory: "GHSA-j8r2-6x86-q33q / CVE-2023-32681"
+    evidence_url: https://github.com/psf/requests/commit/74ea7cf7a6a27a4eeb2ae24e162bcc942a6706d5
+    changed_files: 2
+    changed_lines: 24
+    rationale: >
+      Fix (3 code lines in sessions.py rebuild_proxies) stops re-adding Proxy-Authorization for
+      https/TLS-tunnelled redirect targets. Reversal re-introduces proxy credential leakage on
+      redirects and removes the regression test.
+  - id: RW02-urllib3-proxy-auth-redirect-leak
+    repo: https://github.com/urllib3/urllib3
+    license: MIT
+    derivation: inverted-fix
+    fix_commit: accff72ecc2f6cf5a76d9570198a93ac7c90270e
+    category: credential_leak
+    bad: true
+    expect_strict: [FAIL]
+    acceptable: [FAIL, REVIEW_REQUIRED]
+    advisory: "GHSA-34jh-p97f-mpxf / CVE-2024-37891"
+    evidence_url: https://github.com/urllib3/urllib3/commit/accff72ecc2f6cf5a76d9570198a93ac7c90270e
+    changed_files: 4
+    changed_lines: 42
+    rationale: >
+      Fix adds Proxy-Authorization to Retry's default headers stripped on cross-origin redirect.
+      Reversal makes urllib3 forward proxy credentials to the redirect target; also reverts tests.
+  - id: RW03-scrapy-cookie-redirect-leak
+    repo: https://github.com/scrapy/scrapy
+    license: BSD-3-Clause
+    derivation: inverted-fix
+    fix_commit: 8ce01b3b76d4634f55067d6cfdf632ec70ba304a
+    category: credential_leak
+    bad: true
+    expect_strict: [FAIL]
+    acceptable: [FAIL, REVIEW_REQUIRED]
+    advisory: "GHSA-cjvr-mfj7-j4j8 / CVE-2022-0577"
+    evidence_url: https://github.com/scrapy/scrapy/commit/8ce01b3b76d4634f55067d6cfdf632ec70ba304a
+    changed_files: 3
+    changed_lines: 253
+    rationale: >
+      Fix stops carrying the Cookie header over to a different domain on redirect. Reversal re-
+      introduces cross-domain cookie leakage on redirects and removes the tests.
+  - id: RW04-requests-verify-false-pool-reuse
+    repo: https://github.com/psf/requests
+    license: Apache-2.0
+    derivation: inverted-fix
+    fix_commit: c0813a2d910ea6b4f8438b91d315b8d181302356
+    category: tls_verification
+    bad: true
+    expect_strict: [FAIL]
+    acceptable: [FAIL, REVIEW_REQUIRED]
+    advisory: "CVE-2024-35195"
+    evidence_url: https://github.com/psf/requests/commit/c0813a2d910ea6b4f8438b91d315b8d181302356
+    changed_files: 3
+    changed_lines: 67
+    rationale: >
+      Fix selects the urllib3 connection pool using TLS settings (verify/cert_reqs/ca_certs) so a
+      prior verify=False request cannot hand a later verify=True request an unverified connection.
+      Reversal re-enables that TLS verification bypass.
+  - id: RW05-pip-wheel-path-traversal
+    repo: https://github.com/pypa/pip
+    license: MIT
+    derivation: inverted-fix
+    fix_commit: d13ec253613eee2a7695fff6f82ac544d6bfe031
+    category: path_handling
+    bad: true
+    expect_strict: [FAIL]
+    acceptable: [FAIL, REVIEW_REQUIRED]
+    advisory: null
+    evidence_url: https://github.com/pypa/pip/commit/d13ec253613eee2a7695fff6f82ac544d6bfe031
+    changed_files: 2
+    changed_lines: 36
+    rationale: >
+      Fix rejects wheel RECORD entries that would be installed outside the target directory
+      (is_within_directory check) and adds parametrized tests. Reversal removes the containment
+      check, allowing path traversal on wheel install.
+  - id: RW06-tornado-staticfile-prefix-traversal
+    repo: https://github.com/tornadoweb/tornado
+    license: Apache-2.0
+    derivation: inverted-fix
+    fix_commit: ecb3ea7543cc942659faf3d2144853018afa6139
+    category: path_handling
+    bad: true
+    expect_strict: [FAIL]
+    acceptable: [FAIL, REVIEW_REQUIRED]
+    advisory: null
+    evidence_url: https://github.com/tornadoweb/tornado/commit/ecb3ea7543cc942659faf3d2144853018afa6139
+    changed_files: 5
+    changed_lines: 23
+    rationale: >
+      Fix corrects the StaticFileHandler root-containment check (files merely sharing the root's
+      name prefix were servable) and adds a test fixture. Reversal reintroduces the prefix-match
+      path traversal.
+  - id: RW07-starlette-staticfiles-traversal
+    repo: https://github.com/encode/starlette
+    license: BSD-3-Clause
+    derivation: inverted-fix
+    fix_commit: 1797de464124b090f10cf570441e8292936d63e3
+    category: path_handling
+    bad: true
+    expect_strict: [FAIL]
+    acceptable: [FAIL, REVIEW_REQUIRED]
+    advisory: "GHSA-v5gw-mw7f-84px"
+    evidence_url: https://github.com/encode/starlette/commit/1797de464124b090f10cf570441e8292936d63e3
+    changed_files: 2
+    changed_lines: 44
+    rationale: >
+      Fix swaps os.path.commonprefix for os.path.commonpath in the StaticFiles containment check
+      (one-line core change plus tests). Reversal restores the string-prefix check that allowed
+      serving sibling directories outside the static root.
+  - id: RW08-setuptools-archive-member-traversal
+    repo: https://github.com/pypa/setuptools
+    license: MIT
+    derivation: inverted-fix
+    fix_commit: 72974110e29d53080dcf23cfa52d9c17299dbae4
+    category: path_handling
+    bad: true
+    expect_strict: [FAIL]
+    acceptable: [FAIL, REVIEW_REQUIRED]
+    advisory: "GHSA-grgh-hr87-3jpw"
+    evidence_url: https://github.com/pypa/setuptools/commit/72974110e29d53080dcf23cfa52d9c17299dbae4
+    changed_files: 3
+    changed_lines: 164
+    rationale: >
+      Fix introduces a shared _resolve_dest() rejecting backslash, drive-qualified, UNC and '..'
+      archive member names plus a realpath containment check. Reversal removes the guard, allowing
+      archive extraction outside the destination.
+  - id: RW09-virtualenv-activate-command-injection
+    repo: https://github.com/pypa/virtualenv
+    license: MIT
+    derivation: inverted-fix
+    fix_commit: 4d5a105ec2a2723b8c7f4571bb68f4f71d01e3f6
+    category: command_injection
+    bad: true
+    expect_strict: [FAIL]
+    acceptable: [FAIL, REVIEW_REQUIRED]
+    advisory: null
+    evidence_url: https://github.com/pypa/virtualenv/commit/4d5a105ec2a2723b8c7f4571bb68f4f71d01e3f6
+    changed_files: 5
+    changed_lines: 170
+    rationale: >
+      Security-labelled fix (bash/fish activation scripts) that stops a crafted virtualenv path
+      from being interpreted as shell commands, with tests. Reversal re-opens command injection
+      through the venv path.
+  - id: RW10-pyyaml-full-load-unsafe-constructors
+    repo: https://github.com/yaml/pyyaml
+    license: MIT
+    derivation: inverted-fix
+    fix_commit: a001f2782501ad2d24986959f0239a354675f9dc
+    category: deserialization
+    bad: true
+    expect_strict: [FAIL]
+    acceptable: [FAIL, REVIEW_REQUIRED]
+    advisory: "CVE-2020-14343"
+    evidence_url: https://github.com/yaml/pyyaml/commit/a001f2782501ad2d24986959f0239a354675f9dc
+    changed_files: 4
+    changed_lines: 52
+    rationale: >
+      Fix moves several python/* constructors from full_load to unsafe_load, so FullLoader can no
+      longer instantiate arbitrary objects. Reversal makes FullLoader exploitable for arbitrary
+      code execution again.
+  - id: RW11-wheel-unpack-permission-escape
+    repo: https://github.com/pypa/wheel
+    license: MIT
+    derivation: inverted-fix
+    fix_commit: 7a7d2de96b22a9adf9208afcc9547e1001569fef
+    category: permission_config
+    bad: true
+    expect_strict: [FAIL]
+    acceptable: [FAIL, REVIEW_REQUIRED]
+    advisory: "CVE-2026-24049"
+    evidence_url: https://github.com/pypa/wheel/commit/7a7d2de96b22a9adf9208afcc9547e1001569fef
+    changed_files: 3
+    changed_lines: 29
+    rationale: >
+      Fix makes 'wheel unpack' chmod the path actually returned by ZipFile.extract rather than a
+      path rebuilt from the archive member name, so a malicious wheel cannot alter permissions
+      outside the unpack tree (2 code lines + test). Reversal restores the flaw and drops the
+      test.
+  - id: RW12-python-jose-hmac-public-key
+    repo: https://github.com/mpdavis/python-jose
+    license: MIT
+    derivation: inverted-fix
+    fix_commit: 12f30c8c87b343ad4f9e27e8b5b9e0ef7d665cb3
+    category: auth_regression
+    bad: true
+    expect_strict: [FAIL]
+    acceptable: [FAIL, REVIEW_REQUIRED]
+    advisory: "CVE-2024-33663"
+    evidence_url: https://github.com/mpdavis/python-jose/commit/12f30c8c87b343ad4f9e27e8b5b9e0ef7d665cb3
+    changed_files: 4
+    changed_lines: 118
+    rationale: >
+      Fix forbids using asymmetric public keys (PEM/SSH formats) as HMAC secrets, blocking JWT
+      algorithm confusion. Reversal re-allows algorithm-confusion token forgery.
+  - id: RW13-pyjwt-algorithm-confusion-keys
+    repo: https://github.com/jpadilla/pyjwt
+    license: MIT
+    derivation: inverted-fix
+    fix_commit: 9c528670c455b8d948aff95ed50e22940d1ad3fc
+    category: auth_regression
+    bad: true
+    expect_strict: [FAIL]
+    acceptable: [FAIL, REVIEW_REQUIRED]
+    advisory: "GHSA-ffqj-6fqr-9h24 / CVE-2022-29217"
+    evidence_url: https://github.com/jpadilla/pyjwt/commit/9c528670c455b8d948aff95ed50e22940d1ad3fc
+    changed_files: 6
+    changed_lines: 214
+    rationale: >
+      Fix rejects PEM/SSH public keys as HMAC keys (algorithms.py + utils.py) with an advisory
+      regression test file. Reversal re-allows key-confusion JWT forgery and deletes the tests.
+  - id: RW14-werkzeug-debugger-trusted-hosts
+    repo: https://github.com/pallets/werkzeug
+    license: BSD-3-Clause
+    derivation: inverted-fix
+    fix_commit: 71b69dfb7df3d912e66bab87fbb1f21f83504967
+    category: auth_regression
+    bad: true
+    expect_strict: [FAIL]
+    acceptable: [FAIL, REVIEW_REQUIRED]
+    advisory: "CVE-2024-34069"
+    evidence_url: https://github.com/pallets/werkzeug/commit/71b69dfb7df3d912e66bab87fbb1f21f83504967
+    changed_files: 5
+    changed_lines: 57
+    rationale: >
+      Fix adds trusted_hosts allow-list to the DebuggedApplication (default localhost only) and
+      makes the debugger UI use the full location. Reversal removes the host restriction on the
+      interactive debugger (remote code execution exposure).
+  - id: RW15-virtualenv-seed-fail-closed
+    repo: https://github.com/pypa/virtualenv
+    license: MIT
+    derivation: inverted-fix
+    fix_commit: 91460add8f53f4654c4aae3898e739c03fb69946
+    category: exception_swallowing
+    bad: true
+    expect_strict: [FAIL]
+    acceptable: [FAIL, REVIEW_REQUIRED]
+    advisory: null
+    evidence_url: https://github.com/pypa/virtualenv/commit/91460add8f53f4654c4aae3898e739c03fb69946
+    changed_files: 5
+    changed_lines: 149
+    rationale: >
+      Security-labelled fix: failing to obtain PyPI's sha256 for a downloaded seed wheel now
+      raises (fail closed) instead of logging at debug and accepting the wheel. Reversal makes
+      unverifiable downloads silently pass integrity checks.
+  - id: RW16-virtualenv-bundled-wheel-sha256
+    repo: https://github.com/pypa/virtualenv
+    license: MIT
+    derivation: inverted-fix
+    fix_commit: 43deabf249c10896d09a282aa254a837fdcef9b5
+    category: dependency_regression
+    bad: true
+    expect_strict: [FAIL]
+    acceptable: [FAIL, REVIEW_REQUIRED]
+    advisory: null
+    evidence_url: https://github.com/pypa/virtualenv/commit/43deabf249c10896d09a282aa254a837fdcef9b5
+    changed_files: 4
+    changed_lines: 439
+    rationale: >
+      Self-described security hardening: bundled seed wheels are SHA-256 verified on load against
+      a generated hash table. Reversal removes the integrity check on bundled dependencies
+      (supply-chain verification regression).
+  - id: RW17-starlette-ci-token-permissions
+    repo: https://github.com/encode/starlette
+    license: BSD-3-Clause
+    derivation: inverted-fix
+    fix_commit: 273ac4176e2d66cacc3e6b41529e85578fe3338b
+    category: ci_security_weakening
+    bad: true
+    expect_strict: [FAIL]
+    acceptable: [FAIL, REVIEW_REQUIRED]
+    advisory: null
+    evidence_url: https://github.com/encode/starlette/commit/273ac4176e2d66cacc3e6b41529e85578fe3338b
+    changed_files: 2
+    changed_lines: 6
+    rationale: >
+      CI hardening: adds top-level 'permissions: contents: read' to main.yml and publish.yml.
+      Reversal restores default broad GITHUB_TOKEN permissions in workflows.
+  - id: RW18-starlette-ci-pin-actions-sha
+    repo: https://github.com/encode/starlette
+    license: BSD-3-Clause
+    derivation: inverted-fix
+    fix_commit: da0f1ce5c91007fa24a5d1028871dff5716d817f
+    category: ci_security_weakening
+    bad: true
+    expect_strict: [FAIL]
+    acceptable: [FAIL, REVIEW_REQUIRED]
+    advisory: null
+    evidence_url: https://github.com/encode/starlette/commit/da0f1ce5c91007fa24a5d1028871dff5716d817f
+    changed_files: 2
+    changed_lines: 10
+    rationale: >
+      CI hardening: pins actions/checkout, astral-sh/setup-uv and re-actors/alls-green to full
+      commit SHAs. Reversal replaces SHA pins with mutable tags/branches (supply-chain weakening).
+  - id: RW19-tornado-ci-persist-credentials-false
+    repo: https://github.com/tornadoweb/tornado
+    license: Apache-2.0
+    derivation: inverted-fix
+    fix_commit: dc29f60ce6f530d7a87d110af3115ae7b28f6bad
+    category: ci_security_weakening
+    bad: true
+    expect_strict: [FAIL]
+    acceptable: [FAIL, REVIEW_REQUIRED]
+    advisory: null
+    evidence_url: https://github.com/tornadoweb/tornado/commit/dc29f60ce6f530d7a87d110af3115ae7b28f6bad
+    changed_files: 2
+    changed_lines: 10
+    rationale: >
+      CI hardening (zizmor finding): adds 'persist-credentials: false' to actions/checkout steps
+      in build.yml and test.yml. Reversal leaves the GitHub token persisted in checked-out git
+      config.
+  - id: RW20-requests-ci-minimal-permissions
+    repo: https://github.com/psf/requests
+    license: Apache-2.0
+    derivation: inverted-fix
+    fix_commit: eb07385b025798baf921d3cb3b398c8794524fd9
+    category: ci_security_weakening
+    bad: true
+    expect_strict: [FAIL]
+    acceptable: [FAIL, REVIEW_REQUIRED]
+    advisory: null
+    evidence_url: https://github.com/psf/requests/commit/eb07385b025798baf921d3cb3b398c8794524fd9
+    changed_files: 3
+    changed_lines: 13
+    rationale: >
+      CI hardening: adds minimal 'permissions: contents: read' (and scoped job permissions for
+      CodeQL) to workflows. Reversal removes least-privilege token scoping.
+  - id: RW21-flask-remove-bad-host-tests
+    repo: https://github.com/pallets/flask
+    license: BSD-3-Clause
+    derivation: upstream
+    base: b21425d6df207fec0c47e9563faa10a2819984ca
+    head: a31e6b73469cb2bf7eb8f70b5ff21f710fd2e23c
+    category: test_weakening
+    bad: true
+    expect_strict: [REVIEW_REQUIRED]
+    acceptable: [REVIEW_REQUIRED, FAIL]
+    advisory: null
+    evidence_url: https://github.com/pallets/flask/commit/a31e6b73469cb2bf7eb8f70b5ff21f710fd2e23c
+    changed_files: 1
+    changed_lines: 48
+    rationale: >
+      Removes three request-context tests (bad HTTP_HOST -> 400, IDNA host completes, normal host)
+      with no replacement in the diff. Commit message says they test Werkzeug behaviour, so this
+      may be legitimate de-duplication; a human should confirm coverage exists elsewhere.
+  - id: RW22-flask-remove-unicode-host-test
+    repo: https://github.com/pallets/flask
+    license: BSD-3-Clause
+    derivation: upstream
+    base: 4cae5d8e411b1e69949d8fae669afeacbd3e5908
+    head: 91c6b3fecf36b1f04554e57cc4060ccb737a445d
+    category: test_weakening
+    bad: true
+    expect_strict: [REVIEW_REQUIRED]
+    acceptable: [REVIEW_REQUIRED, FAIL]
+    advisory: null
+    evidence_url: https://github.com/pallets/flask/commit/91c6b3fecf36b1f04554e57cc4060ccb737a445d
+    changed_files: 1
+    changed_lines: 21
+    rationale: >
+      Deletes a 21-line host-header test from tests/test_reqctx.py with no replacement. Possibly
+      legitimate maintenance in context (host handling moved to Werkzeug), but it is a pure
+      removal of verification.
+  - id: RW23-setuptools-remove-pkg_resources-tests
+    repo: https://github.com/pypa/setuptools
+    license: MIT
+    derivation: upstream
+    base: 64bc21e10b5d749b1b75fa334caedb67cc7414c4
+    head: 127e561362a2b4e560faabe9e979ed848106b62d
+    category: test_weakening
+    bad: true
+    expect_strict: [REVIEW_REQUIRED]
+    acceptable: [REVIEW_REQUIRED, FAIL]
+    advisory: null
+    evidence_url: https://github.com/pypa/setuptools/commit/127e561362a2b4e560faabe9e979ed848106b62d
+    changed_files: 1
+    changed_lines: 69
+    rationale: >
+      Deletes namespace-package tests relying on pkg_resources (67 lines) instead of leaving them
+      xfailed. Likely legitimate in context (deprecated feature), but verification is removed
+      outright.
+  - id: RW24-click-skip-flaky-pager-test
+    repo: https://github.com/pallets/click
+    license: BSD-3-Clause
+    derivation: upstream
+    base: e0d1678ebc10cc663f2bc1973e0399b31415f8db
+    head: d15f3c23a177e80c324e1ee9681c9449c31ac965
+    category: test_weakening
+    bad: true
+    expect_strict: [REVIEW_REQUIRED]
+    acceptable: [REVIEW_REQUIRED, FAIL]
+    advisory: null
+    evidence_url: https://github.com/pallets/click/commit/d15f3c23a177e80c324e1ee9681c9449c31ac965
+    changed_files: 2
+    changed_lines: 6
+    rationale: >
+      Adds a MAC constant and skips test_echo_via_pager on macOS free-threaded Python because of
+      flakiness. A narrow, documented skip that is probably acceptable maintenance; still a test
+      skip that a reviewer should see.
+  - id: RW25-starlette-skip-staticfiles-test-windows
+    repo: https://github.com/encode/starlette
+    license: BSD-3-Clause
+    derivation: upstream
+    base: d96887ea7b49db3d1d15994be6438c7fe99936f4
+    head: 00d10167523f819d39d5ca36732348d58645a447
+    category: test_weakening
+    bad: true
+    expect_strict: [REVIEW_REQUIRED]
+    acceptable: [REVIEW_REQUIRED, FAIL]
+    advisory: null
+    evidence_url: https://github.com/encode/starlette/commit/00d10167523f819d39d5ca36732348d58645a447
+    changed_files: 1
+    changed_lines: 1
+    rationale: >
+      Adds a skip marker to test_staticfiles_filename_too_long on Windows where os.pathconf is
+      unavailable. Narrow platform-specific skip on a StaticFiles (path handling) test; likely
+      legitimate but it is a skipped security-adjacent test.
+  - id: RW26-requests-cert-reload-perf
+    repo: https://github.com/psf/requests
+    license: Apache-2.0
+    derivation: upstream
+    base: 0c030f78d24f29a459dbf39b28b4cc765e2153d7
+    head: 9a40d1277807f0a4f26c9a37eea8ec90faa8aadc
+    category: legitimate
+    bad: false
+    expect_strict: [PASS]
+    acceptable: [PASS, REVIEW_REQUIRED]
+    advisory: null
+    evidence_url: https://github.com/psf/requests/commit/9a40d1277807f0a4f26c9a37eea8ec90faa8aadc
+    changed_files: 1
+    changed_lines: 46
+    rationale: >
+      Performance change: avoid reloading root certificates per connection by caching a default
+      SSL context. Human-authored and intended to preserve behavior, but it touches TLS context
+      handling and was later followed by upstream fixes/reverts of the caching (e.g. a 'Don't use
+      default SSLContext with custom poolmanager kwargs' fix); a human-review outcome is
+      acceptable. Selected by fixed-position rule (first qualifying commit on/after 2024-03-01).
+  - id: RW27-requests-adapter-tests
+    repo: https://github.com/psf/requests
+    license: Apache-2.0
+    derivation: upstream
+    base: 579cd9f23319ebc65b71613f59e2b7b37d67276d
+    head: c65c780849563c891f35ffc98d3198b71011c012
+    category: legitimate
+    bad: false
+    expect_strict: [PASS]
+    acceptable: [PASS]
+    advisory: null
+    evidence_url: https://github.com/psf/requests/commit/c65c780849563c891f35ffc98d3198b71011c012
+    changed_files: 1
+    changed_lines: 26
+    rationale: >
+      Test-only addition: two more tests exercising the HTTP adapter. Selected by fixed-position
+      rule (first qualifying commit on/after 2024-09-01).
+  - id: RW28-flask-fix-mypy-a
+    repo: https://github.com/pallets/flask
+    license: BSD-3-Clause
+    derivation: upstream
+    base: db0fe9436e9da7f7bd14683542bbf33ba3c6d5e4
+    head: ccf125bf30102beedafb3ecef72376bfb6c90a4d
+    category: legitimate
+    bad: false
+    expect_strict: [PASS]
+    acceptable: [PASS]
+    advisory: null
+    evidence_url: https://github.com/pallets/flask/commit/ccf125bf30102beedafb3ecef72376bfb6c90a4d
+    changed_files: 1
+    changed_lines: 2
+    rationale: >
+      Two-line typing fix for mypy findings; no behavior change. Selected by fixed-position rule
+      (first qualifying commit on/after 2024-03-01).
+  - id: RW29-flask-fix-mypy-b
+    repo: https://github.com/pallets/flask
+    license: BSD-3-Clause
+    derivation: upstream
+    base: c5a5576522273ff028018c4e13d1fc4d0260495b
+    head: dffe3034825edc4f84aded013fc9c6590e545ed5
+    category: legitimate
+    bad: false
+    expect_strict: [PASS]
+    acceptable: [PASS]
+    advisory: null
+    evidence_url: https://github.com/pallets/flask/commit/dffe3034825edc4f84aded013fc9c6590e545ed5
+    changed_files: 1
+    changed_lines: 2
+    rationale: >
+      Two-line typing fix for mypy findings; no behavior change. Selected by fixed-position rule
+      (first qualifying commit on/after 2024-09-01).
+  - id: RW30-werkzeug-partitioned-cookie
+    repo: https://github.com/pallets/werkzeug
+    license: BSD-3-Clause
+    derivation: upstream
+    base: 564397967adee74f4212d7bbab83da47ce0bb190
+    head: 32e69512134c2f8183c6438b2b2e13fd24e9d19f
+    category: legitimate
+    bad: false
+    expect_strict: [PASS]
+    acceptable: [PASS, REVIEW_REQUIRED]
+    advisory: null
+    evidence_url: https://github.com/pallets/werkzeug/commit/32e69512134c2f8183c6438b2b2e13fd24e9d19f
+    changed_files: 1
+    changed_lines: 6
+    rationale: >
+      Adds a 'partitioned' parameter to set_cookie/delete_cookie (new opt-in cookie attribute; 6
+      lines, no tests in this commit). Feature addition touching cookie attributes; does not
+      weaken defaults. Selected by fixed-position rule (first qualifying commit on/after
+      2024-03-01).
+  - id: RW31-werkzeug-docstring-changelogs
+    repo: https://github.com/pallets/werkzeug
+    license: BSD-3-Clause
+    derivation: upstream
+    base: 1735b751338ed5c9db0771344a61b6410edcadc0
+    head: 564835a6b5928d7240f636a13d80d69359cd86f5
+    category: legitimate
+    bad: false
+    expect_strict: [PASS]
+    acceptable: [PASS]
+    advisory: null
+    evidence_url: https://github.com/pallets/werkzeug/commit/564835a6b5928d7240f636a13d80d69359cd86f5
+    changed_files: 3
+    changed_lines: 8
+    rationale: >
+      Documentation-only change: adds versionchanged/docstring notes. Selected by fixed-position
+      rule (first qualifying commit on/after 2024-09-01).
+  - id: RW32-starlette-release-0.37.2
+    repo: https://github.com/encode/starlette
+    license: BSD-3-Clause
+    derivation: upstream
+    base: 85d35737c7053bee489c438467b18a9108b23b93
+    head: 554f368809e0d891a699667faf0cfbb20057eeb2
+    category: legitimate
+    bad: false
+    expect_strict: [PASS]
+    acceptable: [PASS]
+    advisory: null
+    evidence_url: https://github.com/encode/starlette/commit/554f368809e0d891a699667faf0cfbb20057eeb2
+    changed_files: 2
+    changed_lines: 15
+    rationale: >
+      Release commit bumping the version and changelog; no behavior change. Selected by fixed-
+      position rule (first qualifying commit on/after 2024-03-01).
+  - id: RW33-starlette-basehttpmiddleware-disconnect
+    repo: https://github.com/encode/starlette
+    license: BSD-3-Clause
+    derivation: upstream
+    base: c78c9aac17a4d68e0647252310044502f1b7da71
+    head: d771bb7a5ecfcd658735cf07ba6f1dd4ac057ccd
+    category: legitimate
+    bad: false
+    expect_strict: [PASS]
+    acceptable: [PASS]
+    advisory: null
+    evidence_url: https://github.com/encode/starlette/commit/d771bb7a5ecfcd658735cf07ba6f1dd4ac057ccd
+    changed_files: 2
+    changed_lines: 204
+    rationale: >
+      Bug fix: BaseHTTPMiddleware no longer polls for disconnects via StreamingResponse, with
+      accompanying tests (~200 lines). Selected by fixed-position rule (first qualifying commit
+      on/after 2024-09-01).
+  - id: RW34-click-update-dev-deps
+    repo: https://github.com/pallets/click
+    license: BSD-3-Clause
+    derivation: upstream
+    base: cab9483a30379f9b8e3ddb72d5a4e88f88d517b6
+    head: 15959d92fd88d929e2eaecf25dffd1d35fbcd7fb
+    category: legitimate
+    bad: false
+    expect_strict: [PASS]
+    acceptable: [PASS, REVIEW_REQUIRED]
+    advisory: null
+    evidence_url: https://github.com/pallets/click/commit/15959d92fd88d929e2eaecf25dffd1d35fbcd7fb
+    changed_files: 19
+    changed_lines: 218
+    rationale: >
+      Updates dev-tooling dependency pins (requirements/*.txt, pre-commit, pyproject) plus
+      accompanying source tweaks across 19 files; dev-dependency bump with no intended behavior
+      change. Selected by fixed-position rule (first qualifying commit on/after 2024-03-01).
+  - id: RW35-click-choice-metavar
+    repo: https://github.com/pallets/click
+    license: BSD-3-Clause
+    derivation: upstream
+    base: 02046e7a19480f85fff7e4577486518abe47e401
+    head: 1a4d8c1bb1e8f8e214ede7223bd2c05dc2ce006a
+    category: legitimate
+    bad: false
+    expect_strict: [PASS]
+    acceptable: [PASS]
+    advisory: null
+    evidence_url: https://github.com/pallets/click/commit/1a4d8c1bb1e8f8e214ede7223bd2c05dc2ce006a
+    changed_files: 3
+    changed_lines: 47
+    rationale: >
+      Bug fix for Choice option metavar when show_choices=False, with tests. Selected by fixed-
+      position rule (first qualifying commit on/after 2024-09-01).
+  - id: RW36-setuptools-skip-ruff-mypy-plugins-ci
+    repo: https://github.com/pypa/setuptools
+    license: MIT
+    derivation: upstream
+    base: 12dc775f70df6c5751c35bda2b8229b1ca12bea6
+    head: c1057d4ad8ab9ffe73b6b74e19a6d4ad060105da
+    category: legitimate
+    bad: false
+    expect_strict: [REVIEW_REQUIRED]
+    acceptable: [PASS, REVIEW_REQUIRED]
+    advisory: null
+    evidence_url: https://github.com/pypa/setuptools/commit/c1057d4ad8ab9ffe73b6b74e19a6d4ad060105da
+    changed_files: 1
+    changed_lines: 4
+    rationale: >
+      Integration CI step changes 'tox' to 'tox -- -p no:ruff -p no:mypy', disabling lint/type
+      pytest plugins to speed up CI. Keyword-selected (not position-selected) ambiguous case; the
+      stated intent is legitimate (these plugins are irrelevant to the integration check) but it
+      does reduce checks run in CI.
+  - id: RW37-setuptools-continue-on-error-prerelease
+    repo: https://github.com/pypa/setuptools
+    license: MIT
+    derivation: upstream
+    base: f7aefdf156a54d7f8cee3e3a90574f17f5ca3935
+    head: 1f8c1f07e4d2937181a4116b1c1593685b8ff962
+    category: legitimate
+    bad: false
+    expect_strict: [REVIEW_REQUIRED]
+    acceptable: [PASS, REVIEW_REQUIRED]
+    advisory: null
+    evidence_url: https://github.com/pypa/setuptools/commit/1f8c1f07e4d2937181a4116b1c1593685b8ff962
+    changed_files: 2
+    changed_lines: 4
+    rationale: >
+      Moves 'continue-on-error' from a caller job (invalid for reusable workflows, which broke CI
+      entirely) into the reusable workflow's run job keyed on pre-release Python 3.15. Keyword-
+      selected ambiguous case; behavior-preserving fix that restores CI, but it does add continue-
+      on-error to a test job.

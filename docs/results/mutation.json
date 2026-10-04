@@ -3,42 +3,42 @@
     "id": "M01",
     "invariant": "receipt is bound to the patch digest",
     "killed": true,
-    "seconds": 7.6,
+    "seconds": 9.5,
     "detail": "FAILED tests/test_gate_invariants.py::TestReceipt::test_resealed_receipt_with_forged_patch_digest_rejected"
   },
   {
     "id": "M02",
     "invariant": "a changed HEAD invalidates a receipt",
     "killed": true,
-    "seconds": 7.2,
+    "seconds": 7.4,
     "detail": "FAILED tests/test_gate_invariants.py::TestReceipt::test_new_commit_makes_receipt_stale"
   },
   {
     "id": "M03",
     "invariant": "a failed command is FAIL, never PASS",
     "killed": true,
-    "seconds": 2.0,
+    "seconds": 2.1,
     "detail": "FAILED tests/test_gate_invariants.py::TestEvidence::test_failed_command_is_fail_not_pass"
   },
   {
     "id": "M04",
     "invariant": "deleted assertions are reported",
     "killed": true,
-    "seconds": 1.1,
+    "seconds": 1.4,
     "detail": "FAILED tests/test_test_integrity.py::test_removed_assertion_in_security_test_blocks"
   },
   {
     "id": "M05",
     "invariant": "protected-path modification blocks",
     "killed": true,
-    "seconds": 5.6,
+    "seconds": 5.7,
     "detail": "FAILED tests/test_gate_invariants.py::TestContractAndPolicy::test_patch_cannot_relax_its_own_policy"
   },
   {
     "id": "M06",
     "invariant": "malformed policy fails closed (unknown keys)",
     "killed": true,
-    "seconds": 0.5,
+    "seconds": 0.6,
     "detail": "FAILED tests/test_policy.py::TestContractParsing::test_malformed_policy_fails_closed[version: 1\\nunknown_key: 1\\n]"
   },
   {
@@ -52,21 +52,21 @@
     "id": "M08",
     "invariant": "gate errors never become PASS",
     "killed": true,
-    "seconds": 0.4,
+    "seconds": 0.5,
     "detail": "FAILED tests/test_gate_invariants.py::TestDecision::test_error_never_passes"
   },
   {
     "id": "M09",
     "invariant": "an analyser exception is recorded as a gate error",
     "killed": true,
-    "seconds": 5.5,
+    "seconds": 5.6,
     "detail": "FAILED tests/test_gate_invariants.py::TestContractAndPolicy::test_malformed_policy_is_error"
   },
   {
     "id": "M10",
     "invariant": "a check timeout is ERROR",
     "killed": true,
-    "seconds": 3.5,
+    "seconds": 3.8,
     "detail": "FAILED tests/test_gate_invariants.py::TestEvidence::test_timeout_is_error - A..."
   },
   {
@@ -80,28 +80,28 @@
     "id": "M12",
     "invariant": "new runtime dependencies are evaluated",
     "killed": true,
-    "seconds": 6.8,
+    "seconds": 6.6,
     "detail": "FAILED tests/test_security_ci_deps.py::test_dependency_policy[\"requests==2.31.0\"]-\"requests==2.31.0\", \"leftpad-py>=1\"]-new_runtime_dependency-FAIL]"
   },
   {
     "id": "M13",
     "invariant": "a tampered receipt is rejected",
     "killed": true,
-    "seconds": 7.7,
+    "seconds": 7.5,
     "detail": "FAILED tests/test_gate_invariants.py::TestReceipt::test_tampered_receipt_rejected"
   },
   {
     "id": "M14",
     "invariant": "a non-PASS receipt does not authorise a merge",
     "killed": true,
-    "seconds": 8.6,
+    "seconds": 8.2,
     "detail": "FAILED tests/test_gate_invariants.py::TestReceipt::test_non_pass_receipt_does_not_authorise"
   },
   {
     "id": "M15",
     "invariant": "a moved base branch makes the receipt stale",
     "killed": true,
-    "seconds": 8.5,
+    "seconds": 8.9,
     "detail": "FAILED tests/test_gate_invariants.py::TestReceipt::test_base_moved_or_policy_changed_is_stale"
   },
   {
@@ -115,21 +115,21 @@
     "id": "M17",
     "invariant": "inequality is weaker than equality",
     "killed": true,
-    "seconds": 0.3,
+    "seconds": 0.4,
     "detail": "FAILED tests/test_test_integrity.py::test_assertion_strength[assert r.status != 500-1]"
   },
   {
     "id": "M18",
     "invariant": "new unconditional skips are reported",
     "killed": true,
-    "seconds": 1.9,
+    "seconds": 2.1,
     "detail": "FAILED tests/test_test_integrity.py::test_unconditional_skip_blocks - Asserti..."
   },
   {
     "id": "M19",
     "invariant": "CI failure masking is reported",
     "killed": true,
-    "seconds": 4.9,
+    "seconds": 4.6,
     "detail": "FAILED tests/test_security_ci_deps.py::test_ci_bypass[python -m pytest -q-python -m pytest -q || true-ci_failure_masked]"
   },
   {
@@ -143,49 +143,392 @@
     "id": "M21",
     "invariant": "secrets are redacted in findings",
     "killed": true,
-    "seconds": 3.7,
+    "seconds": 3.9,
     "detail": "FAILED tests/test_security_ci_deps.py::test_secret_is_detected_and_redacted"
   },
   {
     "id": "M22",
     "invariant": "credential env vars are withheld from checks",
     "killed": true,
-    "seconds": 5.4,
+    "seconds": 5.5,
     "detail": "FAILED tests/test_gate_invariants.py::TestEvidence::test_secret_env_vars_are_withheld_from_checks"
   },
   {
     "id": "M23",
     "invariant": "reviewer hypotheses must cite an added line",
     "killed": true,
-    "seconds": 1.0,
+    "seconds": 1.2,
     "detail": "FAILED tests/test_llm_reviewer.py::test_hypotheses_must_cite_added_lines_and_are_capped_at_review"
   },
   {
     "id": "M24",
     "invariant": "reviewer findings are capped at REVIEW",
     "killed": true,
-    "seconds": 1.1,
+    "seconds": 1.2,
     "detail": "FAILED tests/test_llm_reviewer.py::test_hypotheses_must_cite_added_lines_and_are_capped_at_review"
   },
   {
     "id": "M25",
     "invariant": "evidence comes from the head commit, not the working tree",
     "killed": true,
-    "seconds": 4.9,
+    "seconds": 4.7,
     "detail": "FAILED tests/test_gate_invariants.py::TestEvidence::test_evidence_comes_from_head_commit_not_working_tree"
   },
   {
     "id": "M26",
     "invariant": "an internal CLI crash exits as ERROR",
     "killed": true,
-    "seconds": 10.8,
+    "seconds": 11.1,
     "detail": "FAILED tests/test_gate_invariants.py::TestCli::test_internal_crash_is_error_exit"
   },
   {
     "id": "M27",
     "invariant": "a blocking finding is FAIL",
     "killed": true,
-    "seconds": 0.4,
+    "seconds": 0.5,
     "detail": "FAILED tests/test_gate_invariants.py::TestDecision::test_matrix - AssertionEr..."
+  },
+  {
+    "id": "M28",
+    "invariant": "trusted evidence content comes from the base, never the candidate head",
+    "killed": true,
+    "seconds": 4.2,
+    "detail": "FAILED tests/test_trusted_evidence.py::TestTrustedEvidenceDemo::test_candidate_edit_of_trusted_test_is_discarded"
+  },
+  {
+    "id": "M29",
+    "invariant": "a trusted bundle whose digest differs is never used",
+    "killed": true,
+    "seconds": 2.8,
+    "detail": "FAILED tests/test_trusted_evidence.py::TestBundles::test_wrong_digest_is_error_never_used"
+  },
+  {
+    "id": "M30",
+    "invariant": "candidate files under trusted paths are removed before the trusted run",
+    "killed": true,
+    "seconds": 7.4,
+    "detail": "FAILED tests/test_trusted_evidence.py::TestTrustedEvidenceDemo::test_candidate_conftest_inside_trusted_paths_is_removed"
+  },
+  {
+    "id": "M31",
+    "invariant": "a trusted overlay never writes through a symlink planted by the patch",
+    "killed": true,
+    "seconds": 1.1,
+    "detail": "FAILED tests/test_execution_boundary.py::test_safe_write_never_follows_symlinks"
+  },
+  {
+    "id": "M32",
+    "invariant": "a surviving changed-code mutant is not treated as PASS",
+    "killed": true,
+    "seconds": 6.4,
+    "detail": "FAILED tests/test_potency.py::TestPotencyGate::test_covered_but_weakly_asserted_code_needs_review"
+  },
+  {
+    "id": "M33",
+    "invariant": "a mutation engine error/timeout is never clean",
+    "killed": true,
+    "seconds": 10.0,
+    "detail": "FAILED tests/test_potency.py::TestPotencyGate::test_failing_baseline_is_never_pass"
+  },
+  {
+    "id": "M34",
+    "invariant": "a mutant is killed only when the tests fail",
+    "killed": true,
+    "seconds": 6.1,
+    "detail": "FAILED tests/test_potency.py::TestPotencyGate::test_covered_but_weakly_asserted_code_needs_review"
+  },
+  {
+    "id": "M35",
+    "invariant": "a new failure on top of pre-existing ones is a regression",
+    "killed": true,
+    "seconds": 0.4,
+    "detail": "FAILED tests/test_providers_differential.py::TestClassify::test_matrix - Asse..."
+  },
+  {
+    "id": "M36",
+    "invariant": "base PASS -> head FAIL is a new regression, never pre-existing",
+    "killed": true,
+    "seconds": 0.4,
+    "detail": "FAILED tests/test_providers_differential.py::TestClassify::test_matrix - Asse..."
+  },
+  {
+    "id": "M37",
+    "invariant": "'allow' covers only failures proven identical",
+    "killed": true,
+    "seconds": 0.4,
+    "detail": "FAILED tests/test_providers_differential.py::TestClassify::test_severity - As..."
+  },
+  {
+    "id": "M38",
+    "invariant": "a required provider that is SKIPPED is not PASS",
+    "killed": true,
+    "seconds": 6.4,
+    "detail": "FAILED tests/test_providers_differential.py::TestProviderFailClosed::test_junit_no_tests_is_skipped_and_required_skip_is_error"
+  },
+  {
+    "id": "M39",
+    "invariant": "a required provider that errors is not PASS",
+    "killed": true,
+    "seconds": 4.3,
+    "detail": "FAILED tests/test_providers_differential.py::TestProviderFailClosed::test_missing_report_is_error"
+  },
+  {
+    "id": "M40",
+    "invariant": "a report committed by the patch is discarded before the tool runs",
+    "killed": true,
+    "seconds": 4.4,
+    "detail": "FAILED tests/test_providers_differential.py::TestProviderFailClosed::test_preplanted_report_is_discarded"
+  },
+  {
+    "id": "M41",
+    "invariant": "an operator cannot downgrade container execution to local",
+    "killed": true,
+    "seconds": 0.5,
+    "detail": "FAILED tests/test_execution_boundary.py::TestExecutorSelection::test_operator_cannot_downgrade_container_to_local"
+  },
+  {
+    "id": "M42",
+    "invariant": "container network is disabled unless the contract opts in",
+    "killed": true,
+    "seconds": 1.0,
+    "detail": "FAILED tests/test_execution_boundary.py::TestContainerArgv::test_hardening_flags"
+  },
+  {
+    "id": "M43",
+    "invariant": "the host environment is not inherited by the container",
+    "killed": true,
+    "seconds": 1.0,
+    "detail": "FAILED tests/test_execution_boundary.py::TestContainerArgv::test_host_environment_is_not_inherited"
+  },
+  {
+    "id": "M44",
+    "invariant": "an unsigned receipt is rejected when attestation is required",
+    "killed": true,
+    "seconds": 1.2,
+    "detail": "FAILED tests/test_attestation.py::TestSsh::test_unsigned_receipt_rejected_when_attestation_required"
+  },
+  {
+    "id": "M45",
+    "invariant": "an attestation for a different commit is rejected",
+    "killed": true,
+    "seconds": 3.9,
+    "detail": "FAILED tests/test_attestation.py::TestGithub::test_attestation_for_another_commit_fails"
+  },
+  {
+    "id": "M46",
+    "invariant": "a PR-ref signer workflow does not satisfy a protected-ref pin",
+    "killed": true,
+    "seconds": 4.0,
+    "detail": "FAILED tests/test_attestation.py::TestGithub::test_pr_ref_signer_does_not_satisfy_main_pin"
+  },
+  {
+    "id": "M47",
+    "invariant": "re-signing never leaves a stale signature in place",
+    "killed": true,
+    "seconds": 2.7,
+    "detail": "FAILED tests/test_attestation.py::TestSsh::test_base_contract_requires_attestation_and_pins_signers"
+  },
+  {
+    "id": "M48",
+    "invariant": "doctor detects a missing gate workflow",
+    "killed": true,
+    "seconds": 0.5,
+    "detail": "FAILED tests/test_doctor.py::test_missing_gate_workflow_fails - AssertionErro..."
+  },
+  {
+    "id": "M49",
+    "invariant": "doctor detects a masked/disabled gate",
+    "killed": true,
+    "seconds": 0.5,
+    "detail": "FAILED tests/test_doctor.py::test_masked_or_self_policy_gate_fails[mutation0]"
+  },
+  {
+    "id": "M50",
+    "invariant": "doctor never reports unverifiable enforcement as PASS",
+    "killed": true,
+    "seconds": 0.5,
+    "detail": "FAILED tests/test_doctor.py::test_unparseable_workflow_is_unknown_not_pass - ..."
+  },
+  {
+    "id": "M51",
+    "invariant": "F1: the verifier, not the receipt, decides which policy applies",
+    "killed": true,
+    "seconds": 3.1,
+    "detail": "FAILED tests/test_attestation.py::TestSsh::test_forged_policy_source_cannot_skip_required_attestation"
+  },
+  {
+    "id": "M52",
+    "invariant": "F13: trusted content comes from the base tip, not the merge-base",
+    "killed": true,
+    "seconds": 1.7,
+    "detail": "FAILED tests/test_security_review_regressions.py::test_f13_trusted_content_comes_from_base_tip_not_stale_merge_base"
+  },
+  {
+    "id": "M53",
+    "invariant": "F3: trusted content changed during its own run is ERROR",
+    "killed": true,
+    "seconds": 1.5,
+    "detail": "FAILED tests/test_security_review_regressions.py::test_f3_trusted_files_rewritten_during_run_is_never_pass_local"
+  },
+  {
+    "id": "M54",
+    "invariant": "F3: trusted paths are mounted read-only in the container",
+    "killed": true,
+    "seconds": 1.0,
+    "detail": "FAILED tests/test_execution_boundary.py::TestContainerArgv::test_trusted_paths_are_mounted_read_only"
+  },
+  {
+    "id": "M55",
+    "invariant": "F12: globs match paths containing newlines",
+    "killed": true,
+    "seconds": 0.6,
+    "detail": "FAILED tests/test_security_review_regressions.py::test_f12_globs_match_paths_with_newlines"
+  },
+  {
+    "id": "M56",
+    "invariant": "F12: changed paths with control characters block",
+    "killed": true,
+    "seconds": 1.0,
+    "detail": "FAILED tests/test_security_review_regressions.py::test_f12_control_character_paths_block"
+  },
+  {
+    "id": "M57",
+    "invariant": "F4: exit 1 with a clean (or coverage) report is not PASS",
+    "killed": true,
+    "seconds": 1.1,
+    "detail": "FAILED tests/test_security_review_regressions.py::test_f4_coverage_tool_exit_1_is_not_pass"
+  },
+  {
+    "id": "M58",
+    "invariant": "F5: differential identities are a multiset",
+    "killed": true,
+    "seconds": 0.7,
+    "detail": "FAILED tests/test_security_review_regressions.py::test_f5_duplicate_identical_finding_is_a_new_regression"
+  },
+  {
+    "id": "M59",
+    "invariant": "F6a: a killed control mutant makes potency unmeasurable",
+    "killed": true,
+    "seconds": 2.9,
+    "detail": "FAILED tests/test_security_review_regressions.py::test_f6a_self_hash_test_cannot_fake_potency"
+  },
+  {
+    "id": "M60",
+    "invariant": "F6b: a truncated mutant sample is not COMPLETE",
+    "killed": true,
+    "seconds": 2.2,
+    "detail": "FAILED tests/test_security_review_regressions.py::test_f6b_truncated_sample_is_not_complete"
+  },
+  {
+    "id": "M61",
+    "invariant": "F7: test-named modules imported by production code are analysed",
+    "killed": true,
+    "seconds": 5.5,
+    "detail": "FAILED tests/test_security_review_regressions.py::test_f6a_self_hash_test_cannot_fake_potency"
+  },
+  {
+    "id": "M62",
+    "invariant": "F8: doctor sees a gate whose exit status is piped away or ignored",
+    "killed": true,
+    "seconds": 8.9,
+    "detail": "FAILED tests/test_security_review_regressions.py::test_f8_doctor_detects_lost_exit_status[      - run: aicrg check --base B | tee out.txt\\n]"
+  },
+  {
+    "id": "M63",
+    "invariant": "F11: external evidence inside the evaluated checkout is refused",
+    "killed": true,
+    "seconds": 1.0,
+    "detail": "FAILED tests/test_security_review_regressions.py::test_f11_external_report_inside_checkout_is_refused"
+  },
+  {
+    "id": "M64",
+    "invariant": "F11: external evidence for another revision is refused",
+    "killed": true,
+    "seconds": 1.1,
+    "detail": "FAILED tests/test_security_review_regressions.py::test_f11_external_report_for_another_revision_is_refused"
+  },
+  {
+    "id": "M65",
+    "invariant": "F9: XML must be UTF-8 so the DTD guard sees the text",
+    "killed": true,
+    "seconds": 0.6,
+    "detail": "FAILED tests/test_security_review_regressions.py::test_f9_utf16_xml_with_entities_is_refused"
+  },
+  {
+    "id": "M66",
+    "invariant": "F1b: without --base the verifier cannot vouch for the base contract",
+    "killed": true,
+    "seconds": 1.1,
+    "detail": "FAILED tests/test_security_review_regressions.py::test_f1b_verify_without_base_cannot_vouch_for_contract"
+  },
+  {
+    "id": "M67",
+    "invariant": "N1: trusted runs see a read-only workspace in the container",
+    "killed": true,
+    "seconds": 2.4,
+    "detail": "FAILED tests/test_security_review_regressions.py::test_n1_trusted_run_sees_a_read_only_workspace"
+  },
+  {
+    "id": "M68",
+    "invariant": "N2: each changed function gets a behaviour-preserving control mutant",
+    "killed": true,
+    "seconds": 2.5,
+    "detail": "FAILED tests/test_security_review_regressions.py::test_n2_function_bytecode_pin_cannot_fake_potency"
+  },
+  {
+    "id": "M69",
+    "invariant": "N3: string references (importlib/__import__/entry points) count as use",
+    "killed": true,
+    "seconds": 20.7,
+    "detail": "FAILED tests/test_security_review_regressions.py::test_n3_dynamically_imported_test_named_module_is_production[import importlib\\nrun = importlib.import_module('"
+  },
+  {
+    "id": "M70",
+    "invariant": "N4: doctor flags a shell without errexit after the gate",
+    "killed": true,
+    "seconds": 21.5,
+    "detail": "FAILED tests/test_security_review_regressions.py::test_n4_doctor_more_masks[      - run: |\\n          aicrg check --base B\\n          echo done\\n        shell: "
+  },
+  {
+    "id": "M71",
+    "invariant": "N5: require_revision refuses an unbound external report",
+    "killed": true,
+    "seconds": 1.1,
+    "detail": "FAILED tests/test_security_review_regressions.py::test_n5_require_revision_refuses_unbound_external_report"
+  },
+  {
+    "id": "M72",
+    "invariant": "a receipt's CI commit must be a merge built from its head",
+    "killed": true,
+    "seconds": 2.3,
+    "detail": "FAILED tests/test_attestation.py::TestCiProvenance::test_ci_commit_not_built_from_head_is_rejected"
+  },
+  {
+    "id": "M73",
+    "invariant": "a GitHub attestation must sign the CI commit the gate ran on",
+    "killed": true,
+    "seconds": 1.6,
+    "detail": "FAILED tests/test_attestation.py::TestCiProvenance::test_attestation_must_sign_the_ci_commit"
+  },
+  {
+    "id": "M74",
+    "invariant": "an unrelated CI commit is not an evidence revision for the head",
+    "killed": true,
+    "seconds": 3.8,
+    "detail": "FAILED tests/test_provenance_boundary.py::test_report_for_unrelated_ci_commit_is_not_evidence_for_head"
+  },
+  {
+    "id": "M75",
+    "invariant": "a CI merge commit relates to the head only as the merge of exactly base and head",
+    "killed": true,
+    "seconds": 3.4,
+    "detail": "FAILED tests/test_provenance_boundary.py::test_merge_with_other_base_is_not_a_merge_of_head"
+  },
+  {
+    "id": "M76",
+    "invariant": "an ambient CI commit equal to nothing in the target is not related to the head",
+    "killed": true,
+    "seconds": 1.1,
+    "detail": "FAILED tests/test_provenance_boundary.py::test_ambient_ci_cannot_alter_the_subject[unrelated-repo]"
   }
 ]

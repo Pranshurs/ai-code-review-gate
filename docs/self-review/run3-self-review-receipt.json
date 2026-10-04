@@ -1,0 +1,832 @@
+{
+  "checks": [
+    {
+      "argv": [
+        "ruff",
+        "check",
+        "src",
+        "tests",
+        "corpus/run_corpus.py",
+        "scripts"
+      ],
+      "duration_ms": 46.382,
+      "exit_code": 0,
+      "finished_at": "2026-10-04T14:47:41.269Z",
+      "name": "lint",
+      "output_sha256": "sha256:82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "output_tail": "All checks passed!",
+      "provider_status": "COMPLETE",
+      "reason": "",
+      "revision": "head",
+      "source": "head",
+      "started_at": "2026-10-04T14:47:41.222Z",
+      "status": "PASS",
+      "tool_version": "ruff 0.16.10"
+    },
+    {
+      "argv": [
+        "ruff",
+        "format",
+        "--check",
+        "src",
+        "tests",
+        "corpus/run_corpus.py",
+        "scripts"
+      ],
+      "duration_ms": 47.111,
+      "exit_code": 0,
+      "finished_at": "2026-10-04T14:47:41.316Z",
+      "name": "format",
+      "output_sha256": "sha256:70aeb2781372748bf56bc4126fc132461937977430c7144a7cb865fa230b87a6",
+      "output_tail": "69 files already formatted",
+      "provider_status": "COMPLETE",
+      "reason": "",
+      "revision": "head",
+      "source": "head",
+      "started_at": "2026-10-04T14:47:41.269Z",
+      "status": "PASS",
+      "tool_version": "ruff 0.16.10"
+    },
+    {
+      "argv": [
+        "mypy"
+      ],
+      "duration_ms": 4870.659,
+      "exit_code": 0,
+      "finished_at": "2026-10-04T14:47:46.187Z",
+      "name": "types",
+      "output_sha256": "sha256:a459b8765e4db93f08156e7d98399988a9b87243303f92178f28c9db897f6066",
+      "output_tail": "Success: no issues found in 48 source files",
+      "provider_status": "COMPLETE",
+      "reason": "",
+      "revision": "head",
+      "source": "head",
+      "started_at": "2026-10-04T14:47:41.316Z",
+      "status": "PASS",
+      "tool_version": "mypy 2.4.0 (compiled: yes)"
+    },
+    {
+      "argv": [
+        "python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "duration_ms": 117937.755,
+      "exit_code": 0,
+      "finished_at": "2026-10-04T14:49:44.125Z",
+      "name": "tests",
+      "output_sha256": "sha256:b70f25386b36800f20de8e7d7a26f17471ffac6b67eb92b4172f5ce766ea5b99",
+      "output_tail": "........................................................................ [ 21%]\n........................................................................ [ 43%]\n........................................................................ [ 64%]\n........................................................................ [ 86%]\n.............................................                            [100%]",
+      "provider_status": "COMPLETE",
+      "reason": "",
+      "revision": "head",
+      "source": "head",
+      "started_at": "2026-10-04T14:47:46.187Z",
+      "status": "PASS",
+      "tool_version": "pytest 9.1.1"
+    },
+    {
+      "argv": [
+        "python",
+        "corpus/run_corpus.py",
+        "corpus/dev"
+      ],
+      "duration_ms": 39874.613,
+      "exit_code": 0,
+      "finished_at": "2026-10-04T14:50:24.000Z",
+      "name": "dev-corpus",
+      "output_sha256": "sha256:832678523b710eece25c94c46e0cb8af3439e18e2c982f2923c47a9c41d568dc",
+      "output_tail": "ok   J02-legit-auth-bugfix-with-tests         PASS                          \nok   J03-legit-assertion-strengthened         PASS                          \nok   J04-legit-test-moved                     PASS                          \nok   J05-legit-dev-dependency                 PASS                          \nok   J06-legit-parametrize-extended           PASS                          \nok   J07-legit-store-feature                  PASS                          \nok   K01-skip-security-test                   FAIL                         unconditional_skip_added \nok   K02-raises-broadened                     FAIL                         expected_exception_broadened \nok   K03-parametrize-shrunk                   FAIL                         parametrize_cases_reduced \nok   K04-early-return                         FAIL                         unreachable_assertions \nok   K05-assertion-swallowed                  FAIL                         assertion_swallowed \nok   K06-vacuous-assert                       FAIL                         vacuous_assertion_added \nok   K07-match-dropped                        FAIL                         expected_exception_broadened \nok   N01-secret-committed                     FAIL                         secret_introduced \nok   N02-validation-removed                   REVIEW_REQUIRED              input_validation_removed \nok   N03-compare-digest-removed               FAIL                         constant_time_compare_removed \nok   N04-pickle-cache                         FAIL                         unsafe_deserialization \nok   N05-mypy-ignore-errors                   FAIL                         checker_suppression_added \nok   P01-protected-policy-edit                FAIL                         path_outside_contract,policy_modified,protected_path_modified \nok   P02-path-outside-contract                FAIL                         path_outside_contract \nok   R01-gate-runner-failure                  ERROR                          errors: `tests` (head evidence) ERROR: executable not found: definitely-not-installed-aicrg-tool\nok   R02-malformed-policy                     ERROR                          errors: PolicyError: policy: unknown key(s) ['forbiden_changes']; allowed: ['allowed_paths', 'attestation', 'dependency_policy', 'exclude_from_analysis', 'executio\nok   R03-tests-actually-fail                  FAIL                         required_check_failed \nok   S01-stale-receipt-after-new-commit       PASS / stale=REJECTED         verify before change ok=True; after new commit ok=False (STALE: receipt is for head bd327bfccadc, current HEAD is e1e930e1c666); forged head ok=False\n{\n  \"total\": 44,\n  \"bad_patches\": 37,\n  \"bad_detected\": 37,\n  \"bad_missed\": [],\n  \"bad_detected_as_FAIL\": 32,\n  \"bad_detected_as_REVIEW_REQUIRED\": 2,\n  \"bad_detected_as_ERROR\": 2,\n  \"legitimate_patches\": 7,\n  \"legitimate_accepted\": 7,\n  \"false_positives\": [],\n  \"infrastructure_cases\": 0,\n  \"infrastructure_as_expected\": 0,\n  \"expectation_mismatches\": [],\n  \"bad_tests_green\": 31\n}",
+      "provider_status": "COMPLETE",
+      "reason": "",
+      "revision": "head",
+      "source": "head",
+      "started_at": "2026-10-04T14:49:44.125Z",
+      "status": "PASS",
+      "tool_version": "Python 3.12.3"
+    },
+    {
+      "argv": [
+        "python",
+        "scripts/mutation_gate.py"
+      ],
+      "duration_ms": 403354.971,
+      "exit_code": 0,
+      "finished_at": "2026-10-04T14:57:07.355Z",
+      "name": "mutation-gate",
+      "output_sha256": "sha256:516b442743c15cbd376bff0f4e0818e5a833c8f3aa69a7ce3eed4126b8a60a13",
+      "output_tail": "ns.py::test_f12_globs_match_paths_with_newlines\nKILLED   M56 F12: changed paths with control characters block          1.1s  FAILED tests/test_security_review_regressions.py::test_f12_control_character_paths_block\nKILLED   M57 F4: exit 1 with a clean (or coverage) report is not PASS   1.2s  FAILED tests/test_security_review_regressions.py::test_f4_coverage_tool_exit_1_is_not_pass\nKILLED   M58 F5: differential identities are a multiset                0.7s  FAILED tests/test_security_review_regressions.py::test_f5_duplicate_identical_finding_is_a_new_regression\nKILLED   M59 F6a: a killed control mutant makes potency unmeasurable   2.9s  FAILED tests/test_security_review_regressions.py::test_f6a_self_hash_test_cannot_fake_potency\nKILLED   M60 F6b: a truncated mutant sample is not COMPLETE            2.5s  FAILED tests/test_security_review_regressions.py::test_f6b_truncated_sample_is_not_complete\nKILLED   M61 F7: test-named modules imported by production code are analysed   7.0s  FAILED tests/test_security_review_regressions.py::test_f6a_self_hash_test_cannot_fake_potency\nKILLED   M62 F8: doctor sees a gate whose exit status is piped away or ignored   9.3s  FAILED tests/test_security_review_regressions.py::test_f8_doctor_detects_lost_exit_status[      - run: aicrg check --base B | tee out\nKILLED   M63 F11: external evidence inside the evaluated checkout is refused   1.1s  FAILED tests/test_security_review_regressions.py::test_f11_external_report_inside_checkout_is_refused\nKILLED   M64 F11: external evidence for another revision is refused    1.3s  FAILED tests/test_security_review_regressions.py::test_f11_external_report_for_another_revision_is_refused\nKILLED   M65 F9: XML must be UTF-8 so the DTD guard sees the text      0.7s  FAILED tests/test_security_review_regressions.py::test_f9_utf16_xml_with_entities_is_refused\nKILLED   M66 F1b: without --base the verifier cannot vouch for the base contract   1.2s  FAILED tests/test_security_review_regressions.py::test_f1b_verify_without_base_cannot_vouch_for_contract\nKILLED   M67 N1: trusted runs see a read-only workspace in the container   2.8s  FAILED tests/test_security_review_regressions.py::test_n1_trusted_run_sees_a_read_only_workspace\nKILLED   M68 N2: each changed function gets a behaviour-preserving control mutant   2.5s  FAILED tests/test_security_review_regressions.py::test_n2_function_bytecode_pin_cannot_fake_potency\nKILLED   M69 N3: string references (importlib/__import__/entry points) count as use  21.9s  FAILED tests/test_security_review_regressions.py::test_n3_dynamically_imported_test_named_module_is_production[import importlib\\\nKILLED   M70 N4: doctor flags a shell without errexit after the gate  21.7s  FAILED tests/test_security_review_regressions.py::test_n4_doctor_more_masks[      - run: |\\n          aicrg check --base B\\n          echo done\nKILLED   M71 N5: require_revision refuses an unbound external report   0.9s  FAILED tests/test_security_review_regressions.py::test_n5_require_revision_refuses_unbound_external_report\nKILLED   M72 a receipt's CI commit must be a merge built from its head   2.2s  FAILED tests/test_attestation.py::TestCiProvenance::test_ci_commit_not_built_from_head_is_rejected\nKILLED   M73 a GitHub attestation must sign the CI commit the gate ran on   1.6s  FAILED tests/test_attestation.py::TestCiProvenance::test_attestation_must_sign_the_ci_commit\nKILLED   M74 an unrelated CI commit is not an evidence revision for the head   3.9s  FAILED tests/test_provenance_boundary.py::test_report_for_unrelated_ci_commit_is_not_evidence_for_head\nKILLED   M75 a CI merge commit relates to the head only as the merge of exactly base and head   3.7s  FAILED tests/test_provenance_boundary.py::test_merge_with_other_base_is_not_a_merge_of_head\nKILLED   M76 an ambient CI commit equal to nothing in the target is not related to the head   1.2s  FAILED tests/test_provenance_boundary.py::test_ambient_ci_cannot_alter_the_subject[unrelated-repo]\n\n76/76 invariant mutants killed",
+      "provider_status": "COMPLETE",
+      "reason": "",
+      "revision": "head",
+      "source": "head",
+      "started_at": "2026-10-04T14:50:24.000Z",
+      "status": "PASS",
+      "tool_version": "Python 3.12.3"
+    },
+    {
+      "argv": [
+        "python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-c",
+        "tests/trusted.ini",
+        "--rootdir",
+        ".",
+        "tests/test_gate_invariants.py",
+        "tests/test_security_review_regressions.py"
+      ],
+      "duration_ms": 35085.284,
+      "exit_code": 0,
+      "finished_at": "2026-10-04T14:57:42.813Z",
+      "name": "invariants",
+      "output_sha256": "sha256:19da9087d92935b2064df20f632357e22786ce3e50fd7075c1f2ef56c47433ca",
+      "output_tail": "........................................................................ [ 98%]\n.                                                                        [100%]",
+      "provider_status": "COMPLETE",
+      "reason": "",
+      "revision": "head",
+      "source": "base",
+      "started_at": "2026-10-04T14:57:07.728Z",
+      "status": "PASS",
+      "tool_version": "pytest 9.1.1"
+    }
+  ],
+  "decision": "FAIL",
+  "dependencies": [],
+  "environment": {
+    "aicrg": "0.2.0.dev0",
+    "env_vars_withheld_from_checks": 18,
+    "git": "git version 2.43.0",
+    "machine": "x86_64",
+    "platform": "Linux-6.18.44-fc-v64-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "errors": [],
+  "evidence": [
+    {
+      "head_status": "COMPLETE",
+      "name": "lint",
+      "required": true,
+      "source": "head"
+    },
+    {
+      "head_status": "COMPLETE",
+      "name": "format",
+      "required": true,
+      "source": "head"
+    },
+    {
+      "head_status": "COMPLETE",
+      "name": "types",
+      "required": true,
+      "source": "head"
+    },
+    {
+      "head_status": "COMPLETE",
+      "name": "tests",
+      "required": true,
+      "source": "head"
+    },
+    {
+      "head_status": "COMPLETE",
+      "name": "dev-corpus",
+      "required": true,
+      "source": "head"
+    },
+    {
+      "head_status": "COMPLETE",
+      "name": "mutation-gate",
+      "required": true,
+      "source": "head"
+    },
+    {
+      "head_status": "COMPLETE",
+      "name": "invariants",
+      "required": true,
+      "source": "base"
+    }
+  ],
+  "execution": {
+    "executor": "local",
+    "isolation": "none",
+    "note": "trusted-code mode: commands run with the gate's user, filesystem and network"
+  },
+  "findings": [
+    {
+      "category": "trusted_evidence",
+      "code": "trusted_evidence_modified",
+      "file": "tests/conftest.py",
+      "kind": "deterministic",
+      "message": "patch changes 3 path(s) owned by trusted evidence `invariants`; the candidate's version was discarded and the trusted version was used",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "after": "assert created",
+      "before": "assert left == ''",
+      "category": "test_integrity",
+      "code": "assertion_weakened",
+      "file": "tests/test_execution_boundary.py",
+      "kind": "heuristic",
+      "line": 297,
+      "message": "TestRealContainerIsolation.test_container_timeout_is_error_and_container_is_killed: assertion on `left` weakened (strength 3 -> 1)",
+      "provider": "aicrg",
+      "severity": "block"
+    },
+    {
+      "after": "assert 'constant_number' in [m.operator for m in g.equivalent]",
+      "before": "assert [m.operator for m in g.equivalent] == ['constant_number']",
+      "category": "test_integrity",
+      "code": "assertion_weakened",
+      "file": "tests/test_potency.py",
+      "kind": "heuristic",
+      "line": 108,
+      "message": "TestGenerator.test_equivalent_mutants_are_recognised_not_run: assertion on `[m.operator for m in g.equivalent]` weakened (strength 3 -> 2)",
+      "provider": "aicrg",
+      "severity": "block"
+    },
+    {
+      "after": "exec(compile(m.source, 'm.py', 'exec'), ns)",
+      "category": "security",
+      "code": "dynamic_code_execution",
+      "file": "tests/test_potency.py",
+      "kind": "deterministic",
+      "line": 112,
+      "message": "`exec()` executes dynamic code",
+      "provider": "aicrg",
+      "severity": "block"
+    },
+    {
+      "after": "exec(compile(m.source, \"m.py\", \"exec\"), ns)  # noqa: S102 - behaviour, not a claim",
+      "category": "security",
+      "code": "security_suppression_added",
+      "file": "tests/test_potency.py",
+      "kind": "deterministic",
+      "line": 112,
+      "message": "security scanner suppression added",
+      "provider": "aicrg",
+      "severity": "review"
+    }
+  ],
+  "gate": {
+    "name": "ai-code-review-gate",
+    "version": "0.2.0.dev0"
+  },
+  "llm_review": {
+    "discarded_uncited": 0,
+    "error": null,
+    "hypotheses": 0,
+    "model": null,
+    "model_version": null,
+    "provider": null,
+    "request_sha256": null,
+    "status": "not_configured"
+  },
+  "policy": {
+    "contract": {
+      "allowed_paths": [
+        "src/**",
+        "tests/**",
+        "docs/**",
+        "corpus/**",
+        "scripts/**",
+        ".github/**",
+        "action.yml",
+        "pyproject.toml",
+        "README.md",
+        "CONTRIBUTING.md",
+        "SECURITY.md",
+        "CODE_OF_CONDUCT.md",
+        ".gitignore"
+      ],
+      "attestation": {
+        "allowed_signers": null,
+        "identity": null,
+        "method": "github",
+        "repository": null,
+        "required": false,
+        "signer_ref": "refs/heads/main",
+        "signer_workflow": null
+      },
+      "container": null,
+      "dependency_policy": {
+        "allow_direct_url_dependencies": false,
+        "allow_new_dev_dependencies": true,
+        "allow_new_runtime_dependencies": false,
+        "allowed_new_dependencies": [],
+        "max_new_dependencies": 2,
+        "require_pinned_versions": false
+      },
+      "env_passthrough": [],
+      "exclude_from_analysis": [
+        "corpus/**"
+      ],
+      "executor": "local",
+      "external_evidence": [],
+      "forbidden_changes": [
+        "ci_test_bypass",
+        "exception_swallowing",
+        "golden_data_modification",
+        "secret_introduction",
+        "security_check_disablement",
+        "test_deletion",
+        "unsafe_execution"
+      ],
+      "golden_paths": [
+        "**/golden/**",
+        "**/goldens/**",
+        "**/__snapshots__/**",
+        "**/snapshots/**",
+        "**/expected/**",
+        "**/expected_output/**",
+        "*.golden",
+        "*.snap",
+        "**/evals/**/expected*",
+        "**/eval/**/expected*"
+      ],
+      "llm_reviewer": null,
+      "minimum_test_integrity": {
+        "forbid_assertion_weakening": true,
+        "forbid_new_unconditional_skips": true,
+        "forbid_removed_security_assertions": true
+      },
+      "protected_paths": [
+        "./review-gate.yaml",
+        "./LICENSE"
+      ],
+      "required_checks": [
+        {
+          "argv": [
+            "ruff",
+            "check",
+            "src",
+            "tests",
+            "corpus/run_corpus.py",
+            "scripts"
+          ],
+          "block_levels": [
+            "error"
+          ],
+          "differential": false,
+          "min_changed_coverage": null,
+          "name": "lint",
+          "preexisting_failure": "review",
+          "report_format": null,
+          "report_path": null,
+          "require_revision": false,
+          "required": true,
+          "source": "head",
+          "timeout_seconds": 900
+        },
+        {
+          "argv": [
+            "ruff",
+            "format",
+            "--check",
+            "src",
+            "tests",
+            "corpus/run_corpus.py",
+            "scripts"
+          ],
+          "block_levels": [
+            "error"
+          ],
+          "differential": false,
+          "min_changed_coverage": null,
+          "name": "format",
+          "preexisting_failure": "review",
+          "report_format": null,
+          "report_path": null,
+          "require_revision": false,
+          "required": true,
+          "source": "head",
+          "timeout_seconds": 900
+        },
+        {
+          "argv": [
+            "mypy"
+          ],
+          "block_levels": [
+            "error"
+          ],
+          "differential": false,
+          "min_changed_coverage": null,
+          "name": "types",
+          "preexisting_failure": "review",
+          "report_format": null,
+          "report_path": null,
+          "require_revision": false,
+          "required": true,
+          "source": "head",
+          "timeout_seconds": 900
+        },
+        {
+          "argv": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider"
+          ],
+          "block_levels": [
+            "error"
+          ],
+          "differential": false,
+          "min_changed_coverage": null,
+          "name": "tests",
+          "preexisting_failure": "review",
+          "report_format": null,
+          "report_path": null,
+          "require_revision": false,
+          "required": true,
+          "source": "head",
+          "timeout_seconds": 1800
+        },
+        {
+          "argv": [
+            "python",
+            "corpus/run_corpus.py",
+            "corpus/dev"
+          ],
+          "block_levels": [
+            "error"
+          ],
+          "differential": false,
+          "min_changed_coverage": null,
+          "name": "dev-corpus",
+          "preexisting_failure": "review",
+          "report_format": null,
+          "report_path": null,
+          "require_revision": false,
+          "required": true,
+          "source": "head",
+          "timeout_seconds": 1800
+        },
+        {
+          "argv": [
+            "python",
+            "scripts/mutation_gate.py"
+          ],
+          "block_levels": [
+            "error"
+          ],
+          "differential": false,
+          "min_changed_coverage": null,
+          "name": "mutation-gate",
+          "preexisting_failure": "review",
+          "report_format": null,
+          "report_path": null,
+          "require_revision": false,
+          "required": true,
+          "source": "head",
+          "timeout_seconds": 1800
+        }
+      ],
+      "review_required_surfaces": [
+        "ci"
+      ],
+      "test_potency": null,
+      "trusted_evidence": [
+        {
+          "bundle_path": null,
+          "check": {
+            "argv": [
+              "python",
+              "-m",
+              "pytest",
+              "-q",
+              "-p",
+              "no:cacheprovider",
+              "-c",
+              "tests/trusted.ini",
+              "--rootdir",
+              ".",
+              "tests/test_gate_invariants.py",
+              "tests/test_security_review_regressions.py"
+            ],
+            "block_levels": [
+              "error"
+            ],
+            "differential": false,
+            "min_changed_coverage": null,
+            "name": "invariants",
+            "preexisting_failure": "review",
+            "report_format": null,
+            "report_path": null,
+            "require_revision": false,
+            "required": true,
+            "source": "base",
+            "timeout_seconds": 1800
+          },
+          "digest": null,
+          "mount": null,
+          "name": "invariants",
+          "paths": [
+            "./tests/__init__.py",
+            "./tests/conftest.py",
+            "./tests/trusted.ini",
+            "./tests/test_gate_invariants.py",
+            "./tests/test_security_review_regressions.py",
+            "./tests/test_execution_boundary.py"
+          ],
+          "source": "base"
+        }
+      ],
+      "version": 1
+    },
+    "contract_digest": "sha256:78ededd4b468ce03437247aca93c138c8c1803e0631c8e7d188f21c9c14ad6e4",
+    "raw_digest": "sha256:815a59e4cacaa9c62d25d15d37b311ce2702f4bf2253d8cf1e4310a532221f25",
+    "repo_path": "review-gate.yaml",
+    "source": "base:review-gate.yaml"
+  },
+  "reasons": [
+    "assertion_weakened: tests/test_execution_boundary.py: TestRealContainerIsolation.test_container_timeout_is_error_and_container_is_killed: assertion on `left` weakened (strength 3 -> 1)",
+    "assertion_weakened: tests/test_potency.py: TestGenerator.test_equivalent_mutants_are_recognised_not_run: assertion on `[m.operator for m in g.equivalent]` weakened (strength 3 -> 2)",
+    "dynamic_code_execution: tests/test_potency.py: `exec()` executes dynamic code",
+    "trusted_evidence_modified: tests/conftest.py: patch changes 3 path(s) owned by trusted evidence `invariants`; the candidate's version was discarded and the trusted version was used",
+    "security_suppression_added: tests/test_potency.py: security scanner suppression added"
+  ],
+  "receipt_digest": "sha256:1c2f27ff417ce61fc7e3ad4de80034761216f18160d5f28b83c1342e12f4d4ed",
+  "risk": {
+    "evidence": [
+      {
+        "file": "scripts/self_review_challenge.py",
+        "reason": "base: changed code calls OUT.mkdir()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "scripts/self_review_challenge.py",
+        "reason": "base: changed code calls subprocess.run()",
+        "surface": "subprocess"
+      },
+      {
+        "file": "src/aicrg/gate.py",
+        "reason": "head: changed code calls _SHA.fullmatch()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "tests/conftest.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "tests/test_attestation.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "tests/test_execution_boundary.py",
+        "reason": "base: changed code calls subprocess.run()",
+        "surface": "subprocess"
+      },
+      {
+        "file": "tests/test_execution_boundary.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "tests/test_potency.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "tests/test_provenance_boundary.py",
+        "reason": "head: changed code calls rep.write_text()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "tests/test_provenance_boundary.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "tests/test_security_review_regressions.py",
+        "reason": "head: changed definition test_f3_owner_restoring_write_permission_is_detected_local",
+        "surface": "auth"
+      },
+      {
+        "file": "tests/test_security_review_regressions.py",
+        "reason": "test path",
+        "surface": "tests"
+      }
+    ],
+    "level": "CRITICAL",
+    "surfaces": [
+      "auth",
+      "filesystem",
+      "input_validation",
+      "subprocess",
+      "tests"
+    ]
+  },
+  "schema": "aicrg.receipt/v2",
+  "sections": {
+    "Analysis coverage": "PASS",
+    "CI integrity": "PASS",
+    "Change contract": "PASS",
+    "Dependency policy": "PASS",
+    "Required checks": "PASS",
+    "Reviewer model (advisory)": "OFF",
+    "Security regressions": "FAIL",
+    "Test integrity": "FAIL",
+    "Test potency": "OFF",
+    "Trusted evidence": "REVIEW"
+  },
+  "subject": {
+    "base": "72908357a3f2e620b285810e4c2169810cd08415",
+    "base_ref": "72908357a3f2e620b285810e4c2169810cd08415",
+    "files": [
+      {
+        "added_lines": 4,
+        "binary": false,
+        "new_path": "README.md",
+        "old_path": "README.md",
+        "removed_lines": 3,
+        "status": "M"
+      },
+      {
+        "added_lines": 5,
+        "binary": false,
+        "new_path": "docs/EVIDENCE.md",
+        "old_path": "docs/EVIDENCE.md",
+        "removed_lines": 2,
+        "status": "M"
+      },
+      {
+        "added_lines": 1,
+        "binary": false,
+        "new_path": "docs/RECEIPTS.md",
+        "old_path": "docs/RECEIPTS.md",
+        "removed_lines": 1,
+        "status": "M"
+      },
+      {
+        "added_lines": 73,
+        "binary": false,
+        "new_path": "docs/SECURITY_REVIEW.md",
+        "old_path": "docs/SECURITY_REVIEW.md",
+        "removed_lines": 0,
+        "status": "M"
+      },
+      {
+        "added_lines": 366,
+        "binary": false,
+        "new_path": "docs/results/mutation.json",
+        "old_path": "docs/results/mutation.json",
+        "removed_lines": 23,
+        "status": "M"
+      },
+      {
+        "added_lines": 42,
+        "binary": false,
+        "new_path": "scripts/mutation_gate.py",
+        "old_path": "scripts/mutation_gate.py",
+        "removed_lines": 1,
+        "status": "M"
+      },
+      {
+        "added_lines": 171,
+        "binary": false,
+        "new_path": "scripts/self_review_challenge.py",
+        "old_path": "scripts/self_review_challenge.py",
+        "removed_lines": 17,
+        "status": "M"
+      },
+      {
+        "added_lines": 35,
+        "binary": false,
+        "new_path": "src/aicrg/gate.py",
+        "old_path": "src/aicrg/gate.py",
+        "removed_lines": 2,
+        "status": "M"
+      },
+      {
+        "added_lines": 25,
+        "binary": false,
+        "new_path": "tests/conftest.py",
+        "old_path": "tests/conftest.py",
+        "removed_lines": 0,
+        "status": "M"
+      },
+      {
+        "added_lines": 72,
+        "binary": false,
+        "new_path": "tests/test_attestation.py",
+        "old_path": "tests/test_attestation.py",
+        "removed_lines": 0,
+        "status": "M"
+      },
+      {
+        "added_lines": 21,
+        "binary": false,
+        "new_path": "tests/test_execution_boundary.py",
+        "old_path": "tests/test_execution_boundary.py",
+        "removed_lines": 5,
+        "status": "M"
+      },
+      {
+        "added_lines": 12,
+        "binary": false,
+        "new_path": "tests/test_potency.py",
+        "old_path": "tests/test_potency.py",
+        "removed_lines": 2,
+        "status": "M"
+      },
+      {
+        "added_lines": 141,
+        "binary": false,
+        "new_path": "tests/test_provenance_boundary.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 30,
+        "binary": false,
+        "new_path": "tests/test_security_review_regressions.py",
+        "old_path": "tests/test_security_review_regressions.py",
+        "removed_lines": 0,
+        "status": "M"
+      }
+    ],
+    "files_excluded_from_analysis": 0,
+    "head": "2e9e3f1b1f712d1c9a4fcbd55a396da8091189d0",
+    "head_ref": "2e9e3f1b1f712d1c9a4fcbd55a396da8091189d0",
+    "head_tree": "4c5b8ccac5ad661d3aa557960d1853ae29beb7eb",
+    "merge_base": "72908357a3f2e620b285810e4c2169810cd08415",
+    "patch_bytes": 64140,
+    "patch_digest": "sha256:ad667aa6475c180af7562d3979cfa325c50c0917422b7ba14d8666ae130641aa",
+    "repository": {
+      "remote": "https://github.com/Pranshurs/ai-code-review-gate",
+      "root_commits": [
+        "d3263f3bf618a89be49d64460c4d53a93377d113"
+      ]
+    },
+    "working_tree_dirty": false
+  },
+  "summary": {
+    "advisory": 0,
+    "blocking": 3,
+    "deterministic_failures": [
+      "dynamic_code_execution"
+    ],
+    "errors": 0,
+    "heuristic_failures": [
+      "assertion_weakened"
+    ],
+    "review": 2
+  },
+  "test_integrity": {
+    "assertions_after": 186,
+    "assertions_before": 156,
+    "files_analysed": 6,
+    "result": "FAIL",
+    "tests_after": 99,
+    "tests_before": 84
+  },
+  "test_potency": {
+    "status": "not_run"
+  },
+  "timestamps": {
+    "finished_at": "2026-10-04T14:57:43.110Z",
+    "started_at": "2026-10-04T14:47:39.910Z"
+  },
+  "timings_ms": {
+    "ci_integrity": 0.032,
+    "config": 0.016,
+    "contract": 0.145,
+    "dependencies": 0.377,
+    "evidence": 602008.556,
+    "llm_review": 0.013,
+    "patch": 19.91,
+    "policy": 8.758,
+    "provenance": 37.227,
+    "risk": 183.029,
+    "secrets": 4.579,
+    "security": 732.539,
+    "suppressions": 0.165,
+    "test_integrity": 185.849,
+    "total": 603198.881
+  },
+  "trusted_evidence": [
+    {
+      "candidate_files_removed": [],
+      "candidate_files_replaced": [
+        "tests/conftest.py",
+        "tests/test_execution_boundary.py",
+        "tests/test_security_review_regressions.py"
+      ],
+      "digest": "sha256:3595aedb6425315e1ab0224b4ea0c3095b2985861b11c3f25f96224d9610d79e",
+      "files": 6,
+      "name": "invariants",
+      "source": "base"
+    }
+  ]
+}

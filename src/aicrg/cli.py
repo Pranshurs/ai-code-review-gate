@@ -53,6 +53,33 @@ def _parser() -> argparse.ArgumentParser:
         action="store_true",
         help="do not execute required checks (decision becomes ERROR if any exist)",
     )
+    c.add_argument(
+        "--executor",
+        choices=("local", "container"),
+        help="evidence executor; may upgrade 'local' to 'container', never downgrade",
+    )
+    c.add_argument(
+        "--container-image", help="image for --executor container (if the contract has none)"
+    )
+    c.add_argument(
+        "--bundle",
+        action="append",
+        default=[],
+        metavar="NAME=PATH",
+        help="location of a trusted evidence bundle (its digest is pinned by the base contract)",
+    )
+    c.add_argument(
+        "--evidence",
+        action="append",
+        default=[],
+        metavar="NAME=PATH",
+        help="report file for an external_evidence entry (e.g. a CodeQL SARIF)",
+    )
+    c.add_argument(
+        "--no-potency",
+        action="store_true",
+        help="skip test potency (decision becomes ERROR if the contract requires it)",
+    )
     c.add_argument("--format", choices=("text", "json", "markdown"), default="text")
     c.add_argument(
         "--summary-file", help="also append a Markdown summary here (e.g. $GITHUB_STEP_SUMMARY)"
@@ -61,12 +88,42 @@ def _parser() -> argparse.ArgumentParser:
     v = sub.add_parser("verify-receipt", help="check a receipt still authorises the current head")
     v.add_argument("receipt")
     v.add_argument("--head", default="HEAD")
-    v.add_argument("--base", help="also require the base branch/policy to be unchanged")
+    v.add_argument(
+        "--base", help="target branch: binds base staleness, base policy and attestation rules"
+    )
+    v.add_argument(
+        "--no-base",
+        action="store_true",
+        help="explicitly skip base checks (base contract and staleness are NOT verified)",
+    )
+    v.add_argument("--policy", help="policy path at base (default: discovery), or a file")
+    v.add_argument("--policy-from", choices=("base", "file"), default="base")
     v.add_argument(
         "--allow-non-pass",
         action="store_true",
         help="verify binding only; do not require decision PASS",
     )
+    v.add_argument(
+        "--require-attestation",
+        action="store_true",
+        help="reject the receipt unless its authenticity is verified",
+    )
+    v.add_argument("--attestation", choices=("github", "ssh"), help="attestation method")
+    v.add_argument("--signature", help="ssh: signature file (default <receipt>.sig)")
+    v.add_argument("--allowed-signers", help="ssh: allowed_signers file (base contract wins)")
+    v.add_argument("--identity", help="ssh: expected signer principal")
+    v.add_argument("--repo", help="github: owner/repo that must have produced the attestation")
+    v.add_argument("--signer-workflow", help="github: owner/repo/.github/workflows/<file>")
+    v.add_argument("--signer-ref", help="github: ref the signer workflow ran from")
+    v.add_argument("--attestation-bundle", help="github: offline Sigstore bundle (JSONL)")
+
+    rc = sub.add_parser("receipt", help="receipt utilities")
+    rc_sub = rc.add_subparsers(dest="receipt_command", required=True)
+    rs = rc_sub.add_parser("sign", help="sign a receipt with an SSH key (ssh-keygen -Y sign)")
+    rs.add_argument("receipt")
+    rs.add_argument("--key", required=True, help="private key file")
+    st = rc_sub.add_parser("statement", help="print the receipt as an in-toto Statement v1")
+    st.add_argument("receipt")
 
     pv = sub.add_parser("policy", help="review-contract utilities")
     pv_sub = pv.add_subparsers(dest="policy_command", required=True)
@@ -75,6 +132,22 @@ def _parser() -> argparse.ArgumentParser:
     pv_sub.add_parser("show-default", help="print the built-in default contract")
 
     sub.add_parser("rules", help="list every finding code and how its severity is chosen")
+
+    d = sub.add_parser("doctor", help="check whether a pull request could disable its own gate")
+    d.add_argument("--path", default=".", help="repository root (default .)")
+    d.add_argument("--github", action="store_true", help="also inspect branch rules via the API")
+    d.add_argument("--repo", help="owner/repo (default: from the origin remote)")
+    d.add_argument("--branch", default="main", help="protected target branch (default main)")
+    d.add_argument(
+        "--check-name", action="append", default=[], help="required status check name of the gate"
+    )
+    d.add_argument("--strict", action="store_true", help="WARN also fails")
+    d.add_argument("--format", choices=("text", "json"), default="text")
+
+    b = sub.add_parser("bundle", help="trusted evidence bundle utilities")
+    b_sub = b.add_subparsers(dest="bundle_command", required=True)
+    bd = b_sub.add_parser("digest", help="print the aicrg-tree-v2 digest of a directory or tar")
+    bd.add_argument("path")
     return p
 
 
@@ -89,6 +162,12 @@ def main(argv: list[str] | None = None) -> int:
             return _policy(args)
         if args.command == "rules":
             return _rules()
+        if args.command == "bundle":
+            return _bundle(args)
+        if args.command == "receipt":
+            return _receipt_cmd(args)
+        if args.command == "doctor":
+            return _doctor(args)
     except KeyboardInterrupt:
         print("interrupted", file=sys.stderr)
         return EXIT[Decision.ERROR]
@@ -109,6 +188,11 @@ def _check(args: argparse.Namespace) -> int:
         policy=args.policy,
         policy_from=args.policy_from,
         run_checks=not args.no_run,
+        executor=args.executor,
+        container_image=args.container_image,
+        bundles=_pairs(args.bundle, "--bundle"),
+        external_evidence=_pairs(args.evidence, "--evidence"),
+        run_potency=not args.no_potency,
     )
     result = run_gate(opts)
     try:
@@ -139,16 +223,58 @@ def _check(args: argparse.Namespace) -> int:
     return EXIT[result.decision]
 
 
-def _verify(args: argparse.Namespace) -> int:
-    from aicrg.receipt.verify import verify_receipt
+def _pairs(values: list[str], flag: str) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for v in values:
+        name, sep, path = v.partition("=")
+        if not sep or not name or not path:
+            raise SystemExit(f"aicrg: {flag} expects NAME=PATH, got {v!r}")
+        out[name] = path
+    return out
 
+
+def _bundle(args: argparse.Namespace) -> int:
+    from aicrg.evidence.trusted import TrustedEvidenceError, read_bundle, tree_digest
+
+    try:
+        entries = read_bundle(Path(args.path))
+    except TrustedEvidenceError as exc:
+        print(f"bundle INVALID: {exc}")
+        return EXIT[Decision.ERROR]
+    print(tree_digest(entries))
+    return 0
+
+
+def _verify(args: argparse.Namespace) -> int:
+    from aicrg.receipt.verify import AttestationOptions, verify_receipt
+
+    def opt_path(v: str | None) -> Path | None:
+        return Path(v) if v else None
+
+    att = AttestationOptions(
+        require=args.require_attestation,
+        method=args.attestation,
+        signature=opt_path(args.signature),
+        allowed_signers=opt_path(args.allowed_signers),
+        identity=args.identity,
+        repository=args.repo,
+        signer_workflow=args.signer_workflow,
+        signer_ref=args.signer_ref,
+        bundle=opt_path(args.attestation_bundle),
+    )
     v = verify_receipt(
         Path(args.receipt),
         Path.cwd(),
         head=args.head,
         base=args.base,
         require_pass=not args.allow_non_pass,
+        attestation=att,
+        policy=args.policy,
+        policy_from=args.policy_from,
+        require_base=not args.no_base,
     )
+    print(f"INTEGRITY: {v.integrity}")
+    print(v.authenticity.line())
     if v.ok:
         subj = (v.receipt or {}).get("subject", {})
         print(
@@ -160,6 +286,58 @@ def _verify(args: argparse.Namespace) -> int:
     for p in v.problems:
         print(f"  - {p}")
     return EXIT_VERIFY_FAILED
+
+
+def _doctor(args: argparse.Namespace) -> int:
+    import re
+
+    from aicrg.doctor import default_api, gate_job_names, github_checks, static_checks
+    from aicrg.git.repo import GitError, Repo
+    from aicrg.render import clean
+
+    root = Path(args.path)
+    rep = static_checks(root)
+    if args.github:
+        repo_name = args.repo
+        if repo_name is None:
+            try:
+                remote = str(Repo.discover(root).identity().get("remote") or "")
+            except GitError:
+                remote = ""
+            m = re.search(r"github\.com[:/]+([^/]+/[^/]+?)(?:\.git)?$", remote)
+            repo_name = m.group(1) if m else None
+        if repo_name is None:
+            rep.add("github-rules", "UNKNOWN", "cannot determine owner/repo; pass --repo")
+        else:
+            names = args.check_name or gate_job_names(root)
+            github_checks(repo_name, args.branch, names, default_api(), rep)
+    verdict = rep.verdict(args.strict)
+    if args.format == "json":
+        print(
+            json.dumps({"verdict": verdict, "checks": [c.to_json() for c in rep.checks]}, indent=2)
+        )
+    else:
+        for c in rep.checks:
+            loc = f"  ({c.file})" if c.file else ""
+            print(clean(f"{c.status:<8} {c.id:<24} {c.message}{loc}"))
+        print(f"\nDOCTOR: {verdict}")
+    return rep.exit_code(args.strict)
+
+
+def _receipt_cmd(args: argparse.Namespace) -> int:
+    from aicrg.receipt.attest import ssh_sign, statement
+    from aicrg.receipt.receipt import load_receipt
+
+    if args.receipt_command == "statement":
+        print(json.dumps(statement(load_receipt(Path(args.receipt))), indent=2, sort_keys=True))
+        return 0
+    try:
+        sig = ssh_sign(Path(args.receipt), Path(args.key))
+    except RuntimeError as exc:
+        print(f"aicrg: {exc}", file=sys.stderr)
+        return EXIT[Decision.ERROR]
+    print(f"signature: {sig}")
+    return 0
 
 
 def _policy(args: argparse.Namespace) -> int:

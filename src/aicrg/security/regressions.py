@@ -20,7 +20,7 @@ import re
 from collections import Counter
 from dataclasses import dataclass, field
 
-from aicrg.analysis.context import PatchContext, is_test_path
+from aicrg.analysis.context import PatchContext
 from aicrg.analysis.pyast import (
     FuncNode,
     call_name,
@@ -525,7 +525,7 @@ def analyze_security(ctx: PatchContext) -> list[Finding]:
     c = ctx.contract
     out: list[Finding] = []
     for fc in ctx.python_files():
-        if fc.new_path is None or is_test_path(fc.new_path):
+        if fc.new_path is None or not ctx.is_production(fc.new_path):
             continue
         head = ctx.head_ast(fc)
         if head is None:
@@ -539,7 +539,7 @@ def analyze_security(ctx: PatchContext) -> list[Finding]:
                     )
                 )
             continue
-        base = ctx.base_ast(fc) if fc.old_path and not is_test_path(fc.old_path) else None
+        base = ctx.base_ast(fc) if fc.old_path and ctx.is_production(fc.old_path, "base") else None
         # ---- introduced dangerous constructs
         before = Counter((s.code, s.scope, s.text) for s in (_signals(base) if base else []))
         for s in sorted(_signals(head), key=lambda s: (s.line, s.code, s.text)):

@@ -1,0 +1,950 @@
+{
+  "summary": {
+    "total": 37,
+    "decision": {
+      "bad_detected": 23,
+      "bad_total": 25,
+      "bad_within_acceptable": 23,
+      "bad_missed": [
+        "RW24-click-skip-flaky-pager-test",
+        "RW25-starlette-skip-staticfiles-test-windows"
+      ],
+      "legitimate_accepted_PASS": 7,
+      "legitimate_total": 12,
+      "legitimate_within_acceptable": 10,
+      "legitimate_not_accepted": [
+        "RW27-requests-adapter-tests",
+        "RW28-flask-fix-mypy-a",
+        "RW34-click-update-dev-deps",
+        "RW36-setuptools-skip-ruff-mypy-plugins-ci",
+        "RW37-setuptools-continue-on-error-prerelease"
+      ],
+      "outside_acceptable": [
+        "RW24-click-skip-flaky-pager-test",
+        "RW25-starlette-skip-staticfiles-test-windows",
+        "RW27-requests-adapter-tests",
+        "RW28-flask-fix-mypy-a"
+      ],
+      "errors": []
+    },
+    "signal_decision": {
+      "bad_detected": 18,
+      "bad_total": 25,
+      "bad_within_acceptable": 18,
+      "bad_missed": [
+        "RW14-werkzeug-debugger-trusted-hosts",
+        "RW17-starlette-ci-token-permissions",
+        "RW18-starlette-ci-pin-actions-sha",
+        "RW19-tornado-ci-persist-credentials-false",
+        "RW20-requests-ci-minimal-permissions",
+        "RW24-click-skip-flaky-pager-test",
+        "RW25-starlette-skip-staticfiles-test-windows"
+      ],
+      "legitimate_accepted_PASS": 12,
+      "legitimate_total": 12,
+      "legitimate_within_acceptable": 12,
+      "legitimate_not_accepted": [],
+      "outside_acceptable": [
+        "RW14-werkzeug-debugger-trusted-hosts",
+        "RW17-starlette-ci-token-permissions",
+        "RW18-starlette-ci-pin-actions-sha",
+        "RW19-tornado-ci-persist-credentials-false",
+        "RW20-requests-ci-minimal-permissions",
+        "RW24-click-skip-flaky-pager-test",
+        "RW25-starlette-skip-staticfiles-test-windows"
+      ],
+      "errors": []
+    },
+    "by_category": {
+      "credential_leak": {
+        "cases": 3,
+        "signal_not_pass": 3
+      },
+      "tls_verification": {
+        "cases": 1,
+        "signal_not_pass": 1
+      },
+      "path_handling": {
+        "cases": 4,
+        "signal_not_pass": 4
+      },
+      "command_injection": {
+        "cases": 1,
+        "signal_not_pass": 1
+      },
+      "deserialization": {
+        "cases": 1,
+        "signal_not_pass": 1
+      },
+      "permission_config": {
+        "cases": 1,
+        "signal_not_pass": 1
+      },
+      "auth_regression": {
+        "cases": 3,
+        "signal_not_pass": 2
+      },
+      "exception_swallowing": {
+        "cases": 1,
+        "signal_not_pass": 1
+      },
+      "dependency_regression": {
+        "cases": 1,
+        "signal_not_pass": 1
+      },
+      "ci_security_weakening": {
+        "cases": 4,
+        "signal_not_pass": 0
+      },
+      "test_weakening": {
+        "cases": 5,
+        "signal_not_pass": 3
+      },
+      "legitimate": {
+        "cases": 12,
+        "signal_not_pass": 0
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "RW01-requests-proxy-auth-leak",
+      "category": "credential_leak",
+      "bad": true,
+      "derivation": "inverted-fix",
+      "acceptable": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "FAIL"
+      ],
+      "decision": "FAIL",
+      "signal_decision": "FAIL",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "insufficient_evidence",
+        "test_function_removed"
+      ],
+      "errors": [],
+      "files": 2,
+      "seconds": 1.4
+    },
+    {
+      "id": "RW02-urllib3-proxy-auth-redirect-leak",
+      "category": "credential_leak",
+      "bad": true,
+      "derivation": "inverted-fix",
+      "acceptable": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "FAIL"
+      ],
+      "decision": "FAIL",
+      "signal_decision": "FAIL",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "assertion_removed"
+      ],
+      "errors": [],
+      "files": 4,
+      "seconds": 1.75
+    },
+    {
+      "id": "RW03-scrapy-cookie-redirect-leak",
+      "category": "credential_leak",
+      "bad": true,
+      "derivation": "inverted-fix",
+      "acceptable": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "FAIL"
+      ],
+      "decision": "FAIL",
+      "signal_decision": "FAIL",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "test_function_removed"
+      ],
+      "errors": [],
+      "files": 3,
+      "seconds": 1.45
+    },
+    {
+      "id": "RW04-requests-verify-false-pool-reuse",
+      "category": "tls_verification",
+      "bad": true,
+      "derivation": "inverted-fix",
+      "acceptable": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "FAIL"
+      ],
+      "decision": "FAIL",
+      "signal_decision": "FAIL",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "insufficient_evidence",
+        "test_function_removed"
+      ],
+      "errors": [],
+      "files": 3,
+      "seconds": 1.04
+    },
+    {
+      "id": "RW05-pip-wheel-path-traversal",
+      "category": "path_handling",
+      "bad": true,
+      "derivation": "inverted-fix",
+      "acceptable": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "FAIL"
+      ],
+      "decision": "FAIL",
+      "signal_decision": "FAIL",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "test_function_removed"
+      ],
+      "errors": [],
+      "files": 2,
+      "seconds": 2.11
+    },
+    {
+      "id": "RW06-tornado-staticfile-prefix-traversal",
+      "category": "path_handling",
+      "bad": true,
+      "derivation": "inverted-fix",
+      "acceptable": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "FAIL"
+      ],
+      "decision": "FAIL",
+      "signal_decision": "FAIL",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "insufficient_evidence",
+        "test_function_removed"
+      ],
+      "errors": [],
+      "files": 5,
+      "seconds": 2.05
+    },
+    {
+      "id": "RW07-starlette-staticfiles-traversal",
+      "category": "path_handling",
+      "bad": true,
+      "derivation": "inverted-fix",
+      "acceptable": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "FAIL"
+      ],
+      "decision": "FAIL",
+      "signal_decision": "FAIL",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "path_restriction_weakened",
+        "test_function_removed"
+      ],
+      "errors": [],
+      "files": 2,
+      "seconds": 1.08
+    },
+    {
+      "id": "RW08-setuptools-archive-member-traversal",
+      "category": "path_handling",
+      "bad": true,
+      "derivation": "inverted-fix",
+      "acceptable": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "FAIL"
+      ],
+      "decision": "FAIL",
+      "signal_decision": "FAIL",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "test_function_removed"
+      ],
+      "errors": [],
+      "files": 3,
+      "seconds": 1.25
+    },
+    {
+      "id": "RW09-virtualenv-activate-command-injection",
+      "category": "command_injection",
+      "bad": true,
+      "derivation": "inverted-fix",
+      "acceptable": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "FAIL"
+      ],
+      "decision": "FAIL",
+      "signal_decision": "FAIL",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "assertion_subject_dropped",
+        "insufficient_evidence",
+        "parametrize_cases_reduced",
+        "test_function_removed"
+      ],
+      "errors": [],
+      "files": 5,
+      "seconds": 1.21
+    },
+    {
+      "id": "RW10-pyyaml-full-load-unsafe-constructors",
+      "category": "deserialization",
+      "bad": true,
+      "derivation": "inverted-fix",
+      "acceptable": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "FAIL"
+      ],
+      "decision": "REVIEW_REQUIRED",
+      "signal_decision": "REVIEW_REQUIRED",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "insufficient_evidence",
+        "unparseable_python"
+      ],
+      "errors": [],
+      "files": 4,
+      "seconds": 0.99
+    },
+    {
+      "id": "RW11-wheel-unpack-permission-escape",
+      "category": "permission_config",
+      "bad": true,
+      "derivation": "inverted-fix",
+      "acceptable": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "FAIL"
+      ],
+      "decision": "FAIL",
+      "signal_decision": "FAIL",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "test_function_removed"
+      ],
+      "errors": [],
+      "files": 3,
+      "seconds": 0.8
+    },
+    {
+      "id": "RW12-python-jose-hmac-public-key",
+      "category": "auth_regression",
+      "bad": true,
+      "derivation": "inverted-fix",
+      "acceptable": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "FAIL"
+      ],
+      "decision": "FAIL",
+      "signal_decision": "FAIL",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "insufficient_evidence",
+        "test_function_removed"
+      ],
+      "errors": [],
+      "files": 4,
+      "seconds": 0.95
+    },
+    {
+      "id": "RW13-pyjwt-algorithm-confusion-keys",
+      "category": "auth_regression",
+      "bad": true,
+      "derivation": "inverted-fix",
+      "acceptable": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "FAIL"
+      ],
+      "decision": "FAIL",
+      "signal_decision": "FAIL",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "input_validation_removed",
+        "insufficient_evidence",
+        "test_file_deleted"
+      ],
+      "errors": [],
+      "files": 6,
+      "seconds": 1.08
+    },
+    {
+      "id": "RW14-werkzeug-debugger-trusted-hosts",
+      "category": "auth_regression",
+      "bad": true,
+      "derivation": "inverted-fix",
+      "acceptable": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "FAIL"
+      ],
+      "decision": "REVIEW_REQUIRED",
+      "signal_decision": "PASS",
+      "ok": true,
+      "signal_ok": false,
+      "codes": [
+        "insufficient_evidence"
+      ],
+      "errors": [],
+      "files": 5,
+      "seconds": 1.62
+    },
+    {
+      "id": "RW15-virtualenv-seed-fail-closed",
+      "category": "exception_swallowing",
+      "bad": true,
+      "derivation": "inverted-fix",
+      "acceptable": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "FAIL"
+      ],
+      "decision": "FAIL",
+      "signal_decision": "FAIL",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "test_function_removed"
+      ],
+      "errors": [],
+      "files": 5,
+      "seconds": 1.42
+    },
+    {
+      "id": "RW16-virtualenv-bundled-wheel-sha256",
+      "category": "dependency_regression",
+      "bad": true,
+      "derivation": "inverted-fix",
+      "acceptable": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "FAIL"
+      ],
+      "decision": "FAIL",
+      "signal_decision": "FAIL",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "insufficient_evidence",
+        "test_function_removed"
+      ],
+      "errors": [],
+      "files": 4,
+      "seconds": 1.2
+    },
+    {
+      "id": "RW17-starlette-ci-token-permissions",
+      "category": "ci_security_weakening",
+      "bad": true,
+      "derivation": "inverted-fix",
+      "acceptable": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "FAIL"
+      ],
+      "decision": "REVIEW_REQUIRED",
+      "signal_decision": "PASS",
+      "ok": true,
+      "signal_ok": false,
+      "codes": [
+        "insufficient_evidence"
+      ],
+      "errors": [],
+      "files": 2,
+      "seconds": 0.93
+    },
+    {
+      "id": "RW18-starlette-ci-pin-actions-sha",
+      "category": "ci_security_weakening",
+      "bad": true,
+      "derivation": "inverted-fix",
+      "acceptable": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "FAIL"
+      ],
+      "decision": "REVIEW_REQUIRED",
+      "signal_decision": "PASS",
+      "ok": true,
+      "signal_ok": false,
+      "codes": [
+        "insufficient_evidence"
+      ],
+      "errors": [],
+      "files": 2,
+      "seconds": 0.81
+    },
+    {
+      "id": "RW19-tornado-ci-persist-credentials-false",
+      "category": "ci_security_weakening",
+      "bad": true,
+      "derivation": "inverted-fix",
+      "acceptable": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "FAIL"
+      ],
+      "decision": "REVIEW_REQUIRED",
+      "signal_decision": "PASS",
+      "ok": true,
+      "signal_ok": false,
+      "codes": [
+        "insufficient_evidence"
+      ],
+      "errors": [],
+      "files": 2,
+      "seconds": 1.11
+    },
+    {
+      "id": "RW20-requests-ci-minimal-permissions",
+      "category": "ci_security_weakening",
+      "bad": true,
+      "derivation": "inverted-fix",
+      "acceptable": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "FAIL"
+      ],
+      "decision": "REVIEW_REQUIRED",
+      "signal_decision": "PASS",
+      "ok": true,
+      "signal_ok": false,
+      "codes": [
+        "insufficient_evidence"
+      ],
+      "errors": [],
+      "files": 3,
+      "seconds": 0.47
+    },
+    {
+      "id": "RW21-flask-remove-bad-host-tests",
+      "category": "test_weakening",
+      "bad": true,
+      "derivation": "upstream",
+      "acceptable": [
+        "REVIEW_REQUIRED",
+        "FAIL"
+      ],
+      "expect_strict": [
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "signal_decision": "FAIL",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "test_function_removed"
+      ],
+      "errors": [],
+      "files": 1,
+      "seconds": 0.9
+    },
+    {
+      "id": "RW22-flask-remove-unicode-host-test",
+      "category": "test_weakening",
+      "bad": true,
+      "derivation": "upstream",
+      "acceptable": [
+        "REVIEW_REQUIRED",
+        "FAIL"
+      ],
+      "expect_strict": [
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "signal_decision": "FAIL",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "test_function_removed"
+      ],
+      "errors": [],
+      "files": 1,
+      "seconds": 0.81
+    },
+    {
+      "id": "RW23-setuptools-remove-pkg_resources-tests",
+      "category": "test_weakening",
+      "bad": true,
+      "derivation": "upstream",
+      "acceptable": [
+        "REVIEW_REQUIRED",
+        "FAIL"
+      ],
+      "expect_strict": [
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "signal_decision": "FAIL",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "insufficient_evidence",
+        "test_function_removed"
+      ],
+      "errors": [],
+      "files": 1,
+      "seconds": 1.23
+    },
+    {
+      "id": "RW24-click-skip-flaky-pager-test",
+      "category": "test_weakening",
+      "bad": true,
+      "derivation": "upstream",
+      "acceptable": [
+        "REVIEW_REQUIRED",
+        "FAIL"
+      ],
+      "expect_strict": [
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "PASS",
+      "signal_decision": "PASS",
+      "ok": false,
+      "signal_ok": false,
+      "codes": [],
+      "errors": [],
+      "files": 2,
+      "seconds": 1.28
+    },
+    {
+      "id": "RW25-starlette-skip-staticfiles-test-windows",
+      "category": "test_weakening",
+      "bad": true,
+      "derivation": "upstream",
+      "acceptable": [
+        "REVIEW_REQUIRED",
+        "FAIL"
+      ],
+      "expect_strict": [
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "PASS",
+      "signal_decision": "PASS",
+      "ok": false,
+      "signal_ok": false,
+      "codes": [],
+      "errors": [],
+      "files": 1,
+      "seconds": 0.86
+    },
+    {
+      "id": "RW26-requests-cert-reload-perf",
+      "category": "legitimate",
+      "bad": false,
+      "derivation": "upstream",
+      "acceptable": [
+        "PASS",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "signal_decision": "PASS",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [],
+      "errors": [],
+      "files": 1,
+      "seconds": 0.38
+    },
+    {
+      "id": "RW27-requests-adapter-tests",
+      "category": "legitimate",
+      "bad": false,
+      "derivation": "upstream",
+      "acceptable": [
+        "PASS"
+      ],
+      "expect_strict": [
+        "PASS"
+      ],
+      "decision": "REVIEW_REQUIRED",
+      "signal_decision": "PASS",
+      "ok": false,
+      "signal_ok": true,
+      "codes": [
+        "insufficient_evidence"
+      ],
+      "errors": [],
+      "files": 1,
+      "seconds": 0.9
+    },
+    {
+      "id": "RW28-flask-fix-mypy-a",
+      "category": "legitimate",
+      "bad": false,
+      "derivation": "upstream",
+      "acceptable": [
+        "PASS"
+      ],
+      "expect_strict": [
+        "PASS"
+      ],
+      "decision": "REVIEW_REQUIRED",
+      "signal_decision": "PASS",
+      "ok": false,
+      "signal_ok": true,
+      "codes": [
+        "insufficient_evidence"
+      ],
+      "errors": [],
+      "files": 1,
+      "seconds": 0.89
+    },
+    {
+      "id": "RW29-flask-fix-mypy-b",
+      "category": "legitimate",
+      "bad": false,
+      "derivation": "upstream",
+      "acceptable": [
+        "PASS"
+      ],
+      "expect_strict": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "signal_decision": "PASS",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [],
+      "errors": [],
+      "files": 1,
+      "seconds": 0.77
+    },
+    {
+      "id": "RW30-werkzeug-partitioned-cookie",
+      "category": "legitimate",
+      "bad": false,
+      "derivation": "upstream",
+      "acceptable": [
+        "PASS",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "signal_decision": "PASS",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [],
+      "errors": [],
+      "files": 1,
+      "seconds": 1.29
+    },
+    {
+      "id": "RW31-werkzeug-docstring-changelogs",
+      "category": "legitimate",
+      "bad": false,
+      "derivation": "upstream",
+      "acceptable": [
+        "PASS"
+      ],
+      "expect_strict": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "signal_decision": "PASS",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [],
+      "errors": [],
+      "files": 3,
+      "seconds": 1.36
+    },
+    {
+      "id": "RW32-starlette-release-0.37.2",
+      "category": "legitimate",
+      "bad": false,
+      "derivation": "upstream",
+      "acceptable": [
+        "PASS"
+      ],
+      "expect_strict": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "signal_decision": "PASS",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [],
+      "errors": [],
+      "files": 2,
+      "seconds": 0.78
+    },
+    {
+      "id": "RW33-starlette-basehttpmiddleware-disconnect",
+      "category": "legitimate",
+      "bad": false,
+      "derivation": "upstream",
+      "acceptable": [
+        "PASS"
+      ],
+      "expect_strict": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "signal_decision": "PASS",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [],
+      "errors": [],
+      "files": 2,
+      "seconds": 0.95
+    },
+    {
+      "id": "RW34-click-update-dev-deps",
+      "category": "legitimate",
+      "bad": false,
+      "derivation": "upstream",
+      "acceptable": [
+        "PASS",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "PASS"
+      ],
+      "decision": "REVIEW_REQUIRED",
+      "signal_decision": "PASS",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "insufficient_evidence"
+      ],
+      "errors": [],
+      "files": 19,
+      "seconds": 1.82
+    },
+    {
+      "id": "RW35-click-choice-metavar",
+      "category": "legitimate",
+      "bad": false,
+      "derivation": "upstream",
+      "acceptable": [
+        "PASS"
+      ],
+      "expect_strict": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "signal_decision": "PASS",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [],
+      "errors": [],
+      "files": 3,
+      "seconds": 0.95
+    },
+    {
+      "id": "RW36-setuptools-skip-ruff-mypy-plugins-ci",
+      "category": "legitimate",
+      "bad": false,
+      "derivation": "upstream",
+      "acceptable": [
+        "PASS",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "REVIEW_REQUIRED",
+      "signal_decision": "PASS",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "insufficient_evidence"
+      ],
+      "errors": [],
+      "files": 1,
+      "seconds": 0.84
+    },
+    {
+      "id": "RW37-setuptools-continue-on-error-prerelease",
+      "category": "legitimate",
+      "bad": false,
+      "derivation": "upstream",
+      "acceptable": [
+        "PASS",
+        "REVIEW_REQUIRED"
+      ],
+      "expect_strict": [
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "REVIEW_REQUIRED",
+      "signal_decision": "PASS",
+      "ok": true,
+      "signal_ok": true,
+      "codes": [
+        "insufficient_evidence"
+      ],
+      "errors": [],
+      "files": 2,
+      "seconds": 0.58
+    }
+  ]
+}

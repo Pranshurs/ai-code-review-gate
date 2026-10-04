@@ -22,8 +22,16 @@
  │                 secrets               security/secrets    │
  │                 dependency delta      dependencies/       │
  ├───────────────────────────────────────────────────────────┤
- │ 5. Evidence     evidence/workspace.py, commands.py        │  fresh worktree of H;
- │                 required_checks executed, recorded         │  FAIL vs ERROR distinguished
+ │ 5. Evidence     evidence/collect.py (orchestration)        │  executor floor from the BASE
+ │    executor.py  Local (trusted mode) | Container (isolated)│  contract; never downgraded
+ │    workspace.py clean checkout of H (and merge-base)       │  export: no .git link to host
+ │    commands.py  required_checks  (source: head)            │  report → provider status
+ │    trusted.py   trusted_evidence (source: base | bundle)   │  overlay base files / pinned
+ │    providers.py SARIF/JUnit/Cobertura/LCOV/JSON, external  │  bundle onto H; candidate
+ │    differential base vs head classification                │  edits discarded
+ ├───────────────────────────────────────────────────────────┤
+ │ 5b. Potency     potency/mutators.py, potency/engine.py     │  diff-scoped mutants of changed
+ │                 (optional, contract test_potency)          │  production lines vs tests
  ├───────────────────────────────────────────────────────────┤
  │ 6. Reviewer     llm/reviewer.py (optional)                │  cited HYPOTHESES only,
  │                                                            │  ≤ REVIEW_REQUIRED
@@ -32,9 +40,19 @@
  │                                                            │  REVIEW→REVIEW_REQUIRED; PASS
  ├───────────────────────────────────────────────────────────┤
  │ 8. Receipt      receipt/receipt.py, receipt/verify.py     │  canonical JSON + digest;
- │                                                            │  verify-receipt for staleness
+ │                 receipt/attest.py                          │  integrity ≠ authenticity:
+ │                                                            │  GitHub/Sigstore or SSH signers
  └───────────────────────────────────────────────────────────┘
+
+ aicrg doctor [--github]   doctor.py   can a PR disable its own gate? (static + branch rules)
 ```
+
+The organising idea: every input to the decision has a recorded **source**.
+The candidate controls `head` evidence; the base branch controls the
+contract, trusted files and signer lists; a pinned digest controls bundles;
+the operator controls external reports and the executor upgrade. Anything the
+candidate controls is analysed (diff-aware) but never trusted as the sole
+evidence when the contract asks for more. See [EVIDENCE.md](EVIDENCE.md).
 
 ## Core types
 
@@ -44,16 +62,23 @@
 | Patch | `git.diff.Patch`, `FileChange` | status (A/M/D/R), old/new path, added/removed lines with numbers, digest |
 | ReviewContract | `policy.contract.ReviewContract` | frozen dataclass; `digest()` over canonical JSON |
 | RiskSurface | `risk.surfaces.RiskAssessment` | level = max surface weight; each hit carries its reason |
-| EvidenceProvider | analysers + `evidence.commands.run_check` + `llm.reviewer` | each returns findings / check results; none decides |
+| EvidenceProvider | analysers + `evidence.commands.run_check` / `ingest_external` + `llm.reviewer` | each returns findings / check results with a provider status; none decides |
+| Executor | `evidence.executor.LocalExecutor` / `ContainerExecutor` | the only way evidence commands run |
+| TrustedEvidenceBundle | `policy.contract.TrustedEvidence`, `evidence.trusted` | base-owned paths or digest-pinned bundle overlaid on the head |
+| PotencyReport | `potency.engine.PotencyReport` | mutants of changed lines and their outcomes |
 | Finding | `model.Finding` | code, category, severity (block/review/advisory), kind (deterministic/heuristic/hypothesis) |
 | GateDecision | `model.Decision` | PASS / FAIL / REVIEW_REQUIRED / ERROR |
-| GateReceipt | `receipt.receipt` | `aicrg.receipt/v1`, sealed with `receipt_digest` |
+| GateReceipt | `receipt.receipt` | `aicrg.receipt/v2`, sealed with `receipt_digest`; authenticity via `receipt.attest` |
 
 ## Design rules
 
 1. **Diff-aware, not state-aware.** Analysers compare base and head. A pre-existing
    `verify=False` is not reported; a new one is. Absolute scanning is delegated to
-   Bandit/Semgrep/CodeQL run as `required_checks`.
+   Bandit/Semgrep/CodeQL/secret scanners run as evidence providers.
+1a. **Structural answers over more rules.** Subtle semantic misses (held-out
+   misses: one-token constants, `startswith` containment, `or 0`) are addressed by
+   trusted evidence, test potency, differential execution, specialist scanners
+   and human REVIEW — not by adding pattern after pattern.
 2. **The rule registry is the single source of severity.** `rules.py` lists every
    finding code with its category, kind, and severity source (fixed, a forbidden change
    class, or a named contract field). `aicrg rules` prints it.
@@ -91,8 +116,11 @@ src/aicrg/
   testsafety/       assertions, test integrity, config, CI workflows
   security/         regressions, secrets
   dependencies/     manifests, delta
-  evidence/         worktree, command execution
+  evidence/         executors, workspaces, checks, providers, trusted evidence,
+                    differential classification, collection/judging
+  potency/          diff-scoped mutant generation and execution
+  doctor.py         deployment hazard checks
   llm/              optional reviewer adapter
-  receipt/          sealing, verification
+  receipt/          sealing, verification, attestation
   render.py         text and Markdown output
 ```
