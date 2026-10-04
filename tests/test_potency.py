@@ -99,8 +99,18 @@ class TestGenerator:
             assert changed == [m.line - 1]
 
     def test_equivalent_mutants_are_recognised_not_run(self):
-        g = generate("m.py", b"def f():\n    return 1 if True else 1\n", {2})
-        assert [m.operator for m in g.equivalent] == ["constant_number"]
+        src = b"def f():\n    return 1 if True else 1\n"
+        g = generate("m.py", src, {2})
+        # Which mutants compile to identical code depends on the interpreter's
+        # optimiser: 3.12+ also folds `1 if False else 1`, 3.11 does not (it then
+        # runs those mutants, which can only survive: conservative). Pin the
+        # property, not one CPython version's output.
+        assert "constant_number" in [m.operator for m in g.equivalent]
+        assert "return_none" in [m.operator for m in g.mutants]
+        for m in g.equivalent:
+            ns: dict[str, object] = {}
+            exec(compile(m.source, "m.py", "exec"), ns)  # noqa: S102 - behaviour, not a claim
+            assert ns["f"]() == 1, m.operator
 
     def test_pragma_lines_are_skipped_and_reported(self):
         src = b"def f(x):\n    return x > 1  # pragma: no mutate\n"
