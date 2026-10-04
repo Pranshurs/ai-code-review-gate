@@ -374,6 +374,11 @@ def test_f9_utf16_xml_with_entities_is_refused():
     doc = '<?xml version="1.0" encoding="UTF-16"?><!DOCTYPE t [<!ENTITY n "x">]><testsuite/>'
     with pytest.raises(ReportError):
         parse_junit(doc.encode("utf-16"))
+    # The rule is "UTF-8 only", not "no NUL bytes": Latin-1 without a declaration is refused.
+    with pytest.raises(ReportError, match="UTF-8"):
+        parse_junit(
+            '<testsuite name="caf\u00e9"><testcase name="t"/></testsuite>'.encode("latin-1")
+        )
 
 
 # ----------------------------------------------------------------------------- F10
