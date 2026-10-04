@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# Tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Gate output (receipts are build artifacts; commit selected ones deliberately)
+.aicrg/
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
