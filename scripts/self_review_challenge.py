@@ -13,15 +13,24 @@
      delete-trusted         delete the base-owned invariant test file
      weaken-gate-config     make the self-gate job continue-on-error (+ doctor)
      weaken-policy          drop trusted evidence from review-gate.yaml
+     bypass-gate-condition  `if: false` on the self-gate job (+ doctor)
    receipt challenges (on the self-review receipt):
      manipulate-receipt     edit the decision without resealing
      reseal-receipt         edit and recompute receipt_digest
      unsigned-required      verify with --require-attestation
      head-moved             a commit after review (stale receipt)
+     change-subject         reseal the receipt claiming a different head
+     attacker-signed        SSH-sign with a key outside allowed_signers
    evidence challenges (operator contract with one evidence item):
      provider-skipped       required external SARIF never supplied
      provider-error         required external SARIF corrupt
      bundle-digest          trusted bundle content differs from the pinned digest
+     weaken-isolation       contract requires a container; operator asks for local
+     unrelated-github-sha   ambient CI commit X of another repository, report bound to X
+
+   controls (must be accepted, or the challenges above prove nothing):
+     trusted-signed         SSH-signed with the allowed key
+     report-for-head        external report bound to the evaluated head
 
 4. Remove every worktree and verify the repository is exactly restored and no
    challenge commit is reachable from any branch.
@@ -98,14 +107,36 @@ def snapshot() -> dict[str, str]:
     }
 
 
-def aicrg(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
+# The challenges must not inherit the CI context of whatever runs this script.
+AMBIENT_CI = (
+    "GITHUB_ACTIONS",
+    "GITHUB_SHA",
+    "GITHUB_REPOSITORY",
+    "GITHUB_REF",
+    "GITHUB_EVENT_NAME",
+)
+
+
+def aicrg(
+    cwd: Path, *args: str, env: dict[str, str] | None = None
+) -> subprocess.CompletedProcess[str]:
+    base_env = {k: v for k, v in os.environ.items() if k not in AMBIENT_CI}
     return subprocess.run(
-        [sys.executable, "-m", "aicrg", *args], cwd=cwd, capture_output=True, text=True, check=False
+        [sys.executable, "-m", "aicrg", *args],
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        check=False,
+        env={**base_env, **(env or {})},
     )
 
 
-def check(cwd: Path, base: str, head: str, receipt: Path, *extra: str) -> dict[str, object]:
-    proc = aicrg(cwd, "check", "--base", base, "--head", head, "--receipt", str(receipt), *extra)
+def check(
+    cwd: Path, base: str, head: str, receipt: Path, *extra: str, env: dict[str, str] | None = None
+) -> dict[str, object]:
+    proc = aicrg(
+        cwd, "check", "--base", base, "--head", head, "--receipt", str(receipt), *extra, env=env
+    )
     r = json.loads(receipt.read_text())
     return {
         "exit_code": proc.returncode,
@@ -115,6 +146,8 @@ def check(cwd: Path, base: str, head: str, receipt: Path, *extra: str) -> dict[s
         "errors": [e["message"][:160] for e in r["errors"]],
         "checks": {c["name"]: c["provider_status"] for c in r["checks"]},
         "receipt_digest": r["receipt_digest"],
+        "subject_head": r["subject"]["head"],
+        "ci": r["subject"].get("ci"),
     }
 
 
@@ -125,6 +158,7 @@ class Challenges:
         self.head = head
         self.self_receipt = self_receipt
         self.results: dict[str, dict[str, object]] = {}
+        self.controls: dict[str, dict[str, object]] = {}
         self.commits: list[str] = []
 
     def _mutant(self, name: str, edit: Callable[[Path], str], *extra: str) -> None:
@@ -183,22 +217,40 @@ class Challenges:
         self._mutant("sabotage-with-trusted", sabotage)
         self._mutant("delete-trusted", delete_trusted, "--no-run")
         self._mutant("weaken-gate-config", weaken_ci, "--no-run")
-        doc = aicrg(self.tmp / "weaken-gate-config", "doctor", "--format", "json")
-        self.results["weaken-gate-config"]["doctor"] = {
-            "exit_code": doc.returncode,
-            "verdict": json.loads(doc.stdout)["verdict"],
-            "failing": [c["id"] for c in json.loads(doc.stdout)["checks"] if c["status"] == "FAIL"],
-        }
+        self._doctor("weaken-gate-config")
         self._mutant("weaken-policy", weaken_policy, "--no-run")
 
-    def _verify(self, name: str, receipt: Path, cwd: Path, *extra: str) -> None:
+        def bypass_condition(wt: Path) -> str:
+            self._replace(
+                wt / ".github/workflows/ci.yml",
+                "  self-gate:\n    if: github.event_name == 'pull_request'\n",
+                "  self-gate:\n    if: false  # temporarily disabled\n",
+            )
+            return "CI: pause the self-gate"
+
+        self._mutant("bypass-gate-condition", bypass_condition, "--no-run")
+        self._doctor("bypass-gate-condition")
+
+    def _doctor(self, name: str) -> None:
+        doc = aicrg(self.tmp / name, "doctor", "--format", "json")
+        out = json.loads(doc.stdout)
+        self.results[name]["doctor"] = {
+            "exit_code": doc.returncode,
+            "verdict": out["verdict"],
+            "failing": [c["id"] for c in out["checks"] if c["status"] == "FAIL"],
+        }
+
+    def _verify(
+        self, name: str, receipt: Path, cwd: Path, *extra: str, control: bool = False
+    ) -> None:
         proc = aicrg(cwd, "verify-receipt", str(receipt), "--base", self.review_base, *extra)
-        self.results[name] = {
+        res = {
             "exit_code": proc.returncode,
             "decision": "REJECTED" if proc.returncode != 0 else "ACCEPTED",
             "output": proc.stdout.strip().splitlines()[:6],
         }
-        print(f"== {name:<24} {self.results[name]['decision']}")
+        (self.controls if control else self.results)[name] = res
+        print(f"== {name:<24} {res['decision']}{'  (control)' if control else ''}")
 
     def receipt_challenges(self, review_head: str) -> None:
         r = json.loads(self.self_receipt.read_text())
@@ -227,6 +279,41 @@ class Challenges:
         self.commits.append(git("rev-parse", "HEAD", cwd=wt))
         self._verify("head-moved", self.self_receipt, wt, "--head", "HEAD")
 
+        # Subject provenance: claim the reviewed patch was the post-review commit.
+        moved = git("rev-parse", "HEAD", cwd=wt)
+        p3 = self.tmp / "subject.json"
+        p3.write_text(json.dumps(seal({**r, "subject": {**r["subject"], "head": moved}}), indent=2))
+        self._verify("change-subject", p3, wt, "--head", moved)
+
+        # Authenticity: a signature by a key that is not in allowed_signers.
+        keys = {}
+        for who in ("trusted", "attacker"):
+            k = self.tmp / f"{who}-key"
+            subprocess.run(
+                ["ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-C", who, "-f", str(k)],
+                check=True,
+            )
+            keys[who] = k
+        allowed = self.tmp / "allowed_signers"
+        allowed.write_text(f"gate@aicrg {(self.tmp / 'trusted-key.pub').read_text()}")
+        ssh = ("--allowed-signers", str(allowed), "--identity", "gate@aicrg")
+        for who, control in (("attacker", False), ("trusted", True)):
+            p = self.tmp / f"{who}-signed.json"
+            shutil.copy2(self.self_receipt, p)
+            sign = aicrg(wt, "receipt", "sign", str(p), "--key", str(keys[who]))
+            if sign.returncode != 0:
+                raise SystemExit(f"signing failed: {sign.stdout}{sign.stderr}")
+            self._verify(
+                "trusted-signed" if control else "attacker-signed",
+                p,
+                wt,
+                "--head",
+                review_head,
+                "--require-attestation",
+                *ssh,
+                control=control,
+            )
+
     def evidence_challenges(self) -> None:
         sys.path.insert(0, str(ROOT / "src"))
         from aicrg.evidence.trusted import bundle_from_bytes, read_bundle, tree_digest
@@ -241,7 +328,13 @@ class Challenges:
         ext = self.tmp / "external.yaml"
         ext.write_text("version: 1\nexternal_evidence:\n  - name: codeql\n    format: sarif\n")
 
-        def run(name: str, policy: Path, *extra: str) -> None:
+        def run(
+            name: str,
+            policy: Path,
+            *extra: str,
+            env: dict[str, str] | None = None,
+            control: bool = False,
+        ) -> None:
             res = check(
                 wt,
                 self.head,
@@ -252,9 +345,11 @@ class Challenges:
                 "--policy-from",
                 "file",
                 *extra,
+                env=env,
             )
-            self.results[name] = res
-            print(f"== {name:<24} {res['decision']:<16} {res['errors'][:1]}")
+            (self.controls if control else self.results)[name] = res
+            tag = "  (control)" if control else ""
+            print(f"== {name:<24} {res['decision']:<16} {res['errors'][:1]}{tag}")
 
         run("provider-skipped", ext)
         corrupt = self.tmp / "corrupt.sarif"
@@ -270,6 +365,44 @@ class Challenges:
         )
         bundle.write_bytes(bundle_from_bytes({"test_x.py": b"def test_x():\n    pass\n"}))
         run("bundle-digest", pol, "--bundle", f"evals={bundle}")
+
+        iso = self.tmp / "container.yaml"
+        iso.write_text(
+            "version: 1\nexecution:\n  executor: container\n  container:\n"
+            "    image: python:3.12-slim\nrequired_checks:\n"
+            "  - name: noop\n    command: [python, -c, pass]\n"
+        )
+        run("weaken-isolation", iso, "--executor", "local")
+
+        x = "e" * 40  # a commit of an unrelated runner repository
+        ci_env = {
+            "GITHUB_ACTIONS": "true",
+            "GITHUB_REPOSITORY": "other-org/runner",
+            "GITHUB_SHA": x,
+            "GITHUB_REF": "refs/heads/main",
+            "GITHUB_EVENT_NAME": "push",
+        }
+
+        def sarif(rev: str) -> Path:
+            f = self.tmp / f"{rev[:8]}.sarif"
+            run_ = {
+                "tool": {"driver": {"name": "codeql"}},
+                "results": [],
+                "versionControlProvenance": [{"repositoryUri": "u", "revisionId": rev}],
+            }
+            f.write_text(json.dumps({"version": "2.1.0", "runs": [run_]}))
+            return f
+
+        run("unrelated-github-sha", ext, "--evidence", f"codeql={sarif(x)}", env=ci_env)
+        run(
+            "report-for-head",
+            ext,
+            "--evidence",
+            f"codeql={sarif(sha)}",
+            env=ci_env,
+            control=True,
+        )
+        self.evidence_head = sha
 
 
 def main() -> int:
@@ -313,6 +446,7 @@ def main() -> int:
                 )
         git("worktree", "prune")
     summary["challenges"] = ch.results
+    summary["controls"] = ch.controls
     after = snapshot()
     reachable = {c: git("branch", "-a", "--contains", c) for c in ch.commits}
     summary["restoration"] = {
@@ -323,12 +457,32 @@ def main() -> int:
     }
     OUT.mkdir(parents=True, exist_ok=True)
     shutil.copy2(ch.self_receipt, OUT / f"{PREFIX}self-review-receipt.json")
-    for name in ("weaken-test", "sabotage-with-trusted"):
+    for name in ("weaken-test", "sabotage-with-trusted", "unrelated-github-sha"):
         shutil.copy2(tmp / f"{name}.json", OUT / f"{PREFIX}{name}-receipt.json")
     shutil.rmtree(tmp, ignore_errors=True)
     (OUT / f"{PREFIX}challenge.json").write_text(json.dumps(summary, indent=2) + "\n")
     blocked = all(r["decision"] in BLOCKING | {"REJECTED"} for r in ch.results.values())
-    ok = before == after and not any(reachable.values()) and blocked
+    controls_ok = (
+        ch.controls.get("trusted-signed", {}).get("decision") == "ACCEPTED"
+        and ch.controls.get("report-for-head", {}).get("decision") == "PASS"
+    )
+    # The unrelated CI commit is recorded as execution provenance, never as the subject.
+    u = ch.results.get("unrelated-github-sha", {})
+    subject_kept = u.get("subject_head") == getattr(ch, "evidence_head", None) and (
+        (u.get("ci") or {}).get("relation") == "unresolved"
+    )
+    doctor_flags = all(
+        (ch.results.get(n, {}).get("doctor") or {}).get("verdict") not in (None, "PASS")
+        for n in ("weaken-gate-config", "bypass-gate-condition")
+    )
+    summary["checks"] = {
+        "all_challenges_blocked": blocked,
+        "controls_accepted": controls_ok,
+        "subject_not_replaced_by_ci_sha": subject_kept,
+        "doctor_flags_weakened_workflows": doctor_flags,
+    }
+    ok = before == after and not any(reachable.values()) and blocked and controls_ok
+    ok = ok and subject_kept and doctor_flags
     print(json.dumps({k: v for k, v in summary.items() if k != "restoration"}, indent=2)[:6000])
     leaked = any(reachable.values())
     print(f"restoration exact: {before == after}; challenge commits reachable: {leaked}")
