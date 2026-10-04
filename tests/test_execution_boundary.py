@@ -268,7 +268,22 @@ pathlib.Path("result.json").write_text(json.dumps(out))
             "rootfs": "read-only",
         }
 
-    def test_container_timeout_is_error_and_container_is_killed(self, repo, gate):
+    def test_container_timeout_is_error_and_container_is_killed(self, repo, gate, monkeypatch):
+        # Track the containers *this* run creates: a prefix filter (`aicrg-`) also
+        # sees containers of other suites running concurrently on the same host.
+        import uuid
+
+        from aicrg.evidence import executor as executor_mod
+
+        created: list[str] = []
+        real_uuid4 = uuid.uuid4
+
+        def tracked_uuid4() -> uuid.UUID:
+            u = real_uuid4()
+            created.append(f"aicrg-{u.hex[:16]}")
+            return u
+
+        monkeypatch.setattr(executor_mod.uuid, "uuid4", tracked_uuid4)
         pol = CONTAINER_POLICY + (
             "required_checks:\n  - name: hang\n    command: [python, -c, 'import time; time.sleep(60)']\n"
             "    timeout_seconds: 3\n"
@@ -279,13 +294,14 @@ pathlib.Path("result.json").write_text(json.dumps(out))
         res = gate()
         assert res.decision is Decision.ERROR
         assert res.checks[0].provider_status == "TIMEOUT"
-        left = subprocess.run(
-            ["docker", "ps", "-q", "--filter", "name=aicrg-"],
+        assert created, "the container executor did not name a container"
+        running = subprocess.run(
+            ["docker", "ps", "--format", "{{.Names}}"],
             capture_output=True,
             text=True,
             check=False,
-        ).stdout.strip()
-        assert left == ""
+        ).stdout.split()
+        assert not set(created) & set(running), set(created) & set(running)
 
     def test_container_workspace_has_no_git_link_to_host_repo(self, repo, gate):
         pol = CONTAINER_POLICY + (
