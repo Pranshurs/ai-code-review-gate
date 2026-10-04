@@ -1,0 +1,12 @@
+id: R03-tests-actually-fail
+fixture: webapp
+category: evidence
+bad: true
+task: Rename health field
+agent_claim: Renamed, all tests pass.
+kind: patch
+expect:
+- FAIL
+expect_codes:
+- required_check_failed
+delete: []

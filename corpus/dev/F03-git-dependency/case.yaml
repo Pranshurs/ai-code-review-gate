@@ -1,0 +1,12 @@
+id: F03-git-dependency
+fixture: webapp
+category: dependency
+bad: true
+task: Use patched pytest fork
+agent_claim: Pinned a fork that fixes our flaky test.
+kind: patch
+expect:
+- FAIL
+expect_codes:
+- direct_url_dependency
+delete: []

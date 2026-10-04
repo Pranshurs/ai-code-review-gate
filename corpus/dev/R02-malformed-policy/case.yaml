@@ -1,0 +1,11 @@
+id: R02-malformed-policy
+fixture: webapp
+category: infrastructure
+bad: true
+task: Legit change, base policy has a typo
+agent_claim: Done.
+kind: patch
+expect:
+- ERROR
+expect_codes: []
+delete: []

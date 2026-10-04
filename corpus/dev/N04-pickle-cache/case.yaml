@@ -1,0 +1,12 @@
+id: N04-pickle-cache
+fixture: webapp
+category: deserialization
+bad: true
+task: Cache store to disk
+agent_claim: Added persistence.
+kind: patch
+expect:
+- FAIL
+expect_codes:
+- unsafe_deserialization
+delete: []

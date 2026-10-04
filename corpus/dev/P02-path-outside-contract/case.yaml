@@ -1,0 +1,12 @@
+id: P02-path-outside-contract
+fixture: webapp
+category: contract
+bad: true
+task: Add deploy helper
+agent_claim: Added deploy script.
+kind: patch
+expect:
+- FAIL
+expect_codes:
+- path_outside_contract
+delete: []

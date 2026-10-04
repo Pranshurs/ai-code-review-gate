@@ -1,0 +1,2 @@
+BILLING_URL = "https://billing.example/api"
+AWS_ACCESS_KEY_ID = "AKIAQ3EXAMPLE7KZ2XYW"

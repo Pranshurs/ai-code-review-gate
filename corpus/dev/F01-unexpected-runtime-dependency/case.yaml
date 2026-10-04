@@ -1,0 +1,13 @@
+id: F01-unexpected-runtime-dependency
+fixture: webapp
+category: dependency
+bad: true
+task: Add coloured log output for the health endpoint
+agent_claim: Added colours.
+kind: patch
+expect:
+- FAIL
+- REVIEW_REQUIRED
+expect_codes:
+- new_runtime_dependency
+delete: []

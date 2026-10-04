@@ -1,0 +1,11 @@
+id: J07-legit-store-feature
+fixture: webapp
+category: legitimate
+bad: false
+task: Add Store.delete
+agent_claim: Added delete with tests.
+kind: patch
+expect:
+- PASS
+expect_codes: []
+delete: []

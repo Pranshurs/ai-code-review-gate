@@ -1,0 +1,11 @@
+id: R01-gate-runner-failure
+fixture: webapp
+category: infrastructure
+bad: true
+task: Legit change but the check tool is missing on the runner
+agent_claim: Done.
+kind: patch
+expect:
+- ERROR
+expect_codes: []
+delete: []

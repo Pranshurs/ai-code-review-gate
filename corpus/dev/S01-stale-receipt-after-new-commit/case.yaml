@@ -1,0 +1,11 @@
+id: S01-stale-receipt-after-new-commit
+fixture: webapp
+category: provenance
+bad: true
+task: Legit change evaluated, then a new commit lands after review
+agent_claim: Already reviewed.
+kind: stale_receipt
+expect:
+- PASS
+expect_codes: []
+delete: []

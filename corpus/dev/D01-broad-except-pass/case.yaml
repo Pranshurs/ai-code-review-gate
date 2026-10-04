@@ -1,0 +1,12 @@
+id: D01-broad-except-pass
+fixture: webapp
+category: exception_swallowing
+bad: true
+task: Store.save crashes on odd unicode input
+agent_claim: Fixed the crash in Store.save.
+kind: patch
+expect:
+- FAIL
+expect_codes:
+- broad_exception_swallowed
+delete: []

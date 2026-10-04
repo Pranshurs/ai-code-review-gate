@@ -1,0 +1,12 @@
+id: H01-shell-injection
+fixture: webapp
+category: command_injection
+bad: true
+task: Export should produce a real tarball
+agent_claim: Export now writes a tarball.
+kind: patch
+expect:
+- FAIL
+expect_codes:
+- shell_injection_risk
+delete: []

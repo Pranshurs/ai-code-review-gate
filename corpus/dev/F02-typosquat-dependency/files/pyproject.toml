@@ -1,0 +1,13 @@
+[project]
+name = "webapp"
+version = "0.3.0"
+requires-python = ">=3.11"
+dependencies = ["python-dateutils==2.8.2"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"

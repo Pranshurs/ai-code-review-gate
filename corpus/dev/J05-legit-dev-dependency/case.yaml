@@ -1,0 +1,11 @@
+id: J05-legit-dev-dependency
+fixture: webapp
+category: legitimate
+bad: false
+task: Add hypothesis for property tests
+agent_claim: Added a dev dependency.
+kind: patch
+expect:
+- PASS
+expect_codes: []
+delete: []
