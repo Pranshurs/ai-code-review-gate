@@ -102,7 +102,9 @@ llm_reviewer:                        # optional; see docs/RECEIPTS.md#llm_review
   REVIEW_REQUIRED.
 * **Glob semantics.** `*` never crosses `/`. `**` matches zero or more whole
   directories. A pattern without `/` matches the basename at any depth (`*.lock`).
-  A trailing `/` means "everything under".
+  A trailing `/` means "everything under". A leading `./` anchors the pattern at
+  the repository root: `./review-gate.yaml` is only the root file, while
+  `review-gate.yaml` also matches `fixtures/x/review-gate.yaml`.
 * **High-risk patches need evidence.** If the patch touches a HIGH or CRITICAL
   surface and the contract has no `required_checks`, the gate returns
   REVIEW_REQUIRED (`insufficient_evidence`).

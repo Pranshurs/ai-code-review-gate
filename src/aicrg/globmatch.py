@@ -8,6 +8,8 @@ our own patterns:
 * ``?``   one character except ``/``
 * ``**``  any number of whole path segments (including zero)
 * a pattern without ``/`` matches the basename at any depth (``*.lock``)
+* a leading ``./`` anchors the pattern at the repository root
+  (``./review-gate.yaml`` matches only the root file)
 """
 
 from __future__ import annotations
@@ -26,7 +28,12 @@ def compile_glob(pattern: str) -> re.Pattern[str]:
         raise GlobError(f"invalid path pattern {pattern!r}: must be a relative POSIX glob")
     if "[" in pattern or "]" in pattern or "{" in pattern:
         raise GlobError(f"invalid path pattern {pattern!r}: character classes/braces unsupported")
-    anchored = "/" in pattern.rstrip("/")
+    root_anchored = pattern.startswith("./")
+    if root_anchored:
+        pattern = pattern[2:]
+        if not pattern or pattern.startswith("/") or pattern.startswith("./"):
+            raise GlobError("invalid path pattern: nothing after './'")
+    anchored = root_anchored or "/" in pattern.rstrip("/")
     pat = pattern.rstrip("/") if pattern.endswith("/") else pattern
     if pattern.endswith("/"):
         pat += "/**"

@@ -24,6 +24,10 @@ class TestGlob:
             (".github/workflows/ci.yml", ".github/**", True),
             ("github/workflows/ci.yml", ".github/**", False),
             ("srcx/a.py", "src/**", False),
+            ("review-gate.yaml", "review-gate.yaml", True),
+            ("corpus/x/review-gate.yaml", "review-gate.yaml", True),  # basename, any depth
+            ("review-gate.yaml", "./review-gate.yaml", True),
+            ("corpus/x/review-gate.yaml", "./review-gate.yaml", False),  # root-anchored
         ],
     )
     def test_semantics(self, path, pattern, expected):
