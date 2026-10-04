@@ -21,7 +21,7 @@ from aicrg.analysis.context import PatchContext
 from aicrg.dependencies.delta import DependencyReport, analyze_dependencies
 from aicrg.evidence.commands import filtered_env, run_check
 from aicrg.evidence.workspace import head_worktree
-from aicrg.git.diff import Patch, extract_patch
+from aicrg.git.diff import FileChange, Patch, extract_patch
 from aicrg.git.repo import Repo
 from aicrg.globmatch import match_any
 from aicrg.llm.reviewer import ReviewerResult, run_reviewer
@@ -186,10 +186,32 @@ def _provenance(repo: Repo, opts: GateOptions, run: _Run) -> tuple[str, str, str
     return base_sha, merge_base, head_sha
 
 
+NEVER_EXCLUDED = (".github/workflows/*.yml", ".github/workflows/*.yaml")
+
+
+def _content_patch(patch: Patch, contract: ReviewContract, policy_path: str | None) -> Patch:
+    """The patch as seen by content analysers (``exclude_from_analysis`` removed)."""
+    if not contract.exclude_from_analysis:
+        return patch
+
+    def excluded(fc: FileChange) -> bool:
+        for p in fc.paths:
+            if p == policy_path or match_any(p, NEVER_EXCLUDED):
+                return False
+        return all(match_any(p, contract.exclude_from_analysis) for p in fc.paths)
+
+    kept = [fc for fc in patch.files if not excluded(fc)]
+    return Patch(patch.base, patch.head, kept, patch.digest, patch.size_bytes)
+
+
 def _analyse(run: _Run, repo: Repo, patch: Patch, contract: ReviewContract) -> None:
-    ctx = PatchContext(repo, patch, contract)
-    run.risk = run.stage("risk", lambda: assess(ctx, run.policy.repo_path if run.policy else None))
-    run.stage("contract", lambda: run.findings.extend(_contract_findings(ctx, run)))
+    full = PatchContext(repo, patch, contract)
+    policy_path = run.policy.repo_path if run.policy else None
+    run.risk = run.stage("risk", lambda: assess(full, policy_path))
+    run.stage("contract", lambda: run.findings.extend(_contract_findings(full, run)))
+    content = _content_patch(patch, contract, policy_path)
+    run.subject["files_excluded_from_analysis"] = len(patch.files) - len(content.files)
+    ctx = PatchContext(repo, content, contract)
     ti = run.stage("test_integrity", lambda: analyze_test_integrity(ctx))
     if ti is not None:
         run.ti = ti

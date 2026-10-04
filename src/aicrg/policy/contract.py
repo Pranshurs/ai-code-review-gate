@@ -123,6 +123,10 @@ class ReviewContract:
     minimum_test_integrity: TestIntegrityPolicy = field(default_factory=TestIntegrityPolicy)
     review_required_surfaces: tuple[str, ...] = ()
     golden_paths: tuple[str, ...] = DEFAULT_GOLDEN_PATHS
+    # Data that intentionally contains "bad" code (fixtures, corpora, vendored samples).
+    # Still subject to allowed/protected path rules and risk classification; skipped by
+    # content analysers. Workflows and the policy file itself are never excluded.
+    exclude_from_analysis: tuple[str, ...] = ()
     env_passthrough: tuple[str, ...] = ()
     llm_reviewer: LLMReviewerPolicy | None = None
 
@@ -249,7 +253,11 @@ def _section(where: str, value: Any) -> dict[str, Any]:
 
 def parse_contract(text: str) -> ReviewContract:
     try:
-        data = yaml.load(text, Loader=_StrictLoader)  # noqa: S506 - strict SafeLoader subclass
+        loader = _StrictLoader(text)  # SafeLoader subclass; same steps as yaml.safe_load
+        try:
+            data = loader.get_single_data()
+        finally:
+            loader.dispose()
     except PolicyError:
         raise
     except yaml.YAMLError as exc:
@@ -270,6 +278,7 @@ def contract_from_mapping(data: dict[str, Any]) -> ReviewContract:
         "minimum_test_integrity",
         "review_required_surfaces",
         "golden_paths",
+        "exclude_from_analysis",
         "execution",
         "llm_reviewer",
     }
@@ -327,6 +336,10 @@ def contract_from_mapping(data: dict[str, Any]) -> ReviewContract:
         kwargs["review_required_surfaces"] = surfaces
     if "golden_paths" in data:
         kwargs["golden_paths"] = DEFAULT_GOLDEN_PATHS + _globs("golden_paths", data["golden_paths"])
+    if "exclude_from_analysis" in data:
+        kwargs["exclude_from_analysis"] = _globs(
+            "exclude_from_analysis", data["exclude_from_analysis"]
+        )
     if "execution" in data:
         sec = _section("execution", data["execution"])
         _expect_keys("execution", sec, {"env_passthrough"})

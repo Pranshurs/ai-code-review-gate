@@ -277,7 +277,7 @@ def test_check_moved_into_helper_is_not_removed(repo, gate):
     # The denial (raise Forbidden) moves into a module-level helper the function calls.
     src = AUTH.replace(
         'def require_admin(user):\n    if user.role != "admin":\n        raise Forbidden("no")',
-        'def _deny(msg):\n    raise Forbidden(msg)\n\n\n'
+        "def _deny(msg):\n    raise Forbidden(msg)\n\n\n"
         'def require_admin(user):\n    if user.role != "admin":\n        _deny("no")',
     )
     assert src != AUTH

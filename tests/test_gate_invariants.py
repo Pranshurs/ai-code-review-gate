@@ -270,3 +270,29 @@ def test_receipt_digest_is_deterministic_for_same_inputs(repo, gate, n):
         r.pop("timings_ms")
         r.pop("receipt_digest")
     assert a == b
+
+
+class TestExcludeFromAnalysis:
+    POLICY = (
+        "version: 1\nexclude_from_analysis: [corpus/**, .github/**]\n"
+        "protected_paths: [corpus/frozen/**]\n"
+    )
+
+    def test_excluded_data_is_not_analysed(self, repo, gate):
+        _base(repo, self.POLICY)
+        repo.commit({"corpus/case/app.py": "import os\n\ndef f(x):\n    os.system(f'ls {x}')\n"})
+        res = gate()
+        assert "shell_injection_risk" not in codes(res)
+        assert res.receipt["subject"]["files_excluded_from_analysis"] == 1
+
+    def test_protected_paths_still_apply_to_excluded_files(self, repo, gate):
+        _base(repo, self.POLICY)
+        repo.commit({"corpus/frozen/x.txt": "changed"})
+        assert "protected_path_modified" in codes(gate())
+
+    def test_workflows_can_never_be_excluded(self, repo, gate):
+        wf = "on: [pull_request]\njobs:\n  t:\n    runs-on: x\n    steps:\n      - run: pytest\n"
+        repo.commit({"review-gate.yaml": self.POLICY, ".github/workflows/ci.yml": wf})
+        repo.git("checkout", "-q", "-b", "agent")
+        repo.commit({".github/workflows/ci.yml": wf.replace("pytest", "pytest || true")})
+        assert "ci_failure_masked" in codes(gate())
