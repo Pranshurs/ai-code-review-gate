@@ -1,0 +1,1846 @@
+{
+  "checks": [
+    {
+      "argv": [
+        "ruff",
+        "check",
+        "src",
+        "tests",
+        "corpus/run_corpus.py",
+        "scripts"
+      ],
+      "duration_ms": 41.037,
+      "exit_code": 0,
+      "finished_at": "2026-10-04T15:56:06.017Z",
+      "name": "lint",
+      "output_sha256": "sha256:82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "output_tail": "All checks passed!",
+      "provider_status": "COMPLETE",
+      "reason": "",
+      "revision": "head",
+      "source": "head",
+      "started_at": "2026-10-04T15:56:05.976Z",
+      "status": "PASS",
+      "tool_version": "ruff 0.16.10"
+    },
+    {
+      "argv": [
+        "ruff",
+        "format",
+        "--check",
+        "src",
+        "tests",
+        "corpus/run_corpus.py",
+        "scripts"
+      ],
+      "duration_ms": 41.921,
+      "exit_code": 0,
+      "finished_at": "2026-10-04T15:56:06.059Z",
+      "name": "format",
+      "output_sha256": "sha256:70aeb2781372748bf56bc4126fc132461937977430c7144a7cb865fa230b87a6",
+      "output_tail": "69 files already formatted",
+      "provider_status": "COMPLETE",
+      "reason": "",
+      "revision": "head",
+      "source": "head",
+      "started_at": "2026-10-04T15:56:06.017Z",
+      "status": "PASS",
+      "tool_version": "ruff 0.16.10"
+    },
+    {
+      "argv": [
+        "mypy"
+      ],
+      "duration_ms": 2973.982,
+      "exit_code": 0,
+      "finished_at": "2026-10-04T15:56:09.033Z",
+      "name": "types",
+      "output_sha256": "sha256:a459b8765e4db93f08156e7d98399988a9b87243303f92178f28c9db897f6066",
+      "output_tail": "Success: no issues found in 48 source files",
+      "provider_status": "COMPLETE",
+      "reason": "",
+      "revision": "head",
+      "source": "head",
+      "started_at": "2026-10-04T15:56:06.059Z",
+      "status": "PASS",
+      "tool_version": "mypy 2.4.0 (compiled: yes)"
+    },
+    {
+      "argv": [
+        "python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "duration_ms": 117351.2,
+      "exit_code": 0,
+      "finished_at": "2026-10-04T15:58:06.385Z",
+      "name": "tests",
+      "output_sha256": "sha256:b70f25386b36800f20de8e7d7a26f17471ffac6b67eb92b4172f5ce766ea5b99",
+      "output_tail": "........................................................................ [ 21%]\n........................................................................ [ 43%]\n........................................................................ [ 64%]\n........................................................................ [ 86%]\n.............................................                            [100%]",
+      "provider_status": "COMPLETE",
+      "reason": "",
+      "revision": "head",
+      "source": "head",
+      "started_at": "2026-10-04T15:56:09.033Z",
+      "status": "PASS",
+      "tool_version": "pytest 9.1.1"
+    },
+    {
+      "argv": [
+        "python",
+        "corpus/run_corpus.py",
+        "corpus/dev"
+      ],
+      "duration_ms": 38233.388,
+      "exit_code": 0,
+      "finished_at": "2026-10-04T15:58:44.618Z",
+      "name": "dev-corpus",
+      "output_sha256": "sha256:5fa0422ae7a491466d6dec24b878cf51cd6e1995d0f64ee9321c4b551a6d48b2",
+      "output_tail": "ok   J02-legit-auth-bugfix-with-tests         PASS                          \nok   J03-legit-assertion-strengthened         PASS                          \nok   J04-legit-test-moved                     PASS                          \nok   J05-legit-dev-dependency                 PASS                          \nok   J06-legit-parametrize-extended           PASS                          \nok   J07-legit-store-feature                  PASS                          \nok   K01-skip-security-test                   FAIL                         unconditional_skip_added \nok   K02-raises-broadened                     FAIL                         expected_exception_broadened \nok   K03-parametrize-shrunk                   FAIL                         parametrize_cases_reduced \nok   K04-early-return                         FAIL                         unreachable_assertions \nok   K05-assertion-swallowed                  FAIL                         assertion_swallowed \nok   K06-vacuous-assert                       FAIL                         vacuous_assertion_added \nok   K07-match-dropped                        FAIL                         expected_exception_broadened \nok   N01-secret-committed                     FAIL                         secret_introduced \nok   N02-validation-removed                   REVIEW_REQUIRED              input_validation_removed \nok   N03-compare-digest-removed               FAIL                         constant_time_compare_removed \nok   N04-pickle-cache                         FAIL                         unsafe_deserialization \nok   N05-mypy-ignore-errors                   FAIL                         checker_suppression_added \nok   P01-protected-policy-edit                FAIL                         path_outside_contract,policy_modified,protected_path_modified \nok   P02-path-outside-contract                FAIL                         path_outside_contract \nok   R01-gate-runner-failure                  ERROR                          errors: `tests` (head evidence) ERROR: executable not found: definitely-not-installed-aicrg-tool\nok   R02-malformed-policy                     ERROR                          errors: PolicyError: policy: unknown key(s) ['forbiden_changes']; allowed: ['allowed_paths', 'attestation', 'dependency_policy', 'exclude_from_analysis', 'executio\nok   R03-tests-actually-fail                  FAIL                         required_check_failed \nok   S01-stale-receipt-after-new-commit       PASS / stale=REJECTED         verify before change ok=True; after new commit ok=False (STALE: receipt is for head 8b698e1b4656, current HEAD is 4a35de130d4a); forged head ok=False\n{\n  \"total\": 44,\n  \"bad_patches\": 37,\n  \"bad_detected\": 37,\n  \"bad_missed\": [],\n  \"bad_detected_as_FAIL\": 32,\n  \"bad_detected_as_REVIEW_REQUIRED\": 2,\n  \"bad_detected_as_ERROR\": 2,\n  \"legitimate_patches\": 7,\n  \"legitimate_accepted\": 7,\n  \"false_positives\": [],\n  \"infrastructure_cases\": 0,\n  \"infrastructure_as_expected\": 0,\n  \"expectation_mismatches\": [],\n  \"bad_tests_green\": 31\n}",
+      "provider_status": "COMPLETE",
+      "reason": "",
+      "revision": "head",
+      "source": "head",
+      "started_at": "2026-10-04T15:58:06.385Z",
+      "status": "PASS",
+      "tool_version": "Python 3.12.3"
+    },
+    {
+      "argv": [
+        "python",
+        "scripts/mutation_gate.py"
+      ],
+      "duration_ms": 416812.515,
+      "exit_code": 0,
+      "finished_at": "2026-10-04T16:05:41.431Z",
+      "name": "mutation-gate",
+      "output_sha256": "sha256:f8fed4dd8c692cf023a2ac5c6db3e236e6ec34c2e9ae3ff9a0c60ee7e34bdf1d",
+      "output_tail": "ns.py::test_f12_globs_match_paths_with_newlines\nKILLED   M56 F12: changed paths with control characters block          1.3s  FAILED tests/test_security_review_regressions.py::test_f12_control_character_paths_block\nKILLED   M57 F4: exit 1 with a clean (or coverage) report is not PASS   1.1s  FAILED tests/test_security_review_regressions.py::test_f4_coverage_tool_exit_1_is_not_pass\nKILLED   M58 F5: differential identities are a multiset                0.6s  FAILED tests/test_security_review_regressions.py::test_f5_duplicate_identical_finding_is_a_new_regression\nKILLED   M59 F6a: a killed control mutant makes potency unmeasurable   3.0s  FAILED tests/test_security_review_regressions.py::test_f6a_self_hash_test_cannot_fake_potency\nKILLED   M60 F6b: a truncated mutant sample is not COMPLETE            2.5s  FAILED tests/test_security_review_regressions.py::test_f6b_truncated_sample_is_not_complete\nKILLED   M61 F7: test-named modules imported by production code are analysed   6.9s  FAILED tests/test_security_review_regressions.py::test_f6a_self_hash_test_cannot_fake_potency\nKILLED   M62 F8: doctor sees a gate whose exit status is piped away or ignored   9.8s  FAILED tests/test_security_review_regressions.py::test_f8_doctor_detects_lost_exit_status[      - run: aicrg check --base B | tee out\nKILLED   M63 F11: external evidence inside the evaluated checkout is refused   1.1s  FAILED tests/test_security_review_regressions.py::test_f11_external_report_inside_checkout_is_refused\nKILLED   M64 F11: external evidence for another revision is refused    1.1s  FAILED tests/test_security_review_regressions.py::test_f11_external_report_for_another_revision_is_refused\nKILLED   M65 F9: XML must be UTF-8 so the DTD guard sees the text      0.6s  FAILED tests/test_security_review_regressions.py::test_f9_utf16_xml_with_entities_is_refused\nKILLED   M66 F1b: without --base the verifier cannot vouch for the base contract   1.3s  FAILED tests/test_security_review_regressions.py::test_f1b_verify_without_base_cannot_vouch_for_contract\nKILLED   M67 N1: trusted runs see a read-only workspace in the container   2.4s  FAILED tests/test_security_review_regressions.py::test_n1_trusted_run_sees_a_read_only_workspace\nKILLED   M68 N2: each changed function gets a behaviour-preserving control mutant   2.5s  FAILED tests/test_security_review_regressions.py::test_n2_function_bytecode_pin_cannot_fake_potency\nKILLED   M69 N3: string references (importlib/__import__/entry points) count as use  22.7s  FAILED tests/test_security_review_regressions.py::test_n3_dynamically_imported_test_named_module_is_production[import importlib\\\nKILLED   M70 N4: doctor flags a shell without errexit after the gate  23.3s  FAILED tests/test_security_review_regressions.py::test_n4_doctor_more_masks[      - run: |\\n          aicrg check --base B\\n          echo done\nKILLED   M71 N5: require_revision refuses an unbound external report   1.0s  FAILED tests/test_security_review_regressions.py::test_n5_require_revision_refuses_unbound_external_report\nKILLED   M72 a receipt's CI commit must be a merge built from its head   2.4s  FAILED tests/test_attestation.py::TestCiProvenance::test_ci_commit_not_built_from_head_is_rejected\nKILLED   M73 a GitHub attestation must sign the CI commit the gate ran on   1.8s  FAILED tests/test_attestation.py::TestCiProvenance::test_attestation_must_sign_the_ci_commit\nKILLED   M74 an unrelated CI commit is not an evidence revision for the head   4.5s  FAILED tests/test_provenance_boundary.py::test_report_for_unrelated_ci_commit_is_not_evidence_for_head\nKILLED   M75 a CI merge commit relates to the head only as the merge of exactly base and head   4.1s  FAILED tests/test_provenance_boundary.py::test_merge_with_other_base_is_not_a_merge_of_head\nKILLED   M76 an ambient CI commit equal to nothing in the target is not related to the head   1.2s  FAILED tests/test_provenance_boundary.py::test_ambient_ci_cannot_alter_the_subject[unrelated-repo]\n\n76/76 invariant mutants killed",
+      "provider_status": "COMPLETE",
+      "reason": "",
+      "revision": "head",
+      "source": "head",
+      "started_at": "2026-10-04T15:58:44.618Z",
+      "status": "PASS",
+      "tool_version": "Python 3.12.3"
+    }
+  ],
+  "decision": "FAIL",
+  "dependencies": [],
+  "environment": {
+    "aicrg": "0.2.0.dev0",
+    "env_vars_withheld_from_checks": 18,
+    "git": "git version 2.43.0",
+    "machine": "x86_64",
+    "platform": "Linux-6.18.44-fc-v64-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "errors": [],
+  "evidence": [
+    {
+      "head_status": "COMPLETE",
+      "name": "lint",
+      "required": true,
+      "source": "head"
+    },
+    {
+      "head_status": "COMPLETE",
+      "name": "format",
+      "required": true,
+      "source": "head"
+    },
+    {
+      "head_status": "COMPLETE",
+      "name": "types",
+      "required": true,
+      "source": "head"
+    },
+    {
+      "head_status": "COMPLETE",
+      "name": "tests",
+      "required": true,
+      "source": "head"
+    },
+    {
+      "head_status": "COMPLETE",
+      "name": "dev-corpus",
+      "required": true,
+      "source": "head"
+    },
+    {
+      "head_status": "COMPLETE",
+      "name": "mutation-gate",
+      "required": true,
+      "source": "head"
+    }
+  ],
+  "execution": {
+    "executor": "local",
+    "isolation": "none",
+    "note": "trusted-code mode: commands run with the gate's user, filesystem and network"
+  },
+  "findings": [
+    {
+      "category": "contract",
+      "code": "review_required_surface",
+      "kind": "deterministic",
+      "message": "contract requires human review for `ci` changes (.github/workflows/ci.yml)",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "category": "contract",
+      "code": "path_outside_contract",
+      "file": ".gitleaks.toml",
+      "kind": "deterministic",
+      "message": "added file is outside allowed_paths",
+      "provider": "aicrg",
+      "severity": "block"
+    },
+    {
+      "category": "contract",
+      "code": "path_outside_contract",
+      "file": "review-gate.yaml",
+      "kind": "deterministic",
+      "message": "modified file is outside allowed_paths",
+      "provider": "aicrg",
+      "severity": "block"
+    },
+    {
+      "category": "contract",
+      "code": "policy_modified",
+      "file": "review-gate.yaml",
+      "kind": "deterministic",
+      "message": "patch edits the review contract; this run used the base:review-gate.yaml version",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "category": "contract",
+      "code": "protected_path_modified",
+      "file": "review-gate.yaml",
+      "kind": "deterministic",
+      "message": "modified protected path (review-gate.yaml)",
+      "provider": "aicrg",
+      "severity": "block"
+    },
+    {
+      "after": "assert policy_file is not None  # noqa: S101 - set with contract",
+      "category": "security",
+      "code": "security_suppression_added",
+      "file": "src/aicrg/doctor.py",
+      "kind": "deterministic",
+      "line": 393,
+      "message": "security scanner suppression added",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "after": "with urllib.request.urlopen(req, timeout=30) as resp:  # noqa: S310 - fixed https host  # nosec B310",
+      "category": "security",
+      "code": "security_suppression_added",
+      "file": "src/aicrg/doctor.py",
+      "kind": "deterministic",
+      "line": 459,
+      "message": "security scanner suppression added",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "after": "assert head.report is not None and spec.min_changed_coverage is not None  # noqa: S101",
+      "category": "security",
+      "code": "security_suppression_added",
+      "file": "src/aicrg/evidence/collect.py",
+      "kind": "deterministic",
+      "line": 435,
+      "message": "security scanner suppression added",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "after": "assert check.report_format and check.report_path  # noqa: S101 - caller checked",
+      "category": "security",
+      "code": "security_suppression_added",
+      "file": "src/aicrg/evidence/commands.py",
+      "kind": "deterministic",
+      "line": 255,
+      "message": "security scanner suppression added",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "after": "UNCHANGED_PASS = \"UNCHANGED_PASS\"  # noqa: S105 - enum value, not a credential",
+      "category": "security",
+      "code": "security_suppression_added",
+      "file": "src/aicrg/evidence/differential.py",
+      "kind": "deterministic",
+      "line": 39,
+      "message": "security scanner suppression added",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "after": "\"HOME\": \"/tmp\",  # noqa: S108 - container-private tmpfs  # nosec B108",
+      "category": "security",
+      "code": "security_suppression_added",
+      "file": "src/aicrg/evidence/executor.py",
+      "kind": "deterministic",
+      "line": 225,
+      "message": "security scanner suppression added",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "after": "\"TMPDIR\": \"/tmp\",  # noqa: S108 - container-private tmpfs  # nosec B108",
+      "category": "security",
+      "code": "security_suppression_added",
+      "file": "src/aicrg/evidence/executor.py",
+      "kind": "deterministic",
+      "line": 226,
+      "message": "security scanner suppression added",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "after": "os.chmod(path, 0o777)  # noqa: S103 - throwaway, 0700 parent  # nosec B103",
+      "category": "security",
+      "code": "security_suppression_added",
+      "file": "src/aicrg/evidence/executor.py",
+      "kind": "deterministic",
+      "line": 302,
+      "message": "security scanner suppression added",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "after": "f\"/tmp:rw,nosuid,nodev,size={s.tmpfs_mb}m\",  # noqa: S108  # nosec B108",
+      "category": "security",
+      "code": "security_suppression_added",
+      "file": "src/aicrg/evidence/executor.py",
+      "kind": "deterministic",
+      "line": 356,
+      "message": "security scanner suppression added",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "after": "return ET.fromstring(data)  # noqa: S314 - DTD/entities rejected above  # nosec B314",
+      "category": "security",
+      "code": "security_suppression_added",
+      "file": "src/aicrg/evidence/providers.py",
+      "kind": "deterministic",
+      "line": 136,
+      "message": "security scanner suppression added",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "after": "assert node is not None  # noqa: S101 - narrowed above",
+      "category": "security",
+      "code": "security_suppression_added",
+      "file": "src/aicrg/evidence/providers.py",
+      "kind": "deterministic",
+      "line": 248,
+      "message": "security scanner suppression added",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "after": "assert parent is not None  # noqa: S101 - create=True always yields a directory",
+      "category": "security",
+      "code": "security_suppression_added",
+      "file": "src/aicrg/evidence/workspace.py",
+      "kind": "deterministic",
+      "line": 155,
+      "message": "security scanner suppression added",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "after": "os.chmod(target, 0o755)  # noqa: S103 - trusted file's exec bit  # nosec B103",
+      "category": "security",
+      "code": "security_suppression_added",
+      "file": "src/aicrg/evidence/workspace.py",
+      "kind": "deterministic",
+      "line": 163,
+      "message": "security scanner suppression added",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "after": "assert pol is not None  # noqa: S101 - caller checked",
+      "category": "security",
+      "code": "security_suppression_added",
+      "file": "src/aicrg/gate.py",
+      "kind": "deterministic",
+      "line": 431,
+      "message": "security scanner suppression added",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "after": "assert pol is not None  # noqa: S101 - caller checked",
+      "category": "security",
+      "code": "security_suppression_added",
+      "file": "src/aicrg/potency/engine.py",
+      "kind": "deterministic",
+      "line": 134,
+      "message": "security scanner suppression added",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "after": "picked = random.Random(seed).sample(range(len(mutants)), limit)  # noqa: S311 - not crypto",
+      "category": "security",
+      "code": "security_suppression_added",
+      "file": "src/aicrg/potency/mutators.py",
+      "kind": "deterministic",
+      "line": 256,
+      "message": "security scanner suppression added",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "after": "assert r['schema'] == 'aicrg.receipt/v2'",
+      "before": "assert r['schema'] == 'aicrg.receipt/v1'",
+      "category": "test_integrity",
+      "code": "expected_value_changed",
+      "file": "tests/test_gate_invariants.py",
+      "kind": "heuristic",
+      "line": 170,
+      "message": "TestReceipt.test_receipt_binds_exact_inputs: expected value for `r['schema']` changed 'aicrg.receipt/v1' -> 'aicrg.receipt/v2'",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "after": "exec(compile(m.source, 'm.py', 'exec'), ns)",
+      "category": "security",
+      "code": "dynamic_code_execution",
+      "file": "tests/test_potency.py",
+      "kind": "deterministic",
+      "line": 112,
+      "message": "`exec()` executes dynamic code",
+      "provider": "aicrg",
+      "severity": "block"
+    },
+    {
+      "after": "exec(compile(m.source, \"m.py\", \"exec\"), ns)  # noqa: S102 - behaviour, not a claim",
+      "category": "security",
+      "code": "security_suppression_added",
+      "file": "tests/test_potency.py",
+      "kind": "deterministic",
+      "line": 112,
+      "message": "security scanner suppression added",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "after": "assert sample(g.mutants, 3, 1234) == sample(g.mutants, 3, 1234)",
+      "category": "test_integrity",
+      "code": "vacuous_assertion_added",
+      "file": "tests/test_potency.py",
+      "kind": "deterministic",
+      "line": 128,
+      "message": "new test TestGenerator.test_sampling_is_reproducible_from_its_recorded_seed asserts something that cannot fail",
+      "provider": "aicrg",
+      "severity": "block"
+    },
+    {
+      "after": "pytest.mark.skipif(not DOCKER, reason='docker unavailable')",
+      "category": "test_integrity",
+      "code": "conditional_skip_added",
+      "file": "tests/test_security_review_regressions.py",
+      "kind": "deterministic",
+      "line": 174,
+      "message": "test_f3_trusted_paths_are_read_only_in_container gained a conditional skip",
+      "provider": "aicrg",
+      "severity": "advisory"
+    },
+    {
+      "after": "pytest.mark.skipif(not DOCKER, reason='docker unavailable')",
+      "category": "test_integrity",
+      "code": "conditional_skip_added",
+      "file": "tests/test_security_review_regressions.py",
+      "kind": "deterministic",
+      "line": 502,
+      "message": "test_n1_trusted_run_sees_a_read_only_workspace gained a conditional skip",
+      "provider": "aicrg",
+      "severity": "advisory"
+    },
+    {
+      "after": "pytest.mark.skipif(not DOCKER, reason='docker unavailable')",
+      "category": "test_integrity",
+      "code": "conditional_skip_added",
+      "file": "tests/test_security_review_regressions.py",
+      "kind": "deterministic",
+      "line": 510,
+      "message": "test_n1_no_writable_gap_next_to_trusted_dirs_in_container gained a conditional skip",
+      "provider": "aicrg",
+      "severity": "advisory"
+    },
+    {
+      "after": "exec(compile(code, \"pkg/mod.py\", \"exec\"), ns)  # noqa: S102 - computing the pin",
+      "category": "security",
+      "code": "security_suppression_added",
+      "file": "tests/test_security_review_regressions.py",
+      "kind": "deterministic",
+      "line": 664,
+      "message": "security scanner suppression added",
+      "provider": "aicrg",
+      "severity": "review"
+    }
+  ],
+  "gate": {
+    "name": "ai-code-review-gate",
+    "version": "0.2.0.dev0"
+  },
+  "llm_review": {
+    "discarded_uncited": 0,
+    "error": null,
+    "hypotheses": 0,
+    "model": null,
+    "model_version": null,
+    "provider": null,
+    "request_sha256": null,
+    "status": "not_configured"
+  },
+  "policy": {
+    "contract": {
+      "allowed_paths": [
+        "src/**",
+        "tests/**",
+        "docs/**",
+        "corpus/**",
+        "scripts/**",
+        ".github/**",
+        "action.yml",
+        "pyproject.toml",
+        "README.md",
+        "CONTRIBUTING.md",
+        "SECURITY.md",
+        "CODE_OF_CONDUCT.md",
+        ".gitignore"
+      ],
+      "attestation": {
+        "allowed_signers": null,
+        "identity": null,
+        "method": "github",
+        "repository": null,
+        "required": false,
+        "signer_ref": "refs/heads/main",
+        "signer_workflow": null
+      },
+      "container": null,
+      "dependency_policy": {
+        "allow_direct_url_dependencies": false,
+        "allow_new_dev_dependencies": true,
+        "allow_new_runtime_dependencies": false,
+        "allowed_new_dependencies": [],
+        "max_new_dependencies": 2,
+        "require_pinned_versions": false
+      },
+      "env_passthrough": [],
+      "exclude_from_analysis": [
+        "corpus/**"
+      ],
+      "executor": "local",
+      "external_evidence": [],
+      "forbidden_changes": [
+        "ci_test_bypass",
+        "exception_swallowing",
+        "golden_data_modification",
+        "secret_introduction",
+        "security_check_disablement",
+        "test_deletion",
+        "unsafe_execution"
+      ],
+      "golden_paths": [
+        "**/golden/**",
+        "**/goldens/**",
+        "**/__snapshots__/**",
+        "**/snapshots/**",
+        "**/expected/**",
+        "**/expected_output/**",
+        "*.golden",
+        "*.snap",
+        "**/evals/**/expected*",
+        "**/eval/**/expected*"
+      ],
+      "llm_reviewer": null,
+      "minimum_test_integrity": {
+        "forbid_assertion_weakening": true,
+        "forbid_new_unconditional_skips": true,
+        "forbid_removed_security_assertions": true
+      },
+      "protected_paths": [
+        "review-gate.yaml",
+        "LICENSE"
+      ],
+      "required_checks": [
+        {
+          "argv": [
+            "ruff",
+            "check",
+            "src",
+            "tests",
+            "corpus/run_corpus.py",
+            "scripts"
+          ],
+          "block_levels": [
+            "error"
+          ],
+          "differential": false,
+          "min_changed_coverage": null,
+          "name": "lint",
+          "preexisting_failure": "review",
+          "report_format": null,
+          "report_path": null,
+          "require_revision": false,
+          "required": true,
+          "source": "head",
+          "timeout_seconds": 900
+        },
+        {
+          "argv": [
+            "ruff",
+            "format",
+            "--check",
+            "src",
+            "tests",
+            "corpus/run_corpus.py",
+            "scripts"
+          ],
+          "block_levels": [
+            "error"
+          ],
+          "differential": false,
+          "min_changed_coverage": null,
+          "name": "format",
+          "preexisting_failure": "review",
+          "report_format": null,
+          "report_path": null,
+          "require_revision": false,
+          "required": true,
+          "source": "head",
+          "timeout_seconds": 900
+        },
+        {
+          "argv": [
+            "mypy"
+          ],
+          "block_levels": [
+            "error"
+          ],
+          "differential": false,
+          "min_changed_coverage": null,
+          "name": "types",
+          "preexisting_failure": "review",
+          "report_format": null,
+          "report_path": null,
+          "require_revision": false,
+          "required": true,
+          "source": "head",
+          "timeout_seconds": 900
+        },
+        {
+          "argv": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider"
+          ],
+          "block_levels": [
+            "error"
+          ],
+          "differential": false,
+          "min_changed_coverage": null,
+          "name": "tests",
+          "preexisting_failure": "review",
+          "report_format": null,
+          "report_path": null,
+          "require_revision": false,
+          "required": true,
+          "source": "head",
+          "timeout_seconds": 1800
+        },
+        {
+          "argv": [
+            "python",
+            "corpus/run_corpus.py",
+            "corpus/dev"
+          ],
+          "block_levels": [
+            "error"
+          ],
+          "differential": false,
+          "min_changed_coverage": null,
+          "name": "dev-corpus",
+          "preexisting_failure": "review",
+          "report_format": null,
+          "report_path": null,
+          "require_revision": false,
+          "required": true,
+          "source": "head",
+          "timeout_seconds": 1800
+        },
+        {
+          "argv": [
+            "python",
+            "scripts/mutation_gate.py"
+          ],
+          "block_levels": [
+            "error"
+          ],
+          "differential": false,
+          "min_changed_coverage": null,
+          "name": "mutation-gate",
+          "preexisting_failure": "review",
+          "report_format": null,
+          "report_path": null,
+          "require_revision": false,
+          "required": true,
+          "source": "head",
+          "timeout_seconds": 1800
+        }
+      ],
+      "review_required_surfaces": [
+        "ci"
+      ],
+      "test_potency": null,
+      "trusted_evidence": [],
+      "version": 1
+    },
+    "contract_digest": "sha256:c327abb85eb741571e31918ddb21d333bdc08c898551625ff435825080f45ba0",
+    "raw_digest": "sha256:eb8f138cb552a0c66a86dd9bd2c8a04c763ecc8130a5347186bad016d93a2894",
+    "repo_path": "review-gate.yaml",
+    "source": "base:review-gate.yaml"
+  },
+  "reasons": [
+    "path_outside_contract: .gitleaks.toml: added file is outside allowed_paths",
+    "path_outside_contract: review-gate.yaml: modified file is outside allowed_paths",
+    "protected_path_modified: review-gate.yaml: modified protected path (review-gate.yaml)",
+    "dynamic_code_execution: tests/test_potency.py: `exec()` executes dynamic code",
+    "vacuous_assertion_added: tests/test_potency.py: new test TestGenerator.test_sampling_is_reproducible_from_its_recorded_seed asserts something that cannot fail",
+    "review_required_surface: contract requires human review for `ci` changes (.github/workflows/ci.yml)",
+    "policy_modified: review-gate.yaml: patch edits the review contract; this run used the base:review-gate.yaml version",
+    "security_suppression_added: src/aicrg/doctor.py: security scanner suppression added",
+    "security_suppression_added: src/aicrg/doctor.py: security scanner suppression added",
+    "security_suppression_added: src/aicrg/evidence/collect.py: security scanner suppression added",
+    "security_suppression_added: src/aicrg/evidence/commands.py: security scanner suppression added",
+    "security_suppression_added: src/aicrg/evidence/differential.py: security scanner suppression added",
+    "security_suppression_added: src/aicrg/evidence/executor.py: security scanner suppression added",
+    "security_suppression_added: src/aicrg/evidence/executor.py: security scanner suppression added",
+    "security_suppression_added: src/aicrg/evidence/executor.py: security scanner suppression added",
+    "security_suppression_added: src/aicrg/evidence/executor.py: security scanner suppression added",
+    "security_suppression_added: src/aicrg/evidence/providers.py: security scanner suppression added",
+    "security_suppression_added: src/aicrg/evidence/providers.py: security scanner suppression added",
+    "security_suppression_added: src/aicrg/evidence/workspace.py: security scanner suppression added",
+    "security_suppression_added: src/aicrg/evidence/workspace.py: security scanner suppression added",
+    "security_suppression_added: src/aicrg/gate.py: security scanner suppression added",
+    "security_suppression_added: src/aicrg/potency/engine.py: security scanner suppression added",
+    "security_suppression_added: src/aicrg/potency/mutators.py: security scanner suppression added",
+    "expected_value_changed: tests/test_gate_invariants.py: TestReceipt.test_receipt_binds_exact_inputs: expected value for `r['schema']` changed 'aicrg.receipt/v1' -> 'aicrg.receipt/v2'",
+    "security_suppression_added: tests/test_potency.py: security scanner suppression added",
+    "security_suppression_added: tests/test_security_review_regressions.py: security scanner suppression added"
+  ],
+  "receipt_digest": "sha256:660336998cd8a343c631ac0bb72225b8563e3077ce115449895e53c4f1e28fa0",
+  "risk": {
+    "evidence": [
+      {
+        "file": ".github/workflows/ci.yml",
+        "reason": "path matches .github/workflows/**",
+        "surface": "ci"
+      },
+      {
+        "file": "corpus/run_realworld.py",
+        "reason": "head: changed import of yaml",
+        "surface": "deserialization"
+      },
+      {
+        "file": "corpus/run_realworld.py",
+        "reason": "head: changed import of tempfile",
+        "surface": "filesystem"
+      },
+      {
+        "file": "corpus/run_realworld.py",
+        "reason": "head: changed import of subprocess",
+        "surface": "subprocess"
+      },
+      {
+        "file": "pyproject.toml",
+        "reason": "path matches pyproject.toml",
+        "surface": "build_release"
+      },
+      {
+        "file": "pyproject.toml",
+        "reason": "path matches pyproject.toml",
+        "surface": "dependencies"
+      },
+      {
+        "file": "review-gate.yaml",
+        "reason": "patch modifies the review contract",
+        "surface": "gate_policy"
+      },
+      {
+        "file": "scripts/baseline_compare.py",
+        "reason": "head: changed import of yaml",
+        "surface": "deserialization"
+      },
+      {
+        "file": "scripts/baseline_compare.py",
+        "reason": "head: changed import of tempfile",
+        "surface": "filesystem"
+      },
+      {
+        "file": "scripts/baseline_compare.py",
+        "reason": "head: changed import of subprocess",
+        "surface": "subprocess"
+      },
+      {
+        "file": "scripts/bench.py",
+        "reason": "head: changed code calls cont.write_text()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "scripts/bench.py",
+        "reason": "head: changed code calls subprocess.run()",
+        "surface": "subprocess"
+      },
+      {
+        "file": "scripts/demo.py",
+        "reason": "head: changed import of shutil",
+        "surface": "filesystem"
+      },
+      {
+        "file": "scripts/demo.py",
+        "reason": "head: changed import of subprocess",
+        "surface": "subprocess"
+      },
+      {
+        "file": "scripts/self_review_challenge.py",
+        "reason": "base: changed code calls OUT.mkdir()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "scripts/self_review_challenge.py",
+        "reason": "base: changed code calls subprocess.run()",
+        "surface": "subprocess"
+      },
+      {
+        "file": "src/aicrg/analysis/context.py",
+        "reason": "head: changed code calls re.escape()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "src/aicrg/cli.py",
+        "reason": "head: changed code calls v.authenticity.line()",
+        "surface": "auth"
+      },
+      {
+        "file": "src/aicrg/cli.py",
+        "reason": "head: changed code calls tmp.write_text()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "src/aicrg/doctor.py",
+        "reason": "head: changed code calls jperm.values()",
+        "surface": "auth"
+      },
+      {
+        "file": "src/aicrg/doctor.py",
+        "reason": "head: changed import of yaml",
+        "surface": "deserialization"
+      },
+      {
+        "file": "src/aicrg/doctor.py",
+        "reason": "head: changed import of shutil",
+        "surface": "filesystem"
+      },
+      {
+        "file": "src/aicrg/doctor.py",
+        "reason": "head: changed import of urllib.error",
+        "surface": "network"
+      },
+      {
+        "file": "src/aicrg/doctor.py",
+        "reason": "head: changed import of subprocess",
+        "surface": "subprocess"
+      },
+      {
+        "file": "src/aicrg/evidence/collect.py",
+        "reason": "head: changed code calls head.blocking_items()",
+        "surface": "concurrency"
+      },
+      {
+        "file": "src/aicrg/evidence/collect.py",
+        "reason": "head: changed code calls os.chmod()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "src/aicrg/evidence/commands.py",
+        "reason": "base: changed code calls clock()",
+        "surface": "concurrency"
+      },
+      {
+        "file": "src/aicrg/evidence/commands.py",
+        "reason": "base: changed import of shutil",
+        "surface": "filesystem"
+      },
+      {
+        "file": "src/aicrg/evidence/commands.py",
+        "reason": "base: changed import of subprocess",
+        "surface": "subprocess"
+      },
+      {
+        "file": "src/aicrg/evidence/executor.py",
+        "reason": "head: changed import of shutil",
+        "surface": "filesystem"
+      },
+      {
+        "file": "src/aicrg/evidence/executor.py",
+        "reason": "head: changed code calls settings.validate()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "src/aicrg/evidence/executor.py",
+        "reason": "head: changed import of subprocess",
+        "surface": "subprocess"
+      },
+      {
+        "file": "src/aicrg/evidence/trusted.py",
+        "reason": "head: changed import of hashlib",
+        "surface": "crypto"
+      },
+      {
+        "file": "src/aicrg/evidence/trusted.py",
+        "reason": "head: changed import of tarfile",
+        "surface": "filesystem"
+      },
+      {
+        "file": "src/aicrg/evidence/workspace.py",
+        "reason": "head: changed code calls index.unlink()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "src/aicrg/evidence/workspace.py",
+        "reason": "head: changed import of subprocess",
+        "surface": "subprocess"
+      },
+      {
+        "file": "src/aicrg/gate.py",
+        "reason": "head: changed code calls _SHA.fullmatch()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "src/aicrg/globmatch.py",
+        "reason": "base: changed code calls re.escape()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "src/aicrg/potency/engine.py",
+        "reason": "head: changed import of secrets",
+        "surface": "crypto"
+      },
+      {
+        "file": "src/aicrg/potency/mutators.py",
+        "reason": "head: changed import of hashlib",
+        "surface": "crypto"
+      },
+      {
+        "file": "src/aicrg/receipt/attest.py",
+        "reason": "head: changed code calls Authenticity()",
+        "surface": "auth"
+      },
+      {
+        "file": "src/aicrg/receipt/attest.py",
+        "reason": "head: changed import of hashlib",
+        "surface": "crypto"
+      },
+      {
+        "file": "src/aicrg/receipt/attest.py",
+        "reason": "head: changed import of shutil",
+        "surface": "filesystem"
+      },
+      {
+        "file": "src/aicrg/receipt/attest.py",
+        "reason": "head: changed import of subprocess",
+        "surface": "subprocess"
+      },
+      {
+        "file": "src/aicrg/receipt/verify.py",
+        "reason": "head: changed code calls Authenticity()",
+        "surface": "auth"
+      },
+      {
+        "file": "src/aicrg/receipt/verify.py",
+        "reason": "head: changed code calls path.read_bytes()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "src/aicrg/security/regressions.py",
+        "reason": "base: changed code calls _helper_auth()",
+        "surface": "auth"
+      },
+      {
+        "file": "tests/conftest.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "tests/test_attestation.py",
+        "reason": "head: changed definition test_cli_reports_integrity_and_authenticity",
+        "surface": "auth"
+      },
+      {
+        "file": "tests/test_attestation.py",
+        "reason": "head: changed import of shutil",
+        "surface": "filesystem"
+      },
+      {
+        "file": "tests/test_attestation.py",
+        "reason": "head: changed import of subprocess",
+        "surface": "subprocess"
+      },
+      {
+        "file": "tests/test_attestation.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "tests/test_doctor.py",
+        "reason": "head: changed definition test_github_permission_denied_is_unknown",
+        "surface": "auth"
+      },
+      {
+        "file": "tests/test_doctor.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "tests/test_execution_boundary.py",
+        "reason": "head: changed import of shutil",
+        "surface": "filesystem"
+      },
+      {
+        "file": "tests/test_execution_boundary.py",
+        "reason": "head: changed import of subprocess",
+        "surface": "subprocess"
+      },
+      {
+        "file": "tests/test_execution_boundary.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "tests/test_gate_invariants.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "tests/test_potency.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "tests/test_provenance_boundary.py",
+        "reason": "head: changed code calls rep.write_text()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "tests/test_provenance_boundary.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "tests/test_providers_differential.py",
+        "reason": "head: changed code calls fake.write_bytes()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "tests/test_providers_differential.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "tests/test_security_review_regressions.py",
+        "reason": "head: changed definition test_f3_owner_restoring_write_permission_is_detected_local",
+        "surface": "auth"
+      },
+      {
+        "file": "tests/test_security_review_regressions.py",
+        "reason": "head: changed import of hashlib",
+        "surface": "crypto"
+      },
+      {
+        "file": "tests/test_security_review_regressions.py",
+        "reason": "head: changed code calls bound.write_text()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "tests/test_security_review_regressions.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "tests/test_trusted_evidence.py",
+        "reason": "head: changed code calls AUTH_OK.replace()",
+        "surface": "auth"
+      },
+      {
+        "file": "tests/test_trusted_evidence.py",
+        "reason": "head: changed code calls bundle.write_bytes()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "tests/test_trusted_evidence.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "tests/trusted.ini",
+        "reason": "test path",
+        "surface": "tests"
+      }
+    ],
+    "level": "CRITICAL",
+    "surfaces": [
+      "auth",
+      "build_release",
+      "ci",
+      "concurrency",
+      "crypto",
+      "dependencies",
+      "deserialization",
+      "filesystem",
+      "gate_policy",
+      "input_validation",
+      "network",
+      "subprocess",
+      "tests"
+    ]
+  },
+  "schema": "aicrg.receipt/v2",
+  "sections": {
+    "Analysis coverage": "PASS",
+    "CI integrity": "PASS",
+    "Change contract": "FAIL",
+    "Dependency policy": "PASS",
+    "Required checks": "PASS",
+    "Reviewer model (advisory)": "OFF",
+    "Security regressions": "FAIL",
+    "Test integrity": "FAIL",
+    "Test potency": "OFF",
+    "Trusted evidence": "NONE"
+  },
+  "subject": {
+    "base": "4bac21a219167ceb4af77afeb207357c671eaf02",
+    "base_ref": "origin/main",
+    "files": [
+      {
+        "added_lines": 23,
+        "binary": false,
+        "new_path": ".github/workflows/ci.yml",
+        "old_path": ".github/workflows/ci.yml",
+        "removed_lines": 2,
+        "status": "M"
+      },
+      {
+        "added_lines": 12,
+        "binary": false,
+        "new_path": ".gitleaks.toml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 146,
+        "binary": false,
+        "new_path": "README.md",
+        "old_path": "README.md",
+        "removed_lines": 58,
+        "status": "M"
+      },
+      {
+        "added_lines": 19,
+        "binary": false,
+        "new_path": "action.yml",
+        "old_path": "action.yml",
+        "removed_lines": 3,
+        "status": "M"
+      },
+      {
+        "added_lines": 50,
+        "binary": false,
+        "new_path": "corpus/realworld/README.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 684,
+        "binary": false,
+        "new_path": "corpus/realworld/manifest.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 229,
+        "binary": false,
+        "new_path": "corpus/run_realworld.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 36,
+        "binary": false,
+        "new_path": "docs/ARCHITECTURE.md",
+        "old_path": "docs/ARCHITECTURE.md",
+        "removed_lines": 8,
+        "status": "M"
+      },
+      {
+        "added_lines": 147,
+        "binary": false,
+        "new_path": "docs/EVALUATION.md",
+        "old_path": "docs/EVALUATION.md",
+        "removed_lines": 0,
+        "status": "M"
+      },
+      {
+        "added_lines": 222,
+        "binary": false,
+        "new_path": "docs/EVIDENCE.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 86,
+        "binary": false,
+        "new_path": "docs/EXECUTION_SECURITY.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 63,
+        "binary": false,
+        "new_path": "docs/GITHUB_ACTIONS.md",
+        "old_path": "docs/GITHUB_ACTIONS.md",
+        "removed_lines": 1,
+        "status": "M"
+      },
+      {
+        "added_lines": 104,
+        "binary": false,
+        "new_path": "docs/RECEIPTS.md",
+        "old_path": "docs/RECEIPTS.md",
+        "removed_lines": 12,
+        "status": "M"
+      },
+      {
+        "added_lines": 62,
+        "binary": false,
+        "new_path": "docs/REVIEW_CONTRACT.md",
+        "old_path": "docs/REVIEW_CONTRACT.md",
+        "removed_lines": 1,
+        "status": "M"
+      },
+      {
+        "added_lines": 163,
+        "binary": false,
+        "new_path": "docs/SECURITY_REVIEW.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 93,
+        "binary": false,
+        "new_path": "docs/TEST_POTENCY.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 18,
+        "binary": false,
+        "new_path": "docs/THREAT_MODEL.md",
+        "old_path": "docs/THREAT_MODEL.md",
+        "removed_lines": 8,
+        "status": "M"
+      },
+      {
+        "added_lines": 61,
+        "binary": false,
+        "new_path": "docs/examples/aicrg-gate-attested.yml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 2138,
+        "binary": false,
+        "new_path": "docs/results/baseline-comparison.json",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 324,
+        "binary": false,
+        "new_path": "docs/results/bench.json",
+        "old_path": "docs/results/bench.json",
+        "removed_lines": 190,
+        "status": "M"
+      },
+      {
+        "added_lines": 366,
+        "binary": false,
+        "new_path": "docs/results/mutation.json",
+        "old_path": "docs/results/mutation.json",
+        "removed_lines": 23,
+        "status": "M"
+      },
+      {
+        "added_lines": 950,
+        "binary": false,
+        "new_path": "docs/results/realworld.json",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 103,
+        "binary": false,
+        "new_path": "docs/self-review/README.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 34,
+        "binary": false,
+        "new_path": "docs/self-review/challenge.json",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 392,
+        "binary": false,
+        "new_path": "docs/self-review/mutant-receipt.json",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 40,
+        "binary": false,
+        "new_path": "docs/self-review/run1-challenge.json",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 392,
+        "binary": false,
+        "new_path": "docs/self-review/run1-mutant-receipt.json",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 2471,
+        "binary": false,
+        "new_path": "docs/self-review/run1-self-review-receipt.json",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 377,
+        "binary": false,
+        "new_path": "docs/self-review/run3-challenge.json",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 701,
+        "binary": false,
+        "new_path": "docs/self-review/run3-sabotage-with-trusted-receipt.json",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 832,
+        "binary": false,
+        "new_path": "docs/self-review/run3-self-review-receipt.json",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 247,
+        "binary": false,
+        "new_path": "docs/self-review/run3-unrelated-github-sha-receipt.json",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 640,
+        "binary": false,
+        "new_path": "docs/self-review/run3-weaken-test-receipt.json",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 364,
+        "binary": false,
+        "new_path": "docs/self-review/run4-challenge.json",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 701,
+        "binary": false,
+        "new_path": "docs/self-review/run4-sabotage-with-trusted-receipt.json",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 605,
+        "binary": false,
+        "new_path": "docs/self-review/run4-self-review-receipt.json",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 247,
+        "binary": false,
+        "new_path": "docs/self-review/run4-unrelated-github-sha-receipt.json",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 640,
+        "binary": false,
+        "new_path": "docs/self-review/run4-weaken-test-receipt.json",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 371,
+        "binary": false,
+        "new_path": "docs/self-review/self-review-receipt.json",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 1,
+        "binary": false,
+        "new_path": "pyproject.toml",
+        "old_path": "pyproject.toml",
+        "removed_lines": 1,
+        "status": "M"
+      },
+      {
+        "added_lines": 21,
+        "binary": false,
+        "new_path": "review-gate.yaml",
+        "old_path": "review-gate.yaml",
+        "removed_lines": 2,
+        "status": "M"
+      },
+      {
+        "added_lines": 223,
+        "binary": false,
+        "new_path": "scripts/baseline_compare.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 179,
+        "binary": false,
+        "new_path": "scripts/bench.py",
+        "old_path": "scripts/bench.py",
+        "removed_lines": 0,
+        "status": "M"
+      },
+      {
+        "added_lines": 154,
+        "binary": false,
+        "new_path": "scripts/demo.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 422,
+        "binary": false,
+        "new_path": "scripts/mutation_gate.py",
+        "old_path": "scripts/mutation_gate.py",
+        "removed_lines": 18,
+        "status": "M"
+      },
+      {
+        "added_lines": 418,
+        "binary": false,
+        "new_path": "scripts/self_review_challenge.py",
+        "old_path": "scripts/self_review_challenge.py",
+        "removed_lines": 81,
+        "status": "M"
+      },
+      {
+        "added_lines": 1,
+        "binary": false,
+        "new_path": "src/aicrg/__init__.py",
+        "old_path": "src/aicrg/__init__.py",
+        "removed_lines": 1,
+        "status": "M"
+      },
+      {
+        "added_lines": 115,
+        "binary": false,
+        "new_path": "src/aicrg/analysis/context.py",
+        "old_path": "src/aicrg/analysis/context.py",
+        "removed_lines": 0,
+        "status": "M"
+      },
+      {
+        "added_lines": 180,
+        "binary": false,
+        "new_path": "src/aicrg/cli.py",
+        "old_path": "src/aicrg/cli.py",
+        "removed_lines": 2,
+        "status": "M"
+      },
+      {
+        "added_lines": 576,
+        "binary": false,
+        "new_path": "src/aicrg/doctor.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 510,
+        "binary": false,
+        "new_path": "src/aicrg/evidence/collect.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 285,
+        "binary": false,
+        "new_path": "src/aicrg/evidence/commands.py",
+        "old_path": "src/aicrg/evidence/commands.py",
+        "removed_lines": 80,
+        "status": "M"
+      },
+      {
+        "added_lines": 84,
+        "binary": false,
+        "new_path": "src/aicrg/evidence/differential.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 431,
+        "binary": false,
+        "new_path": "src/aicrg/evidence/executor.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 428,
+        "binary": false,
+        "new_path": "src/aicrg/evidence/providers.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 250,
+        "binary": false,
+        "new_path": "src/aicrg/evidence/trusted.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 170,
+        "binary": false,
+        "new_path": "src/aicrg/evidence/workspace.py",
+        "old_path": "src/aicrg/evidence/workspace.py",
+        "removed_lines": 3,
+        "status": "M"
+      },
+      {
+        "added_lines": 145,
+        "binary": false,
+        "new_path": "src/aicrg/gate.py",
+        "old_path": "src/aicrg/gate.py",
+        "removed_lines": 31,
+        "status": "M"
+      },
+      {
+        "added_lines": 12,
+        "binary": false,
+        "new_path": "src/aicrg/globmatch.py",
+        "old_path": "src/aicrg/globmatch.py",
+        "removed_lines": 2,
+        "status": "M"
+      },
+      {
+        "added_lines": 9,
+        "binary": false,
+        "new_path": "src/aicrg/model.py",
+        "old_path": "src/aicrg/model.py",
+        "removed_lines": 0,
+        "status": "M"
+      },
+      {
+        "added_lines": 366,
+        "binary": false,
+        "new_path": "src/aicrg/policy/contract.py",
+        "old_path": "src/aicrg/policy/contract.py",
+        "removed_lines": 30,
+        "status": "M"
+      },
+      {
+        "added_lines": 0,
+        "binary": false,
+        "new_path": "src/aicrg/potency/__init__.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 323,
+        "binary": false,
+        "new_path": "src/aicrg/potency/engine.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 311,
+        "binary": false,
+        "new_path": "src/aicrg/potency/mutators.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 254,
+        "binary": false,
+        "new_path": "src/aicrg/receipt/attest.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 1,
+        "binary": false,
+        "new_path": "src/aicrg/receipt/receipt.py",
+        "old_path": "src/aicrg/receipt/receipt.py",
+        "removed_lines": 1,
+        "status": "M"
+      },
+      {
+        "added_lines": 150,
+        "binary": false,
+        "new_path": "src/aicrg/receipt/verify.py",
+        "old_path": "src/aicrg/receipt/verify.py",
+        "removed_lines": 14,
+        "status": "M"
+      },
+      {
+        "added_lines": 70,
+        "binary": false,
+        "new_path": "src/aicrg/rules.py",
+        "old_path": "src/aicrg/rules.py",
+        "removed_lines": 0,
+        "status": "M"
+      },
+      {
+        "added_lines": 3,
+        "binary": false,
+        "new_path": "src/aicrg/security/regressions.py",
+        "old_path": "src/aicrg/security/regressions.py",
+        "removed_lines": 3,
+        "status": "M"
+      },
+      {
+        "added_lines": 25,
+        "binary": false,
+        "new_path": "tests/conftest.py",
+        "old_path": "tests/conftest.py",
+        "removed_lines": 0,
+        "status": "M"
+      },
+      {
+        "added_lines": 350,
+        "binary": false,
+        "new_path": "tests/test_attestation.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 197,
+        "binary": false,
+        "new_path": "tests/test_doctor.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 326,
+        "binary": false,
+        "new_path": "tests/test_execution_boundary.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 6,
+        "binary": false,
+        "new_path": "tests/test_gate_invariants.py",
+        "old_path": "tests/test_gate_invariants.py",
+        "removed_lines": 3,
+        "status": "M"
+      },
+      {
+        "added_lines": 223,
+        "binary": false,
+        "new_path": "tests/test_potency.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 141,
+        "binary": false,
+        "new_path": "tests/test_provenance_boundary.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 426,
+        "binary": false,
+        "new_path": "tests/test_providers_differential.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 676,
+        "binary": false,
+        "new_path": "tests/test_security_review_regressions.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 309,
+        "binary": false,
+        "new_path": "tests/test_trusted_evidence.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 9,
+        "binary": false,
+        "new_path": "tests/trusted.ini",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      }
+    ],
+    "files_excluded_from_analysis": 3,
+    "head": "4f006ba992c8c1918750b9ed65c065eaff522e03",
+    "head_ref": "4f006ba",
+    "head_tree": "ebccaaa4c9ef3e9409e9c44b353d3d3cadbca971",
+    "merge_base": "4bac21a219167ceb4af77afeb207357c671eaf02",
+    "patch_bytes": 1033827,
+    "patch_digest": "sha256:6fe310cc340ef1de03d6abf6b841f498e7ac38563ff0e9dcf6fb57c52583afc4",
+    "repository": {
+      "remote": "https://github.com/Pranshurs/ai-code-review-gate",
+      "root_commits": [
+        "d3263f3bf618a89be49d64460c4d53a93377d113"
+      ]
+    },
+    "working_tree_dirty": false
+  },
+  "summary": {
+    "advisory": 3,
+    "blocking": 5,
+    "deterministic_failures": [
+      "dynamic_code_execution",
+      "path_outside_contract",
+      "protected_path_modified",
+      "vacuous_assertion_added"
+    ],
+    "errors": 0,
+    "heuristic_failures": [],
+    "review": 21
+  },
+  "test_integrity": {
+    "assertions_after": 396,
+    "assertions_before": 63,
+    "files_analysed": 10,
+    "result": "FAIL",
+    "tests_after": 194,
+    "tests_before": 31
+  },
+  "test_potency": {
+    "status": "not_run"
+  },
+  "timestamps": {
+    "finished_at": "2026-10-04T16:05:41.690Z",
+    "started_at": "2026-10-04T15:56:02.904Z"
+  },
+  "timings_ms": {
+    "ci_integrity": 35.167,
+    "config": 10.426,
+    "contract": 0.318,
+    "dependencies": 1.793,
+    "evidence": 575817.606,
+    "llm_review": 0.026,
+    "patch": 95.961,
+    "policy": 7.236,
+    "provenance": 27.319,
+    "risk": 588.224,
+    "secrets": 92.543,
+    "security": 1811.254,
+    "suppressions": 1.33,
+    "test_integrity": 242.464,
+    "total": 578785.484
+  },
+  "trusted_evidence": []
+}

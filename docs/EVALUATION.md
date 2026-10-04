@@ -232,6 +232,25 @@ So potency turns 3 of 8 silent misses into REVIEW_REQUIRED without any new
 pattern rule, and is structurally blind to additive missing checks and
 test-only manipulation — those need trusted evidence or a secret scanner.
 
+## Release-candidate validation (4f006ba)
+
+* **Tests:** 333 on Python 3.11, 3.12 and 3.13 (local and CI run 21), no skips;
+  the container tests ran (`AICRG_REQUIRE_DOCKER=1`).
+* **Mutation gate:** 76/76 killed (local and CI).
+* **Frozen corpora:** dev 37/37 + 7/7 with no mismatches; held-out v1 and v2
+  per-case decisions identical to the recorded results after the provenance fix.
+* **Packaging** (from `git archive 2e9e3f1`, production code identical to
+  4f006ba): sdist and wheel build; `twine check --strict` passes both. Fresh
+  venvs (no dev extras, run outside the repository; imports resolve to the
+  installed copy): wheel on 3.11 and 3.13, sdist on 3.12, `aicrg --version` /
+  `--help`. End to end with the installed wheel: a good patch PASS and its receipt
+  verifies; a weakened-assertion patch FAIL (`assertion_weakened`); a tampered
+  receipt and a stale receipt rejected (exit 5); `aicrg doctor` PASS with WARN for
+  persisted checkout credentials, local executor and unattested receipts. Nothing
+  was published.
+* **Benchmarks:** see README "Overhead" and [results/bench.json](results/bench.json).
+* **Self-review and challenge:** see [self-review/](self-review/README.md) (runs 3, 4, B, C).
+
 ## Human-labelled corpus
 
 **HUMAN_CORPUS_PENDING.** Every corpus here was written or labelled by AI
