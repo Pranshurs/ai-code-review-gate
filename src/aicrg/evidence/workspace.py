@@ -163,6 +163,15 @@ def safe_write(root: Path, rel: str, data: bytes, executable: bool = False) -> N
         os.chmod(target, 0o755)  # noqa: S103 - trusted file's exec bit  # nosec B103
 
 
+def ensure_dir(root: Path, rel: str) -> Path:
+    """Create directory ``rel`` inside ``root`` without following symlinks."""
+    parts = _rel_parts(rel)
+    parent = _safe_parent(root, (*parts, "x"), create=True)
+    if parent is None:
+        raise WorkspaceError(f"cannot create {rel!r}")
+    return parent
+
+
 def safe_remove(root: Path, rel: str) -> bool:
     parts = _rel_parts(rel)
     parent = _safe_parent(root, parts, create=False)

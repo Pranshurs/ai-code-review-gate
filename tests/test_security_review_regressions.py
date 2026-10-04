@@ -439,3 +439,208 @@ def test_f1b_verify_without_base_cannot_vouch_for_contract(repo, gate, tmp_path)
     v = verify_receipt(path, repo.root, require_base=True)
     assert not v.ok and any("BASE NOT CHECKED" in p for p in v.problems)
     assert verify_receipt(path, repo.root, base="main", require_base=True).ok
+
+
+# ----------------------------------------------------------------------------- re-verification
+
+
+def _n1_policy() -> str:
+    return (
+        f"version: 1\nexecution:\n  executor: container\n  container:\n    image: {IMAGE}\n"
+        "trusted_evidence:\n  - name: tt\n    source: base\n    paths: ['trusted/**/*.py']\n"
+        "    command: [python, -m, unittest, discover, -s, trusted, -p, 'test_*.py']\n"
+    )
+
+
+def _n1_base(repo) -> None:
+    repo.commit(
+        {
+            "review-gate.yaml": _n1_policy(),
+            "impl.py": "def add(a, b):\n    return a + b\n",
+            "trusted/a/__init__.py": "",
+            "trusted/a/test_a.py": "import unittest, impl\n\nclass A(unittest.TestCase):\n    def test_a(self):\n        pass\n",
+            "trusted/b/__init__.py": "",
+            "trusted/b/test_b.py": "import unittest, impl\n\nclass B(unittest.TestCase):\n    def test_add(self):\n        self.assertEqual(impl.add(1, 2), 3)\n",
+            # The property itself: nothing in the workspace is writable during a trusted run.
+            "trusted/b/test_ro.py": "import unittest\n\nclass RO(unittest.TestCase):\n    def test_root_is_read_only(self):\n        with self.assertRaises(OSError):\n            open('probe.txt', 'w')\n",
+        }
+    )
+    repo.git("checkout", "-q", "-b", "agent")
+
+
+@pytest.mark.skipif(not DOCKER, reason="docker unavailable")
+def test_n1_trusted_run_sees_a_read_only_workspace(repo, gate):
+    _n1_base(repo)
+    repo.commit({"impl.py": "def add(a, b):\n    return b + a\n"})
+    res = gate()
+    assert res.decision is Decision.PASS, res.receipt["reasons"]
+
+
+@pytest.mark.skipif(not DOCKER, reason="docker unavailable")
+def test_n1_no_writable_gap_next_to_trusted_dirs_in_container(repo, gate):
+    """Create-then-delete of a test file in a sibling directory must not reach the run."""
+    _n1_base(repo)
+    attack = textwrap.dedent(
+        """
+        import atexit, glob, os
+        d = os.path.join(os.path.dirname(os.path.abspath(__file__)), "trusted", "c")
+        try:
+            open(os.path.join(d, "__init__.py"), "w").close()
+            open(os.path.join(d, "test_zz.py"), "w").write(
+                "import unittest\\n"
+                "def _run(self, result=None):\\n"
+                "    result.startTest(self); result.addSuccess(self); result.stopTest(self)\\n"
+                "unittest.TestCase.run = _run\\n"
+            )
+            atexit.register(lambda: [os.remove(f) for f in glob.glob(os.path.join(d, "*"))])
+        except OSError:
+            pass
+
+        def add(a, b):
+            return a - b
+        """
+    )
+    repo.commit({"impl.py": attack, "trusted/c/keep.txt": "placeholder\n"})
+    res = gate()
+    assert res.decision is Decision.FAIL
+    assert "trusted_evidence_failed" in codes(res)
+
+
+def test_n2_ast_or_bytecode_pin_cannot_fake_potency(repo, gate):
+    repo.commit(
+        {
+            "review-gate.yaml": POT_POLICY,
+            "pkg/__init__.py": "",
+            "pkg/mod.py": "def is_adult(age):\n    return False\n",
+            "tests/__init__.py": "",
+            "tests/test_mod.py": "def test_zero():\n    pass\n",
+        }
+    )
+    repo.git("checkout", "-q", "-b", "agent")
+    code = "def is_adult(age):\n    years = age\n    return years >= 18\n"
+    import ast
+    import hashlib
+
+    ast_pin = hashlib.sha256(ast.dump(ast.parse(code)).encode()).hexdigest()
+    test = (
+        "import ast, hashlib, pathlib\nimport pkg.mod as m\n\ndef test_zero():\n    pass\n\n"
+        "def test_adult():\n    assert m.is_adult(30)\n\n"
+        "def test_shape_pinned():\n"
+        "    tree = ast.parse(pathlib.Path('pkg/mod.py').read_text())\n"
+        f"    assert hashlib.sha256(ast.dump(tree).encode()).hexdigest() == {ast_pin!r}\n"
+    )
+    repo.commit({"pkg/mod.py": code, "tests/test_mod.py": test})
+    res = gate()
+    tp = res.receipt["test_potency"]
+    assert tp["status"] == "ERROR" and "control mutant" in tp["reason"]
+    assert res.decision is Decision.REVIEW_REQUIRED
+
+
+@pytest.mark.parametrize(
+    "importer",
+    [
+        "import importlib\nrun = importlib.import_module('app.runner_' + 'test').run\n",
+        "run = __import__('app.runner_test', fromlist=['run']).run\n",
+    ],
+)
+def test_n3_dynamically_imported_test_named_module_is_production(repo, gate, importer):
+    repo.commit(
+        {"review-gate.yaml": "version: 1\n", "app/__init__.py": "", "app/main.py": "x = 1\n"}
+    )
+    repo.git("checkout", "-q", "-b", "agent")
+    repo.commit({"app/runner_test.py": DANGER, "app/main.py": importer})
+    assert {"shell_injection_risk", "shell_execution_added"} & codes(gate())
+
+
+def test_n3_entry_point_names_production_module(repo, gate):
+    repo.commit(
+        {
+            "review-gate.yaml": "version: 1\n",
+            "app/__init__.py": "",
+            "pyproject.toml": "[project]\nname='x'\n",
+        }
+    )
+    repo.git("checkout", "-q", "-b", "agent")
+    repo.commit(
+        {
+            "app/runner_test.py": DANGER,
+            "pyproject.toml": "[project]\nname='x'\n[project.scripts]\nrun = 'app.runner_test:run'\n",
+        }
+    )
+    assert {"shell_injection_risk", "shell_execution_added"} & codes(gate())
+
+
+@pytest.mark.parametrize(
+    ("step", "extra"),
+    [
+        ("      - run: aicrg check --base B &\n", ""),
+        ("      - run: |\n          aicrg check --base B && echo ok\n          true\n", ""),
+        (
+            "      - run: |\n          aicrg check --base B\n          echo done\n        shell: bash {0}\n",
+            "",
+        ),
+        ("      - run: '! aicrg check --base B'\n", ""),
+        ("      - run: aicrg check --base B\n", "    if: github.event_name == 'push'\n"),
+    ],
+)
+def test_n4_doctor_more_masks(tmp_path, step, extra):
+    rep = static_checks(_wf(tmp_path, step, extra))
+    assert {c.status for c in rep.checks if c.id == "gate-not-masked"} == {"FAIL"}
+
+
+def test_n4_default_shell_errexit_is_not_a_mask(tmp_path):
+    rep = static_checks(
+        _wf(tmp_path, "      - run: |\n          aicrg check --base B\n          echo done\n")
+    )
+    assert {c.status for c in rep.checks if c.id == "gate-not-masked"} == {"PASS"}
+
+
+def test_n4_gate_workflow_without_pr_trigger_fails(tmp_path):
+    root = _wf(tmp_path, "      - run: aicrg check --base B\n")
+    wf = root / ".github" / "workflows" / "g.yml"
+    wf.write_text(wf.read_text().replace("on: pull_request", "on: workflow_dispatch"))
+    rep = static_checks(root)
+    assert "FAIL" in {c.status for c in rep.checks if c.id == "gate-trigger"}
+
+
+def test_n5_require_revision_refuses_unbound_external_report(repo, gate, tmp_path):
+    pol = EXT_POLICY + "    require_revision: true\n"
+    repo.commit({"review-gate.yaml": pol, "a.py": "x = 1\n"})
+    repo.git("checkout", "-q", "-b", "agent")
+    head = repo.commit({"a.py": "x = 2\n"})
+    unbound = tmp_path / "u.sarif"
+    unbound.write_text(_sarif())
+    assert gate(external_evidence={"codeql": str(unbound)}).decision is Decision.ERROR
+    bound = tmp_path / "b.sarif"
+    bound.write_text(_sarif(head))
+    assert gate(external_evidence={"codeql": str(bound)}).decision is Decision.PASS
+
+
+def test_n2_function_bytecode_pin_cannot_fake_potency(repo, gate):
+    """A pin on one function's code object ignores module-level changes; the per-function
+    control (a dead local) must still change it."""
+    repo.commit(
+        {
+            "review-gate.yaml": POT_POLICY,
+            "pkg/__init__.py": "",
+            "pkg/mod.py": "def is_adult(age):\n    return False\n",
+            "tests/__init__.py": "",
+            "tests/test_mod.py": "def test_zero():\n    pass\n",
+        }
+    )
+    repo.git("checkout", "-q", "-b", "agent")
+    code = "def is_adult(age):\n    years = age\n    return years >= 18\n"
+    ns: dict[str, object] = {}
+    exec(compile(code, "pkg/mod.py", "exec"), ns)  # noqa: S102 - computing the pin
+    import hashlib
+
+    pin = hashlib.sha256(ns["is_adult"].__code__.co_code).hexdigest()  # type: ignore[attr-defined]
+    test = (
+        "import hashlib\nimport pkg.mod as m\n\ndef test_zero():\n    pass\n\n"
+        "def test_adult():\n    assert m.is_adult(30)\n\n"
+        "def test_code_pinned():\n"
+        f"    assert hashlib.sha256(m.is_adult.__code__.co_code).hexdigest() == {pin!r}\n"
+    )
+    repo.commit({"pkg/mod.py": code, "tests/test_mod.py": test})
+    tp = gate().receipt["test_potency"]
+    assert tp["status"] == "ERROR" and "control mutant control:is_adult" in tp["reason"]

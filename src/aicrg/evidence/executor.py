@@ -62,6 +62,8 @@ class ExecRequest:
     env: dict[str, str]
     timeout_seconds: int
     readonly: tuple[str, ...] = ()  # workspace-relative paths mounted read-only (container)
+    readonly_workspace: bool = False  # mount the whole workspace read-only (container)
+    writable: tuple[str, ...] = ()  # with readonly_workspace: the only writable subdirectories
 
 
 @dataclass(frozen=True, slots=True)
@@ -350,9 +352,15 @@ class ContainerExecutor:
             "--cpus",
             str(s.cpus),
             "--mount",
-            f"type=bind,source={ws},target={CONTAINER_WORKDIR}",
+            f"type=bind,source={ws},target={CONTAINER_WORKDIR}"
+            + (",readonly" if req.readonly_workspace else ""),
         ]
-        for rel in req.readonly:
+        for rel in req.writable:
+            src = (ws / rel).resolve()
+            if "," in rel or "=" in rel or not src.is_relative_to(ws) or not src.is_dir():
+                raise ExecutorError(f"writable path {rel!r} is not a directory in the workspace")
+            argv += ["--mount", f"type=bind,source={src},target={CONTAINER_WORKDIR}/{rel}"]
+        for rel in () if req.readonly_workspace else req.readonly:
             src = (ws / rel).resolve()
             if "," in rel or "=" in rel or not src.is_relative_to(ws) or not src.exists():
                 raise ExecutorError(f"read-only path {rel!r} is not inside the workspace")

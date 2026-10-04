@@ -56,8 +56,9 @@ How it runs:
    used. The `mount` subtree is replaced by the bundle's files.
 3. The trusted command runs against the candidate implementation through
    the same executor as everything else. With the container executor the
-   directories holding trusted files (and bundle mounts) are bind-mounted
-   **read-only**; with the local executor they are made non-writable on a
+   **entire workspace is mounted read-only** for trusted runs (only the
+   check's own report directory, if it has one, is writable), so candidate
+   code cannot create, edit or delete anything the run will read; with the local executor they are made non-writable on a
    best-effort basis (same-user code can undo that). After the run, every
    trusted file is compared with the trusted content and new files under
    trusted paths are detected; a change makes that run **ERROR**, whatever
@@ -129,7 +130,10 @@ external_evidence:                  # produced elsewhere; --evidence codeql=PATH
 External reports must come from **outside the evaluated checkout** (a file the
 patch committed is refused), and a SARIF report that records
 `versionControlProvenance.revisionId` must name the head (or the CI commit)
-being judged.
+being judged. A report without that field — any SARIF that omits it, and every
+JUnit/coverage/JSON report — is **not bound** to a commit: AICRG trusts the
+operator who supplied it. Set `require_revision: true` on the entry to refuse
+unbound reports (CodeQL records the revision; many tools do not).
 
 | format | typical providers |
 |---|---|

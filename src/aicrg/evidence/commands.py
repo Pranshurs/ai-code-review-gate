@@ -37,7 +37,7 @@ from aicrg.evidence.providers import (
     ReportError,
     parse_report,
 )
-from aicrg.evidence.workspace import WorkspaceError, safe_remove
+from aicrg.evidence.workspace import WorkspaceError, ensure_dir, safe_remove
 from aicrg.model import CheckResult, CheckStatus
 from aicrg.policy.contract import RequiredCheck
 
@@ -156,6 +156,7 @@ def run_check(
     executor: Executor | None = None,
     revision: str = "head",
     readonly: tuple[str, ...] = (),
+    readonly_workspace: bool = False,
     clock: Callable[[], float] = time.monotonic,
 ) -> EvidenceRun:
     executor = executor or LocalExecutor()
@@ -172,7 +173,29 @@ def run_check(
                 check, started, t0, clock, f"bad report path: {exc}", revision=revision
             )
     version = executor.tool_version(argv, cwd, env)
-    outcome = executor.run(ExecRequest(argv, cwd, env, check.timeout_seconds, readonly))
+    writable: tuple[str, ...] = ()
+    if readonly_workspace and check.report_path and "/" in check.report_path:
+        # The only writable place in a read-only workspace: the report's own directory.
+        parent = check.report_path.rsplit("/", 1)[0]
+        try:
+            ensure_dir(cwd, parent)
+        except WorkspaceError as exc:
+            return _error_run(
+                check, started, t0, clock, f"bad report path: {exc}", revision=revision
+            )
+        writable = (parent,)
+    elif readonly_workspace and check.report_path:
+        return _error_run(
+            check,
+            started,
+            t0,
+            clock,
+            "a trusted check's report must be in a subdirectory (the workspace is read-only)",
+            revision=revision,
+        )
+    outcome = executor.run(
+        ExecRequest(argv, cwd, env, check.timeout_seconds, readonly, readonly_workspace, writable)
+    )
     duration = round((clock() - t0) * 1000, 3)
     out = outcome.output
     digest = "sha256:" + hashlib.sha256(out).hexdigest()
@@ -324,6 +347,11 @@ def ingest_external(
         if not check.report_format:
             raise ReportError("external evidence has no format")
         report = parse_report(check.report_format, data)
+        if check.require_revision and not report.revisions:
+            raise ReportError(
+                "require_revision: the report does not record which revision it analysed "
+                "(SARIF versionControlProvenance.revisionId)"
+            )
         if report.revisions and expected_revisions and not (report.revisions & expected_revisions):
             raise ReportError(
                 f"report analysed revision(s) {sorted(report.revisions)}, not the evaluated "

@@ -41,7 +41,7 @@ from aicrg.git.repo import Repo
 from aicrg.globmatch import match_any
 from aicrg.model import Finding, GateError, Severity
 from aicrg.policy.contract import ReviewContract, TestPotencyPolicy
-from aicrg.potency.mutators import Mutant, control_mutant, generate, sample
+from aicrg.potency.mutators import Mutant, control_mutants, generate, sample
 from aicrg.rules import finding
 
 ENGINE = "aicrg-diffmut/1"
@@ -79,6 +79,7 @@ class PotencyReport:
     reason: str = ""
     seconds: float = 0.0
     seed: int | None = None
+    controls: int = 0
     findings: list[Finding] = field(default_factory=list)
     errors: list[GateError] = field(default_factory=list)
 
@@ -95,6 +96,7 @@ class PotencyReport:
             "relevant_mutants": self.generated,
             "sampled_from": self.sampled_from,
             "sample_seed": self.seed,
+            "control_mutants": self.controls,
             "killed": self.count("killed"),
             "killed_by_timeout": self.count("timeout"),
             "survived": self.count("survived"),
@@ -204,21 +206,29 @@ def _run(
             rep.reason = f"unmutated baseline did not pass ({why}); potency cannot be measured"
             return
         originals: dict[str, bytes] = {}
-        ctl = control_mutant(chosen[0].file, _read(ws, chosen[0].file))
-        originals[ctl.file] = _read(ws, ctl.file)
-        safe_write(ws, ctl.file, ctl.source)
-        ex.workspace_ready(ws)
-        try:
-            cres = ex.run(ExecRequest(pol.command, ws, env, pol.mutant_timeout_seconds))
-        finally:
-            safe_write(ws, ctl.file, originals[ctl.file])
-        if cres.start_error or cres.timed_out or cres.returncode != 0:
-            rep.status = "ERROR"
-            rep.reason = (
-                "control mutant (behaviour unchanged, bytes changed) was killed: the tests "
-                "depend on source text, so mutant kills prove nothing"
-            )
-            return
+        files = sorted({m.file for m in chosen})
+        controls = [
+            c
+            for f in files
+            for c in control_mutants(f, _read(ws, f), {m.line for m in chosen if m.file == f})
+        ]
+        rep.controls = len(controls)
+        for ctl in controls:
+            originals.setdefault(ctl.file, _read(ws, ctl.file))
+            safe_write(ws, ctl.file, ctl.source)
+            ex.workspace_ready(ws)
+            try:
+                cres = ex.run(ExecRequest(pol.command, ws, env, pol.mutant_timeout_seconds))
+            finally:
+                safe_write(ws, ctl.file, originals[ctl.file])
+            if cres.start_error or cres.timed_out or cres.returncode != 0:
+                rep.status = "ERROR"
+                rep.reason = (
+                    f"control mutant {ctl.id} in {ctl.file} (behaviour unchanged, source/AST/"
+                    "bytecode changed) was killed: the tests depend on the code's form, so "
+                    "mutant kills prove nothing"
+                )
+                return
         for m in chosen:
             if time.monotonic() - t0 > pol.total_timeout_seconds:
                 rep.results.append(MutantResult(m, "not_run"))

@@ -257,10 +257,55 @@ def sample(mutants: list[Mutant], limit: int, seed: int) -> list[Mutant]:
     return [mutants[i] for i in sorted(picked)]
 
 
-CONTROL_SUFFIX = b"\n# aicrg potency control mutant: behaviour unchanged\n"
+CONTROL_NAME = "_aicrg_potency_control"
+CONTROL_SUFFIX = f"\n{CONTROL_NAME} = None  # aicrg potency control: behaviour unchanged\n".encode()
 
 
-def control_mutant(path: str, src: bytes) -> Mutant:
-    """Same behaviour, different bytes. It must SURVIVE: if the tests 'kill' it, they
-    depend on source text (a self-hash or line-number test) and kill counts mean nothing."""
-    return Mutant("control", path, 0, "control", "", "", src + CONTROL_SUFFIX)
+def _function_controls(path: str, src: bytes, lines: set[int]) -> list[Mutant]:
+    try:
+        tree = ast.parse(src, path)
+    except (SyntaxError, ValueError):
+        return []
+    offs = _line_offsets(src)
+    out: list[Mutant] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+            continue
+        end = node.end_lineno or node.lineno
+        if not any(node.lineno <= ln <= end for ln in lines):
+            continue
+        body = node.body
+        first = body[1] if len(body) > 1 and _is_docstring(body[0]) else body[0]
+        if _is_docstring(first) or first.lineno == node.lineno:
+            continue  # one-line body: covered by the module-level control
+        insert_at = offs[first.lineno - 1]
+        indent = b" " * first.col_offset
+        new = src[:insert_at] + indent + f"{CONTROL_NAME} = None\n".encode() + src[insert_at:]
+        try:
+            compile(new, path, "exec", dont_inherit=True)
+        except (SyntaxError, ValueError):
+            continue
+        out.append(Mutant(f"control:{node.name}", path, first.lineno, "control", "", "", new))
+    return out
+
+
+def _is_docstring(stmt: ast.stmt) -> bool:
+    return (
+        isinstance(stmt, ast.Expr)
+        and isinstance(stmt.value, ast.Constant)
+        and isinstance(stmt.value.value, str)
+    )
+
+
+def control_mutants(path: str, src: bytes, lines: set[int]) -> list[Mutant]:
+    """Behaviour-preserving variants that MUST survive.
+
+    One appends a dead module-level assignment (changes text, AST and module
+    bytecode); one per changed function inserts a dead local assignment (changes
+    that function's code object). If the tests "kill" any of them, they depend on
+    the source text, AST or bytecode (self-hash pins), and kill counts mean nothing.
+    """
+    return [
+        Mutant("control:module", path, 0, "control", "", "", src + CONTROL_SUFFIX),
+        *_function_controls(path, src, lines),
+    ]

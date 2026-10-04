@@ -103,6 +103,7 @@ class RequiredCheck:
     report_path: str | None = None
     block_levels: tuple[str, ...] = ("error",)
     min_changed_coverage: float | None = None
+    require_revision: bool = False  # external: the report must name the evaluated revision
 
     @property
     def command(self) -> str:
@@ -121,6 +122,7 @@ class RequiredCheck:
             "report_path": self.report_path,
             "block_levels": list(self.block_levels),
             "min_changed_coverage": self.min_changed_coverage,
+            "require_revision": self.require_revision,
         }
 
 
@@ -343,7 +345,9 @@ def _check(where: str, item: Any, source: str, *, need_command: bool = True) -> 
         return RequiredCheck(name=item.strip(), argv=_argv(where, item), source=source)
     if not isinstance(item, dict):
         raise PolicyError(f"{where}: expected a string or a mapping")
-    _expect_keys(where, item, _CHECK_KEYS | ({"format"} if not need_command else set()))
+    _expect_keys(
+        where, item, _CHECK_KEYS | ({"format", "require_revision"} if not need_command else set())
+    )
     if "name" not in item:
         raise PolicyError(f"{where}: 'name' is required")
     if need_command and "command" not in item:
@@ -360,6 +364,10 @@ def _check(where: str, item: Any, source: str, *, need_command: bool = True) -> 
     )
     kw["required"] = _bool(f"{where}.required", item.get("required", True))
     kw["differential"] = _bool(f"{where}.differential", item.get("differential", False))
+    if not need_command:
+        kw["require_revision"] = _bool(
+            f"{where}.require_revision", item.get("require_revision", False)
+        )
     if not need_command and kw["differential"]:
         raise PolicyError(f"{where}: external evidence cannot be differential")
     mode = item.get("preexisting_failure", "review")

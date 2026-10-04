@@ -41,6 +41,26 @@ are signed from `refs/heads/gh-readonly-queue/…` and do not satisfy a
 (U3); THREAT_MODEL rows 9, 18, 19, 20 and 22 were updated to match what is
 actually mitigated.
 
+## Re-verification round
+
+The same reviewer re-ran every PoC against the fixes (27ac784) and attacked
+the fixes themselves. Confirmed FIXED: F1, F1b, F2, F4, F5, F6b, F9, F10,
+F12, F13, F15, F16. New or residual findings, each reproduced and fixed:
+
+| ID | Sev. | Finding | Fix | Evidence |
+|---|---|---|---|---|
+| N1 | HIGH | F3's read-only mounts covered only directories holding trusted files; candidate code created a test file in a writable sibling directory during the run and deleted it at exit (post-run verification cannot see transient files) → PASS | container trusted runs mount the **whole workspace read-only** (only a check's report directory is writable); locally, best-effort protection covers glob static prefixes | `test_n1_trusted_run_sees_a_read_only_workspace`, `test_n1_no_writable_gap_…`, M67 |
+| N2 | HIGH | the F6a control mutant only appended a comment; a test pinning the **AST** (or one function's bytecode) ignored it but killed every real mutant → PASS | controls now change form without behaviour: a dead module-level assignment, and a dead local in every mutated function | `test_n2_ast_or_bytecode_pin_…`, `test_n2_function_bytecode_pin_…`, M68 |
+| N3 | HIGH | F7 resolved only static imports; `importlib.import_module(...)`, `__import__` and `pyproject` entry points still hid a test-named production module | string references in non-test Python (with constant `+` folding) and entry points in config files count as use | `test_n3_…` (3), M69 |
+| N4 | MEDIUM | `doctor` still passed `aicrg check &`, `&&` chains followed by more commands, `! aicrg check`, a custom shell without `-e`, gate steps limited to non-PR events, and gate workflows with no PR trigger | all detected (`paths` filters reported as WARN); `aicrg check; true` under the default `bash -e` is correctly not flagged | `test_n4_…` (7), M70 |
+| N5 | LOW | external evidence without SARIF revision provenance is unbound | documented; new `require_revision: true` refuses unbound reports | `test_n5_…`, M71 |
+
+Residual by design: module names computed at run time from non-constant
+fragments are not resolved (N3); potency controls are a deterrent against
+form-pinning tests, not a proof — tests can still fingerprint mutants through
+other side channels (N2); local-executor trusted protection is detection and
+best-effort only (N1).
+
 ## Not fixed (accepted, documented)
 
 * **U4 – required-check name spoofing.** A PR-added workflow with a job of the

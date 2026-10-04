@@ -31,11 +31,14 @@ test_potency:
    construction (e.g. a constant in a branch the compiler removes); it is
    recorded and not run.
 4. In a clean head checkout, through the contract's executor, the unmutated
-   command must pass first (baseline). Then a **control mutant** runs: the
-   original file plus a trailing comment — identical behaviour, different
-   bytes. It must survive; if the tests "kill" it they depend on source text
-   (e.g. a test asserting the file's SHA-256) and kill counts would mean
-   nothing, so potency is ERROR. Then each mutant is written in place, the
+   command must pass first (baseline). Then **control mutants** run: the
+   file with a dead module-level assignment appended, and, for every mutated
+   function, the function with a dead local assignment inserted — identical
+   behaviour, different text, AST and bytecode. They must survive; if the
+   tests "kill" one, they depend on the code's form (a test pinning the file's
+   SHA-256, its AST, or a function's bytecode) and kill counts would mean
+   nothing, so potency is ERROR. This is a deterrent, not a proof: tests can
+   still fingerprint mutants through other side channels. Then each mutant is written in place, the
    command runs, and the original is restored.
 5. Mutant outcome: **killed** (command failed), **killed by timeout**,
    **survived** (command passed), **not run** (budget exhausted).

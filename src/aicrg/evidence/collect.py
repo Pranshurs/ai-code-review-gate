@@ -134,9 +134,23 @@ class TrustedScope:
         return bad
 
 
+def _static_prefix(pattern: str) -> str:
+    parts: list[str] = []
+    for seg in pattern.removeprefix("./").split("/"):
+        if any(ch in seg for ch in "*?"):
+            break
+        parts.append(seg)
+    return "/".join(parts)
+
+
 def readonly_paths(scope: TrustedScope) -> tuple[str, ...]:
-    """Directories holding trusted files (or the file itself at the root), minimal set."""
+    """Paths to protect: glob static prefixes, bundle mounts, directories of trusted files.
+
+    (The container executor mounts the whole workspace read-only for trusted runs;
+    this set is used for the local executor's best-effort protection.)
+    """
     cands: set[str] = set(scope.mounts)
+    cands.update(p for p in (_static_prefix(g) for g in scope.patterns) if p)
     for rel in scope.files:
         parent = rel.rsplit("/", 1)[0] if "/" in rel else ""
         cands.add(parent or rel)
@@ -154,6 +168,8 @@ def protect_locally(ws: Path, paths: tuple[str, ...], enabled: bool) -> Iterator
     try:
         for rel in paths:
             root = ws / rel
+            if root.is_symlink() or not root.exists():
+                continue
             targets = [root] if root.is_file() else [root, *root.rglob("*")]
             for t in targets:
                 if t.is_symlink():
@@ -271,7 +287,13 @@ class _Collector:
                 self.ex.workspace_ready(ws)
                 with protect_locally(ws, ro, self.ex.name == "local"):
                     run = run_check(
-                        spec, ws, self.env, executor=self.ex, revision=revision, readonly=ro
+                        spec,
+                        ws,
+                        self.env,
+                        executor=self.ex,
+                        revision=revision,
+                        readonly=ro,
+                        readonly_workspace=self.ex.name == "container",
                     )
                 changed = scope.verify(ws)
                 if changed:

@@ -43,7 +43,7 @@ _HEAD_REF = re.compile(
 _MASK = re.compile(r"\|\|\s*(true|:|exit\s+0)\b|;\s*exit\s+0\b|set\s+\+e")
 # The gate command at the start of a shell command (not inside an echo or a string).
 _GATE_RUN = re.compile(
-    r"(?:^|[;&|(]\s*|\bthen\s+|\bdo\s+)(?:\S*/)?(?:aicrg|python3?\s+-m\s+aicrg)\s+check\b",
+    r"(?:^\s*|[;&|(!]\s*|\bthen\s+|\bdo\s+)(?:\S*/)?(?:aicrg|python3?\s+-m\s+aicrg)\s+check\b",
     re.M,
 )
 _GATE_USES = re.compile(r"ai-code-review-gate(@|$)", re.I)
@@ -119,15 +119,37 @@ def _maybe_true(value: Any) -> bool:
 def _gate_line_hazards(run: str, shell: str) -> list[str]:
     """Shell constructs on the gate's own command line that lose its exit status."""
     out: list[str] = []
-    for line in run.splitlines():
-        if not _GATE_RUN.search(line):
+    lines = run.splitlines()
+    errexit = _errexit(run, shell)
+    for i, line in enumerate(lines):
+        m = _GATE_RUN.search(line)
+        if not m:
             continue
-        rest = line[_GATE_RUN.search(line).end() :]  # type: ignore[union-attr]
+        rest = line[m.end() :]
+        later = any(ln.strip() and not ln.strip().startswith("#") for ln in lines[i + 1 :])
         if re.search(r"\|\|", rest):
             out.append("gate command followed by `||` (failure handled/ignored)")
         elif re.search(r"(?<!\|)\|(?!\|)", rest) and not _pipefail(run, shell):
             out.append("gate output piped without `set -o pipefail` (exit status lost)")
+        if re.search(r"(?<![&>])&(?!&)", rest):
+            out.append("gate command runs in the background (`&`)")
+        if "&&" in rest and (later or re.search(r"&&[^;]*;\s*\S", rest)):
+            # `a && b` does not trigger errexit when `a` fails; a later command then
+            # decides the step's exit status.
+            out.append("gate in an `&&` chain followed by more commands (exit status lost)")
+        if re.match(r"\s*!", line[: m.start() + 1]) or re.search(r"!\s*$", line[: m.start()]):
+            out.append("gate exit status negated (`!`)")
+        if not errexit and (later or re.search(r";\s*\S", rest)):
+            out.append("shell without errexit (`-e`) runs commands after the gate")
     return out
+
+
+def _errexit(run: str, shell: str) -> bool:
+    # Default (no shell key) is `bash -e {0}`; `shell: bash` adds pipefail; `sh` is `sh -e`.
+    sh = shell.strip()
+    if sh in ("", "bash", "sh"):
+        return "set +e" not in run
+    return bool(re.search(r"(^|\s)-\w*e|errexit", sh)) or "set -e" in run
 
 
 def _pipefail(run: str, shell: str) -> bool:
@@ -298,6 +320,12 @@ def static_checks(root: Path, report: Report | None = None) -> Report:
                 run = str(s.get("run", ""))
                 if "--policy-from file" in run or "--policy-from=file" in run:
                     masked.append("policy read from the working tree (--policy-from file)")
+        gate_steps = [s for s in _steps(job) if _is_gate_step(s, local_gate)]
+        for cond in [job.get("if"), *[s.get("if") for s in gate_steps]]:
+            text = str(cond or "")
+            events = re.findall(r"github\.event_name\s*==\s*['\"]([\w-]+)['\"]", text)
+            if events and not set(events) & {"pull_request", "merge_group", "pull_request_target"}:
+                masked.append(f"gate only runs for {sorted(set(events))} events")
         if masked:
             rep.add(
                 "gate-not-masked", "FAIL", f"gate result can be ignored: {', '.join(masked)}", where
@@ -305,6 +333,23 @@ def static_checks(root: Path, report: Report | None = None) -> Report:
         else:
             rep.add("gate-not-masked", "PASS", "gate exit status is enforced", where)
         trig = wf.triggers
+        if not trig & {"pull_request", "pull_request_target", "merge_group"}:
+            rep.add(
+                "gate-trigger",
+                "FAIL",
+                f"gate workflow never runs on pull requests (triggers: {sorted(trig) or 'none'})",
+                where,
+            )
+        on = wf.doc.get("on", wf.doc.get(True))
+        pr_cfg = on.get("pull_request") if isinstance(on, dict) else None
+        if isinstance(pr_cfg, dict) and ("paths" in pr_cfg or "paths-ignore" in pr_cfg):
+            rep.add(
+                "gate-trigger",
+                "WARN",
+                "pull_request has a paths filter: PRs outside it do not run the gate "
+                "(a required check then stays pending; an optional one is simply absent)",
+                where,
+            )
         if "pull_request_target" in trig:
             rep.add(
                 "gate-trigger",
