@@ -25,7 +25,12 @@ DESELECT_RE = re.compile(
     r"(--ignore(-glob)?[=\s]|--deselect[=\s]|-k\s+['\"]?\s*not\b|-m\s+['\"]?\s*not\b|"
     r"--co\b|--collect-only\b|--lf\b|--last-failed\b|--maxfail[=\s]*0\b|--exitfirst\b.*--co)"
 )
-MASK_RE = re.compile(r"(\|\|\s*(true|:|exit\s+0)\b|;\s*exit\s+0\b|set\s+\+e\b|\|\|\s*echo\b)")
+MASK_RE = re.compile(
+    r"(\|\|\s*(true|:|exit\s+0)\b|;\s*exit\s+0\b|set\s+\+e\b|\|\|\s*echo\b|"
+    # tool flags that make a checker always exit 0 (bandit/flake8/pylint/ruff/pip-audit...)
+    r"--exit-zero\b|--no-fail\b|--fail-under[=\s]+0\b|--cov-fail-under[=\s]+0\b|"
+    r"--severity-threshold[=\s]+none\b)"
+)
 SCANNER_RE = re.compile(
     r"(codeql|semgrep|dependency-review|bandit|pip-audit|safety\s+check|gitleaks|trivy|"
     r"trufflehog|scorecard|snyk|osv-scanner|zizmor|aicrg|ai-code-review-gate)",

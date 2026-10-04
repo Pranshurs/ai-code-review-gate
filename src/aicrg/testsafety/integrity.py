@@ -320,6 +320,8 @@ class _Analyzer:
                     self._compare(before[q], t)
             if base_mod is not None and head_mod is not None:
                 self._collection_hooks(fc.path, base_mod, head_mod)
+            if head_mod is not None:
+                self._golden_writes(fc.path, base_mod, head_mod)
         self._resolve_removals()
         self.report.findings.sort(key=Finding.sort_key)
         return self.report
@@ -443,9 +445,24 @@ class _Analyzer:
             self._pair(h, r, partner, security)
         # pair leftovers positionally (subject rewritten as well)
         leftovers = list(zip(unmatched_removed, unmatched_added, strict=False))
+        head_subjects = {x.subject for x in h.assertions}
         for r, a in leftovers:
             if a.strength < r.strength or exception_broadened(r, a):
                 self._pair(h, r, a, security)
+            elif r.subject not in head_subjects:
+                # Same count, same strength, but the thing that was checked is no longer
+                # checked at all ("assert not marker.exists()" -> "assert p.exists()").
+                self.add(
+                    finding(
+                        "assertion_subject_dropped",
+                        self.contract,
+                        f"{h.qualname}: `{r.subject}` is no longer asserted on",
+                        file=h.file,
+                        line=a.line,
+                        before=r.key,
+                        after=a.key,
+                    )
+                )
         net_removed = unmatched_removed[len(leftovers) :]
         for a in unmatched_added[len(leftovers) :]:
             if a.strength == 0:
@@ -578,6 +595,24 @@ class _Analyzer:
                 )
             )
 
+    def _golden_writes(self, path: str, base: ast.Module | None, head: ast.Module) -> None:
+        """A test that writes its own expected output can never fail on it."""
+        before = Counter(_golden_write_sites(base)) if base is not None else Counter()
+        for text, line in _golden_write_sites_with_lines(head):
+            if before[text] > 0:
+                before[text] -= 1
+                continue
+            self.add(
+                finding(
+                    "golden_regenerated_by_test",
+                    self.contract,
+                    "test code now writes to golden/expected data it compares against",
+                    file=path,
+                    line=line,
+                    after=text,
+                )
+            )
+
     def _collection_hooks(self, path: str, base: ast.Module, head: ast.Module) -> None:
         if not path.endswith("conftest.py") and "pytestmark" not in unparse(head):
             return
@@ -608,6 +643,37 @@ class _Analyzer:
                         file=path,
                     )
                 )
+
+
+_GOLDEN_NAME_RE = re.compile(r"(golden|expected|snapshot|baseline|fixture_out|reference)", re.I)
+_WRITE_CALLS = {"write_text", "write_bytes", "dump", "dumps_to", "copy", "copyfile", "copy2"}
+
+
+def _golden_write_sites_with_lines(module: ast.Module) -> list[tuple[str, int]]:
+    out: list[tuple[str, int]] = []
+    for node in ast.walk(module):
+        if not isinstance(node, ast.Call):
+            continue
+        seg = last_segment(call_name(node))
+        text = unparse(node)
+        writes = seg in _WRITE_CALLS
+        if seg == "open":
+            modes = [a for a in node.args[1:2]] + [
+                k.value for k in node.keywords if k.arg == "mode"
+            ]
+            writes = any(
+                isinstance(m, ast.Constant)
+                and isinstance(m.value, str)
+                and set(m.value) & set("wax")
+                for m in modes
+            )
+        if writes and _GOLDEN_NAME_RE.search(text):
+            out.append((text, node.lineno))
+    return out
+
+
+def _golden_write_sites(module: ast.Module) -> list[str]:
+    return [t for t, _ in _golden_write_sites_with_lines(module)]
 
 
 def _take(items: list[Assertion], wanted: Counter[str]) -> list[Assertion]:

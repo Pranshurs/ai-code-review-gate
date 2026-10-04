@@ -244,3 +244,42 @@ def test_lockfile_drift(repo, gate):
     res = gate()
     assert "lockfile_not_updated" in codes(res)
     assert res.decision.value == "REVIEW_REQUIRED"
+
+
+SAVE_BODY = """    try:
+        store[k] = v
+    except KeyError as exc:
+        raise RuntimeError("save failed") from exc"""
+
+
+@pytest.mark.parametrize(
+    "new_body",
+    [
+        "    try:\n        store[k] = v\n    except Exception:\n        return {}",
+        "    with contextlib.suppress(Exception):\n        store[k] = v",
+    ],
+)
+def test_disguised_exception_swallowing(repo, gate, new_body):
+    res = _patch(repo, gate, "import contextlib\n" + AUTH.replace(SAVE_BODY, new_body))
+    assert "broad_exception_swallowed" in codes(res)
+
+
+def test_exit_zero_flag_masks_scanner(repo, gate):
+    repo.commit({"review-gate.yaml": POLICY_OK, ".github/workflows/ci.yml": WORKFLOW})
+    repo.git("checkout", "-q", "-b", "agent")
+    repo.commit(
+        {".github/workflows/ci.yml": WORKFLOW.replace("bandit -r src", "bandit -r src --exit-zero")}
+    )
+    assert "ci_failure_masked" in codes(gate())
+
+
+def test_check_moved_into_helper_is_not_removed(repo, gate):
+    # The denial (raise Forbidden) moves into a module-level helper the function calls.
+    src = AUTH.replace(
+        'def require_admin(user):\n    if user.role != "admin":\n        raise Forbidden("no")',
+        'def _deny(msg):\n    raise Forbidden(msg)\n\n\n'
+        'def require_admin(user):\n    if user.role != "admin":\n        _deny("no")',
+    )
+    assert src != AUTH
+    res = _patch(repo, gate, src)
+    assert "auth_check_removed" not in codes(res)

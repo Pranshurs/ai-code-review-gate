@@ -22,6 +22,7 @@ from dataclasses import dataclass, field
 
 from aicrg.analysis.context import PatchContext, is_test_path
 from aicrg.analysis.pyast import (
+    FuncNode,
     call_name,
     dotted,
     is_dynamic_string,
@@ -191,6 +192,21 @@ def _func_facts(func: ast.FunctionDef | ast.AsyncFunctionDef) -> FuncFacts:
     return f
 
 
+def _helper_auth(func: ast.AST, funcs: dict[str, FuncNode]) -> Counter[str]:
+    """Auth facts of same-module functions called directly from ``func``.
+
+    Extracting a check into a helper ("_require_owner(doc)") is a refactor, not a
+    removal. Only direct calls to module-level functions are followed (one level).
+    """
+    out: Counter[str] = Counter()
+    for node in _walk_own(func):
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+            target = funcs.get(node.func.id)
+            if target is not None and target is not func:
+                out += _func_facts(target).auth
+    return out
+
+
 def _walk_own(func: ast.AST) -> list[ast.AST]:
     """Walk a function body without descending into nested defs/classes."""
     out: list[ast.AST] = []
@@ -217,6 +233,18 @@ class Signal:
     detail: str
 
 
+def _is_placeholder_value(node: ast.expr) -> bool:
+    """A literal that stands in for a real result: None, False, 0, "", {}, [], ()."""
+    if isinstance(node, ast.Constant):
+        return node.value is not True  # ``return True`` is reported as fail-open instead
+    if isinstance(node, (ast.Dict, ast.List, ast.Tuple, ast.Set)):
+        return all(
+            isinstance(e, ast.Constant)
+            for e in (node.values if isinstance(node, ast.Dict) else node.elts)
+        )
+    return False
+
+
 def _handler_swallows(h: ast.ExceptHandler) -> bool:
     body = [
         s
@@ -232,13 +260,7 @@ def _handler_swallows(h: ast.ExceptHandler) -> bool:
     return all(
         isinstance(s, (ast.Pass, ast.Continue, ast.Break))
         or (isinstance(s, ast.Expr) and isinstance(s.value, ast.Constant))
-        or (
-            isinstance(s, ast.Return)
-            and (
-                s.value is None
-                or (isinstance(s.value, ast.Constant) and s.value.value in (None, False, 0, "", ()))
-            )
-        )
+        or (isinstance(s, ast.Return) and (s.value is None or _is_placeholder_value(s.value)))
         for s in body
     )
 
@@ -329,6 +351,19 @@ def _node_signals(scope: str, node: ast.AST) -> list[Signal]:
                     line,
                     f"`{name}` runs a shell command"
                     + (" built from non-literal input" if dynamic else ""),
+                )
+            )
+        # contextlib.suppress(Exception) is a broad except-pass in disguise
+        if seg == "suppress" and any(
+            last_segment(dotted(a)) in ("Exception", "BaseException") for a in node.args
+        ):
+            out.append(
+                Signal(
+                    "broad_exception_swallowed",
+                    scope,
+                    unparse(node),
+                    line,
+                    f"`{unparse(node)}` discards every error raised in its block",
                 )
             )
         # deserialization / dynamic code
@@ -523,7 +558,7 @@ def analyze_security(ctx: PatchContext) -> list[Finding]:
                 continue
             fb, fh = _func_facts(info.node), _func_facts(hn)
             q = info.qualname
-            lost_auth = fb.auth - fh.auth
+            lost_auth = fb.auth - fh.auth - _helper_auth(hn, head_funcs)
             if lost_auth:
                 out.append(
                     finding(

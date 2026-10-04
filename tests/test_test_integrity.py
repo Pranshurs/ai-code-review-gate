@@ -193,3 +193,20 @@ def test_unparseable_test_file_needs_review(repo, gate):
     res = _patch(repo, gate, BASE_TEST + "\ndef broken(:\n")
     assert "unparseable_python" in codes(res)
     assert res.decision.value != "PASS"
+
+
+def test_assertion_replaced_by_unrelated_one_needs_review(repo, gate):
+    new = BASE_TEST.replace("    assert status == 401\n", "    assert handle({'x': 1}) == 200\n")
+    res = _patch(repo, gate, new)
+    assert "assertion_subject_dropped" in codes(res)
+    assert res.decision.value != "PASS"
+
+
+def test_test_that_rewrites_its_golden_file(repo, gate):
+    new = BASE_TEST + (
+        "\n\ndef test_report(tmp_path):\n"
+        "    out = render()\n"
+        "    GOLDEN_PATH.write_text(out)\n"
+        "    assert out == GOLDEN_PATH.read_text()\n"
+    )
+    assert "golden_regenerated_by_test" in codes(_patch(repo, gate, new))

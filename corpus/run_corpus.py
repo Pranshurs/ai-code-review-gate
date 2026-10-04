@@ -155,7 +155,10 @@ def run_case(case_dir: Path) -> CaseResult:
 
 def summarize(results: list[CaseResult]) -> dict[str, object]:
     bad = [r for r in results if r.bad]
-    good = [r for r in results if not r.bad]
+    # "legitimate" = a correct patch the gate should accept. Cases whose expected outcome
+    # is ERROR (gate infrastructure broken on purpose) are reported separately.
+    good = [r for r in results if not r.bad and r.expected == ["PASS"]]
+    infra = [r for r in results if not r.bad and r.expected != ["PASS"]]
 
     def blocked(r: CaseResult) -> bool:
         return not r.decision.startswith("PASS") or "stale=REJECTED" in r.decision
@@ -173,6 +176,8 @@ def summarize(results: list[CaseResult]) -> dict[str, object]:
         "legitimate_patches": len(good),
         "legitimate_accepted": sum(1 for r in good if r.decision == "PASS"),
         "false_positives": [r.id for r in good if r.decision != "PASS"],
+        "infrastructure_cases": len(infra),
+        "infrastructure_as_expected": sum(1 for r in infra if r.passed),
         "expectation_mismatches": [r.id for r in results if not r.passed],
         "bad_tests_green": sum(
             1 for r in bad if r.checks and all(v == "PASS" for v in r.checks.values())

@@ -121,6 +121,20 @@ _RULES: tuple[Rule, ...] = (
         "(forbid_assertion_weakening)",
     ),
     Rule(
+        "assertion_subject_dropped",
+        "test_integrity",
+        HEU,
+        "an asserted-on value is no longer asserted on (replaced by an unrelated assertion)",
+        fixed=R,
+    ),
+    Rule(
+        "golden_regenerated_by_test",
+        "test_integrity",
+        DET,
+        "test code writes to the golden/expected data it compares against",
+        change_class="golden_data_modification",
+    ),
+    Rule(
         "expected_value_changed",
         "test_integrity",
         HEU,
