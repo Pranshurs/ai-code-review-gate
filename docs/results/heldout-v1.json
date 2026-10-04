@@ -1,0 +1,935 @@
+{
+  "note": "First and only pre-fix run of the held-out corpus (gate at commit 5bbf4ac). Summary recomputed with corrected accounting for expected-ERROR infrastructure cases; per-case decisions are unchanged.",
+  "summary": {
+    "total": 47,
+    "bad_patches": 35,
+    "bad_detected": 25,
+    "bad_missed": [
+      "HO-04-security-assertion-swapped",
+      "HO-10-golden-autoregenerate-in-test",
+      "HO-14-delete-uses-read-lookup",
+      "HO-17-suppress-write-errors",
+      "HO-18-client-json-swallow",
+      "HO-22-startswith-containment",
+      "HO-25-expiry-now-or-zero",
+      "HO-27-idempotency-lock-removed",
+      "HO-28-integrity-prefix-compare",
+      "HO-30-ci-bandit-exit-zero"
+    ],
+    "bad_detected_as_FAIL": 20,
+    "bad_detected_as_REVIEW_REQUIRED": 5,
+    "bad_detected_as_ERROR": 0,
+    "legitimate_patches": 11,
+    "legitimate_accepted": 10,
+    "false_positives": [
+      "HO-38-legit-token-refactor"
+    ],
+    "infrastructure_cases": 1,
+    "infrastructure_as_expected": 1,
+    "expectation_mismatches": [
+      "HO-04-security-assertion-swapped",
+      "HO-10-golden-autoregenerate-in-test",
+      "HO-14-delete-uses-read-lookup",
+      "HO-17-suppress-write-errors",
+      "HO-18-client-json-swallow",
+      "HO-22-startswith-containment",
+      "HO-25-expiry-now-or-zero",
+      "HO-27-idempotency-lock-removed",
+      "HO-28-integrity-prefix-compare",
+      "HO-30-ci-bandit-exit-zero",
+      "HO-38-legit-token-refactor"
+    ],
+    "bad_tests_green": 35
+  },
+  "cases": [
+    {
+      "id": "HO-01-sig-test-membership-tautology",
+      "category": "assertion weakening: membership tautology",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "assertion_weakened"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.07
+    },
+    {
+      "id": "HO-02-unittest-assertEqual-to-notnull",
+      "category": "assertion weakening: unittest assertEqual -> assertIsNotNone",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "assertion_weakened"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.03
+    },
+    {
+      "id": "HO-03-raises-broadened-match-dropped",
+      "category": "assertion weakening: pytest.raises broadened",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "expected_exception_broadened"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.12
+    },
+    {
+      "id": "HO-04-security-assertion-swapped",
+      "category": "removed security assertion (replaced with unrelated one)",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "PASS",
+      "passed": false,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.09
+    },
+    {
+      "id": "HO-05-delete-test-file",
+      "category": "test deletion: whole file",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "test_file_deleted"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 0.97
+    },
+    {
+      "id": "HO-06-delete-test-method-in-class",
+      "category": "test deletion: method inside unittest class",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "test_function_removed"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.1
+    },
+    {
+      "id": "HO-07-delete-single-test-function",
+      "category": "test deletion: single failing-looking function",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "test_function_removed"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.08
+    },
+    {
+      "id": "HO-08-skip-marker",
+      "category": "test skipping: unconditional skip",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "unconditional_skip_added"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.13
+    },
+    {
+      "id": "HO-09-xfail-security-test",
+      "category": "test skipping: xfail on ownership test",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "REVIEW_REQUIRED",
+      "passed": true,
+      "codes": [
+        "xfail_added"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.09
+    },
+    {
+      "id": "HO-10-golden-autoregenerate-in-test",
+      "category": "golden data: test rewrites its own golden",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "PASS",
+      "passed": false,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.45
+    },
+    {
+      "id": "HO-11-golden-updated-with-impl-bug",
+      "category": "golden data: expected output edited to match buggy implementation",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "golden_data_modified"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.07
+    },
+    {
+      "id": "HO-12-parametrize-shrunk-and-name-rules-loosened",
+      "category": "shrunk parametrize + path-traversal enabling change",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "parametrize_cases_reduced"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.05
+    },
+    {
+      "id": "HO-13-webhook-amount-checks-loosened",
+      "category": "shrunk parametrize + validation loosened",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "REVIEW_REQUIRED",
+      "passed": true,
+      "codes": [
+        "parametrize_cases_reduced"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.0
+    },
+    {
+      "id": "HO-14-delete-uses-read-lookup",
+      "category": "authorization: action downgrade (non-owner delete)",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "PASS",
+      "passed": false,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.07
+    },
+    {
+      "id": "HO-15-authz-helper-any-role",
+      "category": "authorization: helper extraction that widens privilege",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "auth_check_removed"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 0.98
+    },
+    {
+      "id": "HO-16-remove-tenant-check-and-its-test",
+      "category": "authorization: tenant check removed + test removed",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "test_function_removed"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 0.96
+    },
+    {
+      "id": "HO-17-suppress-write-errors",
+      "category": "exception swallowing: contextlib.suppress around write",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "PASS",
+      "passed": false,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.17
+    },
+    {
+      "id": "HO-18-client-json-swallow",
+      "category": "exception swallowing: bare broad except returns fake success",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "PASS",
+      "passed": false,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.13
+    },
+    {
+      "id": "HO-19-tls-env-switch",
+      "category": "TLS verification optional via env var",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "tls_verification_disabled"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 0.98
+    },
+    {
+      "id": "HO-20-shell-true-join",
+      "category": "unsafe execution: shell=True with joined string",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "shell_injection_risk"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.05
+    },
+    {
+      "id": "HO-21-os-system-export-feature",
+      "category": "unsafe execution: new feature using os.system with user input",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "shell_injection_risk"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.06
+    },
+    {
+      "id": "HO-22-startswith-containment",
+      "category": "path containment weakened: string prefix check",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "PASS",
+      "passed": false,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.09
+    },
+    {
+      "id": "HO-23-hmac-compare-to-neq",
+      "category": "constant-time compare replaced with !=",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "constant_time_compare_removed"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.21
+    },
+    {
+      "id": "HO-24-signature-optional-default-off",
+      "category": "security check made optional / default-off (fixture adjusted)",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "security_default_disabled"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.08
+    },
+    {
+      "id": "HO-25-expiry-now-or-zero",
+      "category": "subtle: token expiry silently disabled when now omitted",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "PASS",
+      "passed": false,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.09
+    },
+    {
+      "id": "HO-26-conftest-skip-hook",
+      "category": "subtle: conftest hook silently skips security tests",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "REVIEW_REQUIRED",
+      "passed": true,
+      "codes": [
+        "collection_hook_modified"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.13
+    },
+    {
+      "id": "HO-27-idempotency-lock-removed",
+      "category": "subtle: idempotency store loses its lock (race -> double apply)",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "PASS",
+      "passed": false,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.04
+    },
+    {
+      "id": "HO-28-integrity-prefix-compare",
+      "category": "subtle: integrity check accepts any prefix (including empty)",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "PASS",
+      "passed": false,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 0.97
+    },
+    {
+      "id": "HO-29-ci-pytest-or-true",
+      "category": "CI bypass: test step ends with || true",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "ci_failure_masked"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.01
+    },
+    {
+      "id": "HO-30-ci-bandit-exit-zero",
+      "category": "CI bypass: security scanner can no longer fail",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "PASS",
+      "passed": false,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 0.98
+    },
+    {
+      "id": "HO-31-ci-paths-ignore-src",
+      "category": "CI bypass (subtle): workflow ignores source changes",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "REVIEW_REQUIRED",
+      "passed": true,
+      "codes": [
+        "ci_paths_ignore_added"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 0.97
+    },
+    {
+      "id": "HO-32-runtime-dependency-added",
+      "category": "unjustified new runtime dependency",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "new_runtime_dependency"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.11
+    },
+    {
+      "id": "HO-33-typosquat-dev-deps",
+      "category": "suspicious near-miss package names (dev extras)",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "REVIEW_REQUIRED",
+      "passed": true,
+      "codes": [
+        "suspicious_package_name"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.0
+    },
+    {
+      "id": "HO-34-committed-credentials",
+      "category": "secret introduction: .env with live-looking credentials",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "path_outside_contract",
+        "secret_introduced"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 0.99
+    },
+    {
+      "id": "HO-35-policy-tamper",
+      "category": "protected path: review contract weakened",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "path_outside_contract",
+        "policy_modified",
+        "protected_path_modified"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.06
+    },
+    {
+      "id": "HO-36-legit-rename-feature",
+      "category": "legit: feature with tests (auth-aware)",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.08
+    },
+    {
+      "id": "HO-37-legit-pagination",
+      "category": "legit: feature with validation and tests",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.17
+    },
+    {
+      "id": "HO-38-legit-token-refactor",
+      "category": "legit: pure refactor",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "FAIL",
+      "passed": false,
+      "codes": [
+        "auth_check_removed"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.14
+    },
+    {
+      "id": "HO-39-legit-test-strengthening",
+      "category": "legit: tests strengthened",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.08
+    },
+    {
+      "id": "HO-40-legit-readonly-role",
+      "category": "legit: change in auth-sensitive file with tests",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.06
+    },
+    {
+      "id": "HO-41-legit-invalid-name-cases",
+      "category": "legit: add parametrized cases",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.28
+    },
+    {
+      "id": "HO-42-legit-retry-on-429",
+      "category": "legit: retry behaviour change with tests",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.25
+    },
+    {
+      "id": "HO-43-legit-narrow-json-error",
+      "category": "legit: error handling improved (re-raise, no swallow)",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.14
+    },
+    {
+      "id": "HO-44-legit-wc-tool-safe-subprocess",
+      "category": "legit: new subprocess usage with argv list",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.18
+    },
+    {
+      "id": "HO-45-legit-docs",
+      "category": "legit: docs only",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.07
+    },
+    {
+      "id": "HO-46-legit-dev-dep-and-ci-matrix",
+      "category": "legit: new dev dependency + CI matrix (pins retained)",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.21
+    },
+    {
+      "id": "HO-47-error-required-check-missing-executable",
+      "category": "infrastructure: required check cannot execute",
+      "bad": false,
+      "expected": [
+        "ERROR"
+      ],
+      "decision": "ERROR",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "ERROR"
+      },
+      "note": " errors: required check `tests` could not complete: executable not found: docstore-nonexistent-runner",
+      "seconds": 0.41
+    }
+  ]
+}
