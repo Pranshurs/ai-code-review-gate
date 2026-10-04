@@ -88,3 +88,56 @@ F7 → FAIL for the imported test-named modules; F8/F8b → FAIL; F12 → FAIL w
 `unsafe_path_name`; F13 → BLOCKED. The PoC for `app/test/runner.py` remains
 PASS because that PoC's `main.py` imports a different module (`app.runner`);
 with the correct import the case is covered by `test_f7_…[app/test/runner.py]`.
+
+## Continuation findings (after `7290835`)
+
+### CI was red on every push of the 0.2 work (runs 8-17)
+
+Every GitHub Actions run on the 0.2 branch, from `dbfda1e` (run 8) to
+`7290835` (run 17), **failed**; run 14 was cancelled. Earlier "all green"
+statements were local results only. They are not reused as CI evidence. Run 17
+(`7290835`): lint-types, package, security and corpus passed; `tests (3.11)`,
+`tests (3.12)`, `tests (3.13)` and `mutation` failed. Two independent causes:
+
+1. **Ambient CI provenance (product bug P1 below, surfaced as a test failure).**
+   The test suite inherited the runner's own `GITHUB_ACTIONS`/`GITHUB_SHA`,
+   so fixture receipts recorded AICRG's CI commit in `subject.ci` and the
+   attestation tests (which assumed no CI context) failed. Nothing in the suite
+   exercised the CI-context path, so local runs could not see it.
+2. **Test portability (test defect).** `test_equivalent_mutants_are_recognised_not_run`
+   pinned CPython 3.11's optimiser: 3.12+ also folds `1 if False else 1`, so it
+   correctly reports two more mutants as equivalent. Equivalence detection
+   compares a recursive code-object fingerprint (bytecode, constants, names,
+   variables), so equal fingerprints mean equal behaviour on every version; on
+   3.11 those mutants are run and can only survive (conservative). The test now
+   asserts the promised property: every mutant reported as equivalent behaves
+   identically when executed.
+
+### P1 — HIGH — execution provenance accepted as subject provenance
+
+`subject.ci.sha` is where the gate ran (the workflow's `GITHUB_SHA`);
+`subject.head` is what it evaluated. These were kept apart in the receipt
+(no ambient value ever replaced `subject.head`, `base`, the patch digest or
+repository identity — now pinned by tests), **but external-evidence binding
+(F11) accepted a SARIF report whose revision equalled either the head or the
+CI commit, without checking that the CI commit had anything to do with the
+head.** Under an unrelated runner (`GITHUB_SHA = X`, target head `H ≠ X`), a
+clean report of the runner's own code `X` was accepted as evidence about `H`:
+reproduced as decision **PASS**.
+
+Fix: the gate records `subject.ci.relation` (`head`, `merge_of_head` = parents
+exactly `[base, head]`, `unrelated`, `unresolved`) and only a `head` /
+`merge_of_head` CI commit may stand in for the head as an evidence revision.
+Attestation binding is unchanged: an attestation still has to sign
+`subject.ci.sha` (execution provenance), while the signed receipt binds
+`subject.head` (subject provenance) and verification still rejects a moved head.
+
+Evidence: `tests/test_provenance_boundary.py` (subject unchanged under five
+ambient `GITHUB_SHA` shapes, unrelated `GITHUB_REPOSITORY`/`GITHUB_REF`;
+relation classification; report for unrelated `X` ⇒ ERROR, for the merge
+commit or the head ⇒ PASS; verification stays bound to `H`), both evidence
+tests fail on `7290835`; `tests/test_attestation.py::TestCiProvenance`
+(attestation must sign the CI commit; CI commit not built from head rejected);
+mutants M72-M76. `tests/conftest.py` now clears ambient `GITHUB_*`/`GH_TOKEN`
+so the suite is hermetic; CI-context behaviour is tested by setting it
+explicitly.

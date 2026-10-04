@@ -52,6 +52,31 @@ class GitRepo:
         return self.git("rev-parse", "HEAD")
 
 
+# Variables a CI runner sets that change the gate's behaviour (gate._ci_context,
+# doctor's API access). Tests must not inherit the runner's values: under GitHub
+# Actions every fixture receipt would otherwise be bound to *this* repository's
+# CI commit, and attestation tests fail only in CI. Tests that exercise CI
+# provenance set these explicitly.
+AMBIENT_CI_ENV = (
+    "GITHUB_ACTIONS",
+    "GITHUB_REPOSITORY",
+    "GITHUB_SHA",
+    "GITHUB_REF",
+    "GITHUB_EVENT_NAME",
+    "GITHUB_WORKFLOW_REF",
+    "GITHUB_RUN_ID",
+    "GITHUB_RUN_ATTEMPT",
+    "GH_TOKEN",
+    "GITHUB_TOKEN",
+)
+
+
+@pytest.fixture(autouse=True)
+def _no_ambient_ci(monkeypatch: pytest.MonkeyPatch) -> None:
+    for name in AMBIENT_CI_ENV:
+        monkeypatch.delenv(name, raising=False)
+
+
 @pytest.fixture
 def repo(tmp_path: Path) -> GitRepo:
     return GitRepo(tmp_path / "r")

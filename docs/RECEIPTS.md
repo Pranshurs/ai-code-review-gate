@@ -18,7 +18,7 @@ with what evidence, and what was decided.
 | `subject.patch_digest` | `sha256:` of the canonical `git diff --binary --full-index` merge_base..head |
 | `subject.files` | per file: status, old/new path, added/removed line counts, binary |
 | `subject.working_tree_dirty` | uncommitted changes existed and were **not** evaluated |
-| `subject.ci` | on GitHub Actions: `{provider, repository, sha, ref, event, workflow_ref, run_id, run_attempt}`; `sha` is the commit an attestation signs |
+| `subject.ci` | **execution** provenance, on GitHub Actions: `{provider, repository, sha, ref, event, workflow_ref, run_id, run_attempt, relation}`; `sha` is the commit an attestation signs. It never replaces `base`/`head` (**subject** provenance): the runner may belong to another repository. `relation` says how `sha` relates to the subject: `head`, `merge_of_head` (parents exactly `[base, head]`, GitHub's pull_request merge), `unrelated` (a commit of this repository that is neither) or `unresolved` (not in this repository) |
 | `subject.files_excluded_from_analysis` | count, if `exclude_from_analysis` matched |
 | `policy` | `{source, repo_path, raw_digest, contract_digest, contract}` |
 | `risk` | `{level, surfaces, evidence[{surface, file, reason}]}` |

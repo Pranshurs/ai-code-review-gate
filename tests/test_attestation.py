@@ -276,3 +276,75 @@ def test_github_contract_requires_pinned_signer():
 
     with pytest.raises(PolicyError):
         parse_contract("version: 1\nattestation:\n  required: true\n  repository: acme/app\n")
+
+
+# ----------------------------------------------------------------------------- CI provenance
+# Under GitHub Actions the gate records where it ran; an attestation then has to
+# sign that CI commit (for pull_request: the merge commit), not merely the head.
+
+
+def _actions_env(monkeypatch, sha):
+    for k, v in {
+        "GITHUB_ACTIONS": "true",
+        "GITHUB_REPOSITORY": "acme/app",
+        "GITHUB_SHA": sha,
+        "GITHUB_REF": "refs/pull/7/merge",
+        "GITHUB_EVENT_NAME": "pull_request",
+        "GITHUB_WORKFLOW_REF": "acme/app/.github/workflows/gate.yml@refs/heads/main",
+        "GITHUB_RUN_ID": "1",
+        "GITHUB_RUN_ATTEMPT": "1",
+    }.items():
+        monkeypatch.setenv(k, v)
+
+
+def _merge_commit(repo):
+    """A pull_request-style merge of HEAD into main, without moving HEAD."""
+    return repo.git("commit-tree", "HEAD^{tree}", "-p", "main", "-p", "HEAD", "-m", "merge")
+
+
+class TestCiProvenance:
+    def _setup(self, repo):
+        repo.commit({"review-gate.yaml": POLICY_NO_CHECKS, "a.py": "x = 1\n"})
+        repo.git("checkout", "-q", "-b", "agent")
+        return repo.commit({"a.py": "x = 2\n"})
+
+    def test_no_ci_context_outside_actions(self, repo, gate):
+        self._setup(repo)
+        assert "ci" not in gate().receipt["subject"]
+
+    def test_ci_context_is_recorded_under_actions(self, repo, gate, monkeypatch):
+        self._setup(repo)
+        merge = _merge_commit(repo)
+        _actions_env(monkeypatch, merge)
+        ci = gate().receipt["subject"]["ci"]
+        assert ci["sha"] == merge and ci["event"] == "pull_request"
+        assert ci["provider"] == "github-actions" and ci["repository"] == "acme/app"
+
+    def test_attestation_must_sign_the_ci_commit(self, repo, gate, tmp_path, monkeypatch):
+        head = self._setup(repo)
+        merge = _merge_commit(repo)
+        _actions_env(monkeypatch, merge)
+        res = gate()
+        path = write_receipt(res.receipt, tmp_path / "receipts")
+        r = res.receipt
+        ok = github_verify(path, r, IDENT, runner=_runner(_cert(r, sourceRepositoryDigest=merge)))
+        assert ok.status == "VERIFIED", ok.problems
+        # An attestation over the head alone was not produced by this CI run.
+        bad = github_verify(path, r, IDENT, runner=_runner(_cert(r, sourceRepositoryDigest=head)))
+        assert bad.status == "FAILED" and "commit" in bad.problems[0]
+
+    def test_ci_merge_commit_built_from_head_verifies(self, repo, gate, tmp_path, monkeypatch):
+        self._setup(repo)
+        _actions_env(monkeypatch, _merge_commit(repo))
+        path = write_receipt(gate().receipt, tmp_path / "receipts")
+        v = verify_receipt(path, repo.root, base="main")
+        assert v.ok, v.problems
+
+    def test_ci_commit_not_built_from_head_is_rejected(self, repo, gate, tmp_path, monkeypatch):
+        self._setup(repo)
+        unrelated = repo.git("commit-tree", "main^{tree}", "-p", "main", "-m", "elsewhere")
+        _actions_env(monkeypatch, unrelated)
+        path = write_receipt(gate().receipt, tmp_path / "receipts")
+        v = verify_receipt(path, repo.root, base="main")
+        assert not v.ok
+        assert any("not a merge built from head" in p for p in v.problems), v.problems

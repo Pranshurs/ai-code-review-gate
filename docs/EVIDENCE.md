@@ -129,8 +129,11 @@ external_evidence:                  # produced elsewhere; --evidence codeql=PATH
 
 External reports must come from **outside the evaluated checkout** (a file the
 patch committed is refused), and a SARIF report that records
-`versionControlProvenance.revisionId` must name the head (or the CI commit)
-being judged. A report without that field — any SARIF that omits it, and every
+`versionControlProvenance.revisionId` must name the head being judged, or the
+CI commit when that commit is the head or GitHub's pull_request merge of
+exactly base and head (`subject.ci.relation`). The commit of the workflow the
+gate happens to run in is never accepted otherwise: under an unrelated runner,
+a report about the runner's own code is not evidence about the head. A report without that field — any SARIF that omits it, and every
 JUnit/coverage/JSON report — is **not bound** to a commit: AICRG trusts the
 operator who supplied it. Set `require_revision: true` on the entry to refuse
 unbound reports (CodeQL records the revision; many tools do not).

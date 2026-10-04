@@ -36,6 +36,7 @@ TP = "tests/test_potency.py"
 AT = "tests/test_attestation.py"
 DR = "tests/test_doctor.py"
 SR = "tests/test_security_review_regressions.py"
+PB = "tests/test_provenance_boundary.py"
 
 
 @dataclass(frozen=True)
@@ -630,6 +631,46 @@ MUTANTS: tuple[Mutant, ...] = (
         "        if check.require_revision and not report.revisions:",
         "        if False:",
         (f"{SR}::test_n5_require_revision_refuses_unbound_external_report",),
+    ),
+    Mutant(
+        "M72",
+        "a receipt's CI commit must be a merge built from its head",
+        "src/aicrg/receipt/verify.py",
+        "    if not sha or sha == head:",
+        "    if True:",
+        (f"{AT}::TestCiProvenance",),
+    ),
+    Mutant(
+        "M73",
+        "a GitHub attestation must sign the CI commit the gate ran on",
+        "src/aicrg/receipt/attest.py",
+        '    expected_commit = ((receipt.get("subject") or {}).get("ci") or {}).get("sha") or (',
+        '    expected_commit = ({}).get("sha") or (',
+        (f"{AT}::TestCiProvenance",),
+    ),
+    Mutant(
+        "M74",
+        "an unrelated CI commit is not an evidence revision for the head",
+        "src/aicrg/gate.py",
+        '    return ci.get("sha") if ci.get("relation") in ("head", "merge_of_head") else None',
+        '    return ci.get("sha")',
+        (PB,),
+    ),
+    Mutant(
+        "M75",
+        "a CI merge commit relates to the head only as the merge of exactly base and head",
+        "src/aicrg/gate.py",
+        '    return "merge_of_head" if parents == [base, head] else "unrelated"',
+        '    return "merge_of_head" if head in parents else "unrelated"',
+        (PB,),
+    ),
+    Mutant(
+        "M76",
+        "an ambient CI commit equal to nothing in the target is not related to the head",
+        "src/aicrg/gate.py",
+        '    if sha == head:\n        return "head"',
+        '    if True:\n        return "head"',
+        (PB,),
     ),
 )
 

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 import platform
+import re
 import sys
 import time
 from collections.abc import Callable
@@ -27,7 +28,7 @@ from aicrg.evidence.collect import (
     trusted_paths_touched,
 )
 from aicrg.git.diff import FileChange, Patch, extract_patch
-from aicrg.git.repo import Repo
+from aicrg.git.repo import GitError, Repo
 from aicrg.globmatch import has_control_chars, match_any
 from aicrg.llm.reviewer import ReviewerResult, run_reviewer
 from aicrg.model import CheckResult, Decision, Finding, GateError, Severity
@@ -202,6 +203,7 @@ def _provenance(repo: Repo, opts: GateOptions, run: _Run) -> tuple[str, str, str
     )
     ci = _ci_context()
     if ci:
+        ci["relation"] = _ci_relation(repo, ci["sha"], base_sha, head_sha)
         run.subject["ci"] = ci
     run.env_info["git"] = repo.git_version()
     return base_sha, merge_base, head_sha
@@ -222,6 +224,37 @@ def _ci_context() -> dict[str, str] | None:
         "run_attempt": "GITHUB_RUN_ATTEMPT",
     }
     return {"provider": "github-actions", **{k: env.get(v, "") for k, v in keys.items()}}
+
+
+_SHA = re.compile(r"[0-9a-f]{40}(?:[0-9a-f]{24})?")
+
+
+def _ci_relation(repo: Repo, sha: str, base: str, head: str) -> str:
+    """How the commit the CI run reports relates to the evaluated subject.
+
+    ``subject.ci`` is *execution* provenance (where the gate ran); ``base``/``head``
+    are *subject* provenance (what it evaluated). The runner may belong to another
+    repository or have checked out something else, so the CI commit is evidence
+    about the head only when it is the head (``head``) or GitHub's pull_request
+    merge of exactly ``base`` and ``head`` (``merge_of_head``). Anything else is
+    ``unrelated`` (or ``unresolved`` when the commit is not in this repository) and
+    must never stand in for the head.
+    """
+    if sha == head:
+        return "head"
+    if not _SHA.fullmatch(sha):
+        return "unresolved"
+    try:
+        parents = repo.git("rev-list", "--parents", "-n", "1", sha).decode().split()[1:]
+    except GitError:
+        return "unresolved"
+    return "merge_of_head" if parents == [base, head] else "unrelated"
+
+
+def _evidence_ci_sha(subject: dict[str, Any]) -> str | None:
+    """The CI commit, only when it may be accepted as an evidence revision for the head."""
+    ci = subject.get("ci") or {}
+    return ci.get("sha") if ci.get("relation") in ("head", "merge_of_head") else None
 
 
 NEVER_EXCLUDED = (".github/workflows/*.yml", ".github/workflows/*.yaml")
@@ -381,7 +414,7 @@ def _evidence(run: _Run, repo: Repo, patch: Patch, contract: ReviewContract) -> 
         container_image=run.opts.container_image,
         bundles=dict(run.opts.bundles),
         external=dict(run.opts.external_evidence),
-        ci_sha=(run.subject.get("ci") or {}).get("sha"),
+        ci_sha=_evidence_ci_sha(run.subject),
     )
     out = collect_evidence(repo, patch, c, opts, trusted_commit=run.subject.get("base"))
     run.evidence = out
