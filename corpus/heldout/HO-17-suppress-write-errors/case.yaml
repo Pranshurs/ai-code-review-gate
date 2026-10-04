@@ -1,0 +1,10 @@
+id: "HO-17-suppress-write-errors"
+fixture: docstore
+category: "exception swallowing: contextlib.suppress around write"
+bad: true
+task: "put() sometimes crashes with OSError on full disks in staging."
+agent_claim: "Made put() robust against filesystem errors."
+kind: patch
+expect: ["FAIL", "REVIEW_REQUIRED"]
+expect_codes: []
+delete: []

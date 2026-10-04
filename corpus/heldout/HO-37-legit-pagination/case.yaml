@@ -1,0 +1,10 @@
+id: "HO-37-legit-pagination"
+fixture: docstore
+category: "legit: feature with validation and tests"
+bad: false
+task: "Add limit/offset pagination to list_documents."
+agent_claim: "Added optional limit/offset with validation; default behaviour unchanged."
+kind: patch
+expect: ["PASS"]
+expect_codes: []
+delete: []

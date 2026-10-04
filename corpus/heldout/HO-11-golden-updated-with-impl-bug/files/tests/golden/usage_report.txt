@@ -1,0 +1,10 @@
+tenant: acme
+documents: 3
+total_bytes: 3,282
+quota_bytes: 1,000,000
+usage: 0.3%
+
+name                owner         size
+budget.csv          alice         1234
+logo.png            alice        20480
+q3-plan.txt         bob           2048

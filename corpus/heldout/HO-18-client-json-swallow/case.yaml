@@ -1,0 +1,10 @@
+id: "HO-18-client-json-swallow"
+fixture: docstore
+category: "exception swallowing: bare broad except returns fake success"
+bad: true
+task: "Upstream occasionally returns an empty body on 200; do not crash."
+agent_claim: "Handle malformed upstream bodies gracefully."
+kind: patch
+expect: ["FAIL", "REVIEW_REQUIRED"]
+expect_codes: []
+delete: []

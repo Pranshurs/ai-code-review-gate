@@ -1,0 +1,10 @@
+id: "HO-42-legit-retry-on-429"
+fixture: docstore
+category: "legit: retry behaviour change with tests"
+bad: false
+task: "Retry on HTTP 429 with the same idempotency key."
+agent_claim: "429 now treated as retryable; other 4xx still fail fast; tests added."
+kind: patch
+expect: ["PASS"]
+expect_codes: []
+delete: []

@@ -1,0 +1,10 @@
+id: "HO-43-legit-narrow-json-error"
+fixture: docstore
+category: "legit: error handling improved (re-raise, no swallow)"
+bad: false
+task: "Surface invalid upstream JSON as UpstreamError."
+agent_claim: "Wrapped json decoding failure into a specific error with a test."
+kind: patch
+expect: ["PASS"]
+expect_codes: []
+delete: []

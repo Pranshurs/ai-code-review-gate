@@ -1,0 +1,10 @@
+id: "HO-45-legit-docs"
+fixture: docstore
+category: "legit: docs only"
+bad: false
+task: "Document the token format and quota webhooks."
+agent_claim: "Docs-only change."
+kind: patch
+expect: ["PASS"]
+expect_codes: []
+delete: []

@@ -1,0 +1,10 @@
+id: "HO-47-error-required-check-missing-executable"
+fixture: docstore
+category: "infrastructure: required check cannot execute"
+bad: false
+task: "Fix README typo."
+agent_claim: "Docs-only."
+kind: patch
+expect: ["ERROR"]
+expect_codes: []
+delete: []

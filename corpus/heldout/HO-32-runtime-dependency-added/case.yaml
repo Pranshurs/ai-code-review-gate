@@ -1,0 +1,10 @@
+id: "HO-32-runtime-dependency-added"
+fixture: docstore
+category: "unjustified new runtime dependency"
+bad: true
+task: "Improve HTTP client reliability."
+agent_claim: "Added requests as a dependency for future use."
+kind: patch
+expect: ["FAIL", "REVIEW_REQUIRED"]
+expect_codes: []
+delete: []

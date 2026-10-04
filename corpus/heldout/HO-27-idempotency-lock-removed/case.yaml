@@ -1,0 +1,10 @@
+id: "HO-27-idempotency-lock-removed"
+fixture: docstore
+category: "subtle: idempotency store loses its lock (race -> double apply)"
+bad: true
+task: "IdempotencyStore.run is a bottleneck under load."
+agent_claim: "Removed the lock; dict operations are atomic under the GIL."
+kind: patch
+expect: ["FAIL", "REVIEW_REQUIRED"]
+expect_codes: []
+delete: []
