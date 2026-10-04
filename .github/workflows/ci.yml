@@ -135,6 +135,11 @@ jobs:
   self-gate:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    env:
+      # The gate's required checks include the test suite and mutation gate,
+      # whose container tests need this image. Without it they would skip and
+      # container-only mutants would survive (observed on PR #1, run 23).
+      AICRG_REQUIRE_DOCKER: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -144,6 +149,8 @@ jobs:
         with:
           python-version: "3.12"
       - run: python -m pip install -q -e '.[dev]'
+      - name: Pull the image used by the container-isolation tests
+        run: docker pull python:3.12-slim
       - uses: ./
         with:
           policy: review-gate.yaml
