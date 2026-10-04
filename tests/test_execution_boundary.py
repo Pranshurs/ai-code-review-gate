@@ -191,6 +191,16 @@ class TestContainerArgv:
                 ex.runtime_argv(ExecRequest(("x",), p, {}, 1), "n")
 
 
+def test_local_runs_get_a_private_temp_dir(tmp_path):
+    code = "import tempfile, sys; sys.stdout.write(tempfile.gettempdir())"
+    out = LocalExecutor().run(
+        ExecRequest((PY, "-c", code), tmp_path, {"PATH": "/usr/bin:/bin"}, 30)
+    )
+    path = out.output.decode()
+    assert Path(path).name.startswith("aicrg-tmp-")
+    assert not Path(path).exists()  # removed after the run
+
+
 def test_safe_write_never_follows_symlinks(tmp_path):
     ws = tmp_path / "ws"
     ws.mkdir()

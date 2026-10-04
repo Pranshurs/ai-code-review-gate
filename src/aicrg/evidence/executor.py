@@ -38,6 +38,7 @@ import re
 import shutil
 import signal
 import subprocess
+import tempfile
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -137,15 +138,26 @@ class LocalExecutor:
         return None
 
     def run(self, req: ExecRequest) -> ExecOutcome:
+        # A private temp dir per run: evidence must not share (or be disturbed by) the
+        # host's temp state, e.g. pytest's per-user basetemp, which concurrent pytest
+        # sessions prune.
+        tmp = tempfile.mkdtemp(prefix="aicrg-tmp-")
+        try:
+            env = {**req.env, "TMPDIR": tmp, "TEMP": tmp, "TMP": tmp}
+            return self._run(req, env)
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def _run(self, req: ExecRequest, env: dict[str, str]) -> ExecOutcome:
         argv = req.argv
-        exe = shutil.which(argv[0], path=req.env.get("PATH")) if "/" not in argv[0] else argv[0]
+        exe = shutil.which(argv[0], path=env.get("PATH")) if "/" not in argv[0] else argv[0]
         if exe is None:
             return ExecOutcome(None, b"", start_error=f"executable not found: {argv[0]}")
         try:
             proc = subprocess.Popen(
                 list(argv),
                 cwd=req.cwd,
-                env=req.env,
+                env=env,
                 stdin=subprocess.DEVNULL,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,

@@ -185,7 +185,7 @@ corpus is still pending.
 
 ## The gate checks itself
 
-* **Mutation gate** ([scripts/mutation_gate.py](scripts/mutation_gate.py)): 50
+* **Mutation gate** ([scripts/mutation_gate.py](scripts/mutation_gate.py)): 71
   targeted mutants, each breaking one security-critical invariant: stale HEAD
   accepted, failed command treated as PASS, policy read from head, trusted
   evidence read from the candidate, bundle digest ignored, surviving mutant
@@ -193,7 +193,12 @@ corpus is still pending.
   hidden as pre-existing, container downgraded to local, network or host env
   leaking into the container, unsigned receipt accepted when attestation is
   required, attestation for the wrong commit or from a PR-ref workflow,
-  doctor missing a disabled gate... All 50 are killed.
+  doctor missing a disabled gate, and one mutant per fix from the security
+  review... All 71 are killed.
+* **Cold security review** ([docs/SECURITY_REVIEW.md](docs/SECURITY_REVIEW.md)):
+  an independent reviewer found 1 BLOCKER and 9 HIGH issues, then 3 more HIGH
+  residuals while re-verifying the fixes; every one was reproduced, fixed and
+  pinned by a regression test.
 * **Self-review** ([docs/self-review/](docs/self-review/)): AICRG reviews its own
   changes under its own [review-gate.yaml](review-gate.yaml), then is handed
   adversarial copies of itself (weakened test, deleted trusted evidence, wrong
