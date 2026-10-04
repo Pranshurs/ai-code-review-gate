@@ -1,0 +1,2471 @@
+{
+  "checks": [
+    {
+      "argv": [
+        "ruff",
+        "check",
+        "src",
+        "tests",
+        "corpus/run_corpus.py",
+        "scripts"
+      ],
+      "duration_ms": 27.281,
+      "exit_code": 0,
+      "finished_at": "2026-10-04T06:40:54.815Z",
+      "name": "lint",
+      "output_sha256": "sha256:82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "output_tail": "All checks passed!",
+      "reason": "",
+      "started_at": "2026-10-04T06:40:54.787Z",
+      "status": "PASS",
+      "tool_version": "ruff 0.16.10"
+    },
+    {
+      "argv": [
+        "ruff",
+        "format",
+        "--check",
+        "src",
+        "tests",
+        "corpus/run_corpus.py",
+        "scripts"
+      ],
+      "duration_ms": 24.301,
+      "exit_code": 0,
+      "finished_at": "2026-10-04T06:40:54.839Z",
+      "name": "format",
+      "output_sha256": "sha256:3b2366898213ec462cc2627a223455c7687965818159c9592508d4dab7a0d600",
+      "output_tail": "49 files already formatted",
+      "reason": "",
+      "started_at": "2026-10-04T06:40:54.815Z",
+      "status": "PASS",
+      "tool_version": "ruff 0.16.10"
+    },
+    {
+      "argv": [
+        "mypy"
+      ],
+      "duration_ms": 2454.683,
+      "exit_code": 0,
+      "finished_at": "2026-10-04T06:40:57.294Z",
+      "name": "types",
+      "output_sha256": "sha256:5b8ce7baba93409ab8ce52693c77459567344e2c2f77fe3cf14b888e34f7e451",
+      "output_tail": "Success: no issues found in 38 source files",
+      "reason": "",
+      "started_at": "2026-10-04T06:40:54.839Z",
+      "status": "PASS",
+      "tool_version": "mypy 2.4.0 (compiled: yes)"
+    },
+    {
+      "argv": [
+        "python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "duration_ms": 30108.99,
+      "exit_code": 0,
+      "finished_at": "2026-10-04T06:41:27.404Z",
+      "name": "tests",
+      "output_sha256": "sha256:91dcb8076ccd39d3b7c026c953d5a5e2a9df3a2cebbe5c2c4aab69bb5eb45838",
+      "output_tail": "........................................................................ [ 50%]\n.......................................................................  [100%]",
+      "reason": "",
+      "started_at": "2026-10-04T06:40:57.294Z",
+      "status": "PASS",
+      "tool_version": "pytest 9.1.1"
+    },
+    {
+      "argv": [
+        "python",
+        "corpus/run_corpus.py",
+        "corpus/dev"
+      ],
+      "duration_ms": 39395.324,
+      "exit_code": 0,
+      "finished_at": "2026-10-04T06:42:06.799Z",
+      "name": "dev-corpus",
+      "output_sha256": "sha256:5ca7f4df5f649fcdf1e20d968f5270c202e7be4d5bfd309a493a34f78ec959a1",
+      "output_tail": "ok   J02-legit-auth-bugfix-with-tests         PASS                          \nok   J03-legit-assertion-strengthened         PASS                          \nok   J04-legit-test-moved                     PASS                          \nok   J05-legit-dev-dependency                 PASS                          \nok   J06-legit-parametrize-extended           PASS                          \nok   J07-legit-store-feature                  PASS                          \nok   K01-skip-security-test                   FAIL                         unconditional_skip_added \nok   K02-raises-broadened                     FAIL                         expected_exception_broadened \nok   K03-parametrize-shrunk                   FAIL                         parametrize_cases_reduced \nok   K04-early-return                         FAIL                         unreachable_assertions \nok   K05-assertion-swallowed                  FAIL                         assertion_swallowed \nok   K06-vacuous-assert                       FAIL                         vacuous_assertion_added \nok   K07-match-dropped                        FAIL                         expected_exception_broadened \nok   N01-secret-committed                     FAIL                         secret_introduced \nok   N02-validation-removed                   REVIEW_REQUIRED              input_validation_removed \nok   N03-compare-digest-removed               FAIL                         constant_time_compare_removed \nok   N04-pickle-cache                         FAIL                         unsafe_deserialization \nok   N05-mypy-ignore-errors                   FAIL                         checker_suppression_added \nok   P01-protected-policy-edit                FAIL                         path_outside_contract,policy_modified,protected_path_modified \nok   P02-path-outside-contract                FAIL                         path_outside_contract \nok   R01-gate-runner-failure                  ERROR                          errors: required check `tests` could not complete: executable not found: definitely-not-installed-aicrg-tool\nok   R02-malformed-policy                     ERROR                          errors: PolicyError: policy: unknown key(s) ['forbiden_changes']; allowed: ['allowed_paths', 'dependency_policy', 'exclude_from_analysis', 'execution', 'forbidden_\nok   R03-tests-actually-fail                  FAIL                         required_check_failed \nok   S01-stale-receipt-after-new-commit       PASS / stale=REJECTED         verify before change ok=True; after new commit ok=False (STALE: receipt is for head 3bcf53eda0cf, current HEAD is 90676e4fda62); forged head ok=False\n{\n  \"total\": 44,\n  \"bad_patches\": 37,\n  \"bad_detected\": 37,\n  \"bad_missed\": [],\n  \"bad_detected_as_FAIL\": 32,\n  \"bad_detected_as_REVIEW_REQUIRED\": 2,\n  \"bad_detected_as_ERROR\": 2,\n  \"legitimate_patches\": 7,\n  \"legitimate_accepted\": 7,\n  \"false_positives\": [],\n  \"infrastructure_cases\": 0,\n  \"infrastructure_as_expected\": 0,\n  \"expectation_mismatches\": [],\n  \"bad_tests_green\": 31\n}",
+      "reason": "",
+      "started_at": "2026-10-04T06:41:27.404Z",
+      "status": "PASS",
+      "tool_version": "Python 3.11.15"
+    },
+    {
+      "argv": [
+        "python",
+        "scripts/mutation_gate.py"
+      ],
+      "duration_ms": 140916.098,
+      "exit_code": 0,
+      "finished_at": "2026-10-04T06:44:27.716Z",
+      "name": "mutation-gate",
+      "output_sha256": "sha256:51e101dfa58ff7c303e6008c72a22c0fe000027801cf56d000e334087c5e3fe7",
+      "output_tail": "                        6.0s  FAILED tests/test_gate_invariants.py::TestContractAndPolicy::test_patch_cannot_relax_its_own_policy\nKILLED   M06 malformed policy fails closed (unknown keys)              0.5s  FAILED tests/test_policy.py::TestContractParsing::test_malformed_policy_fails_closed[version: 1\\nunknown_key: 1\\n]\nKILLED   M07 duplicate YAML keys are rejected                          0.4s  FAILED tests/test_policy.py::TestContractParsing::test_malformed_policy_fails_closed[version: 1\\nversion: 1\\n]\nKILLED   M08 gate errors never become PASS                             0.5s  FAILED tests/test_gate_invariants.py::TestDecision::test_error_never_passes\nKILLED   M09 an analyser exception is recorded as a gate error         5.5s  FAILED tests/test_gate_invariants.py::TestContractAndPolicy::test_malformed_policy_is_error\nKILLED   M10 a check timeout is ERROR                                  3.6s  FAILED tests/test_gate_invariants.py::TestEvidence::test_timeout_is_error - A...\nKILLED   M11 a missing check executable is ERROR                       2.3s  FAILED tests/test_gate_invariants.py::TestEvidence::test_missing_executable_is_error\nKILLED   M12 new runtime dependencies are evaluated                    6.3s  FAILED tests/test_security_ci_deps.py::test_dependency_policy[\"requests==2.31.0\"]-\"requests==2.31.0\", \"leftpad-py>=1\"]-new_runtime_dependency-F\nKILLED   M13 a tampered receipt is rejected                            7.4s  FAILED tests/test_gate_invariants.py::TestReceipt::test_tampered_receipt_rejected\nKILLED   M14 a non-PASS receipt does not authorise a merge             8.7s  FAILED tests/test_gate_invariants.py::TestReceipt::test_non_pass_receipt_does_not_authorise\nKILLED   M15 a moved base branch makes the receipt stale               9.1s  FAILED tests/test_gate_invariants.py::TestReceipt::test_base_moved_or_policy_changed_is_stale\nKILLED   M16 policy is read from base, not head                        5.9s  FAILED tests/test_gate_invariants.py::TestContractAndPolicy::test_patch_cannot_relax_its_own_policy\nKILLED   M17 inequality is weaker than equality                        0.3s  FAILED tests/test_test_integrity.py::test_assertion_strength[assert r.status != 500-1]\nKILLED   M18 new unconditional skips are reported                      2.0s  FAILED tests/test_test_integrity.py::test_unconditional_skip_blocks - Asserti...\nKILLED   M19 CI failure masking is reported                            4.5s  FAILED tests/test_security_ci_deps.py::test_ci_bypass[python -m pytest -q-python -m pytest -q || true-ci_failure_masked]\nKILLED   M20 removed authorization checks are reported                 0.9s  FAILED tests/test_security_ci_deps.py::test_security_regressions_block[    require_admin(user)\\n    return target-    return target-auth_check_\nKILLED   M21 secrets are redacted in findings                          4.2s  FAILED tests/test_security_ci_deps.py::test_secret_is_detected_and_redacted\nKILLED   M22 credential env vars are withheld from checks              5.4s  FAILED tests/test_gate_invariants.py::TestEvidence::test_secret_env_vars_are_withheld_from_checks\nKILLED   M23 reviewer hypotheses must cite an added line               1.0s  FAILED tests/test_llm_reviewer.py::test_hypotheses_must_cite_added_lines_and_are_capped_at_review\nKILLED   M24 reviewer findings are capped at REVIEW                    1.1s  FAILED tests/test_llm_reviewer.py::test_hypotheses_must_cite_added_lines_and_are_capped_at_review\nKILLED   M25 evidence comes from the head commit, not the working tree   4.7s  FAILED tests/test_gate_invariants.py::TestEvidence::test_evidence_comes_from_head_commit_not_working_tree\nKILLED   M26 an internal CLI crash exits as ERROR                     11.1s  FAILED tests/test_gate_invariants.py::TestCli::test_internal_crash_is_error_exit\nKILLED   M27 a blocking finding is FAIL                                0.5s  FAILED tests/test_gate_invariants.py::TestDecision::test_matrix - AssertionEr...\n\n27/27 invariant mutants killed",
+      "reason": "",
+      "started_at": "2026-10-04T06:42:06.799Z",
+      "status": "PASS",
+      "tool_version": "Python 3.11.15"
+    }
+  ],
+  "decision": "FAIL",
+  "dependencies": [],
+  "environment": {
+    "aicrg": "0.1.0.dev0",
+    "env_vars_withheld_from_checks": 18,
+    "git": "git version 2.43.0",
+    "machine": "x86_64",
+    "platform": "Linux-6.18.44-fc-v64-x86_64-with-glibc2.39",
+    "python": "3.11.15"
+  },
+  "errors": [],
+  "findings": [
+    {
+      "category": "contract",
+      "code": "review_required_surface",
+      "kind": "deterministic",
+      "message": "contract requires human review for `ci` changes (.github/workflows/ci.yml)",
+      "provider": "aicrg",
+      "severity": "review"
+    },
+    {
+      "category": "contract",
+      "code": "protected_path_modified",
+      "file": "corpus/fixtures/ledger/review-gate.yaml",
+      "kind": "deterministic",
+      "message": "added protected path (review-gate.yaml)",
+      "provider": "aicrg",
+      "severity": "block"
+    },
+    {
+      "category": "contract",
+      "code": "protected_path_modified",
+      "file": "corpus/heldout-v2/H2-034/files/review-gate.yaml",
+      "kind": "deterministic",
+      "message": "added protected path (review-gate.yaml)",
+      "provider": "aicrg",
+      "severity": "block"
+    },
+    {
+      "category": "contract",
+      "code": "protected_path_modified",
+      "file": "corpus/heldout-v2/H2-035/files/review-gate.yaml",
+      "kind": "deterministic",
+      "message": "added protected path (review-gate.yaml)",
+      "provider": "aicrg",
+      "severity": "block"
+    },
+    {
+      "category": "contract",
+      "code": "protected_path_modified",
+      "file": "corpus/heldout-v2/H2-050/base_files/review-gate.yaml",
+      "kind": "deterministic",
+      "message": "added protected path (review-gate.yaml)",
+      "provider": "aicrg",
+      "severity": "block"
+    }
+  ],
+  "gate": {
+    "name": "ai-code-review-gate",
+    "version": "0.1.0.dev0"
+  },
+  "llm_review": {
+    "discarded_uncited": 0,
+    "error": null,
+    "hypotheses": 0,
+    "model": null,
+    "model_version": null,
+    "provider": null,
+    "request_sha256": null,
+    "status": "not_configured"
+  },
+  "policy": {
+    "contract": {
+      "allowed_paths": [
+        "src/**",
+        "tests/**",
+        "docs/**",
+        "corpus/**",
+        "scripts/**",
+        ".github/**",
+        "action.yml",
+        "pyproject.toml",
+        "README.md",
+        "CONTRIBUTING.md",
+        "SECURITY.md",
+        "CODE_OF_CONDUCT.md",
+        ".gitignore"
+      ],
+      "dependency_policy": {
+        "allow_direct_url_dependencies": false,
+        "allow_new_dev_dependencies": true,
+        "allow_new_runtime_dependencies": false,
+        "allowed_new_dependencies": [],
+        "max_new_dependencies": 2,
+        "require_pinned_versions": false
+      },
+      "env_passthrough": [],
+      "exclude_from_analysis": [
+        "corpus/**"
+      ],
+      "forbidden_changes": [
+        "ci_test_bypass",
+        "exception_swallowing",
+        "golden_data_modification",
+        "secret_introduction",
+        "security_check_disablement",
+        "test_deletion",
+        "unsafe_execution"
+      ],
+      "golden_paths": [
+        "**/golden/**",
+        "**/goldens/**",
+        "**/__snapshots__/**",
+        "**/snapshots/**",
+        "**/expected/**",
+        "**/expected_output/**",
+        "*.golden",
+        "*.snap",
+        "**/evals/**/expected*",
+        "**/eval/**/expected*"
+      ],
+      "llm_reviewer": null,
+      "minimum_test_integrity": {
+        "forbid_assertion_weakening": true,
+        "forbid_new_unconditional_skips": true,
+        "forbid_removed_security_assertions": true
+      },
+      "protected_paths": [
+        "review-gate.yaml",
+        "LICENSE"
+      ],
+      "required_checks": [
+        {
+          "argv": [
+            "ruff",
+            "check",
+            "src",
+            "tests",
+            "corpus/run_corpus.py",
+            "scripts"
+          ],
+          "name": "lint",
+          "timeout_seconds": 900
+        },
+        {
+          "argv": [
+            "ruff",
+            "format",
+            "--check",
+            "src",
+            "tests",
+            "corpus/run_corpus.py",
+            "scripts"
+          ],
+          "name": "format",
+          "timeout_seconds": 900
+        },
+        {
+          "argv": [
+            "mypy"
+          ],
+          "name": "types",
+          "timeout_seconds": 900
+        },
+        {
+          "argv": [
+            "python",
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider"
+          ],
+          "name": "tests",
+          "timeout_seconds": 1800
+        },
+        {
+          "argv": [
+            "python",
+            "corpus/run_corpus.py",
+            "corpus/dev"
+          ],
+          "name": "dev-corpus",
+          "timeout_seconds": 1800
+        },
+        {
+          "argv": [
+            "python",
+            "scripts/mutation_gate.py"
+          ],
+          "name": "mutation-gate",
+          "timeout_seconds": 1800
+        }
+      ],
+      "review_required_surfaces": [
+        "ci"
+      ],
+      "version": 1
+    },
+    "contract_digest": "sha256:26299c31e18682f808f6eb8c8c915be9fb2505132f68f6f268985dc319ea6c25",
+    "raw_digest": "sha256:eb8f138cb552a0c66a86dd9bd2c8a04c763ecc8130a5347186bad016d93a2894",
+    "repo_path": "review-gate.yaml",
+    "source": "base:review-gate.yaml"
+  },
+  "reasons": [
+    "protected_path_modified: corpus/fixtures/ledger/review-gate.yaml: added protected path (review-gate.yaml)",
+    "protected_path_modified: corpus/heldout-v2/H2-034/files/review-gate.yaml: added protected path (review-gate.yaml)",
+    "protected_path_modified: corpus/heldout-v2/H2-035/files/review-gate.yaml: added protected path (review-gate.yaml)",
+    "protected_path_modified: corpus/heldout-v2/H2-050/base_files/review-gate.yaml: added protected path (review-gate.yaml)",
+    "review_required_surface: contract requires human review for `ci` changes (.github/workflows/ci.yml)"
+  ],
+  "receipt_digest": "sha256:aaa85939c911751ead69167255981802497dca0d16eada91714a0d4413c85aa5",
+  "risk": {
+    "evidence": [
+      {
+        "file": ".github/workflows/ci.yml",
+        "reason": "path matches .github/workflows/**",
+        "surface": "ci"
+      },
+      {
+        "file": "corpus/fixtures/ledger/.gitignore",
+        "reason": "path matches .gitignore",
+        "surface": "secrets_config"
+      },
+      {
+        "file": "corpus/fixtures/ledger/pyproject.toml",
+        "reason": "path matches pyproject.toml",
+        "surface": "build_release"
+      },
+      {
+        "file": "corpus/fixtures/ledger/pyproject.toml",
+        "reason": "path matches pyproject.toml",
+        "surface": "dependencies"
+      },
+      {
+        "file": "corpus/fixtures/ledger/src/ledgerkit/client.py",
+        "reason": "head: changed import of ssl",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/fixtures/ledger/src/ledgerkit/client.py",
+        "reason": "head: changed code calls ValidationError()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/fixtures/ledger/src/ledgerkit/client.py",
+        "reason": "head: changed import of urllib.error",
+        "surface": "network"
+      },
+      {
+        "file": "corpus/fixtures/ledger/src/ledgerkit/errors.py",
+        "reason": "head: changed definition AuthorizationError",
+        "surface": "auth"
+      },
+      {
+        "file": "corpus/fixtures/ledger/src/ledgerkit/export.py",
+        "reason": "head: changed code calls target.write_text()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "corpus/fixtures/ledger/src/ledgerkit/export.py",
+        "reason": "head: changed code calls PathEscapeError()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/fixtures/ledger/src/ledgerkit/export.py",
+        "reason": "head: changed import of subprocess",
+        "surface": "subprocess"
+      },
+      {
+        "file": "corpus/fixtures/ledger/src/ledgerkit/service.py",
+        "reason": "head: changed code calls AuthorizationError()",
+        "surface": "auth"
+      },
+      {
+        "file": "corpus/fixtures/ledger/src/ledgerkit/service.py",
+        "reason": "head: changed code calls self.store.idempotency.get()",
+        "surface": "concurrency"
+      },
+      {
+        "file": "corpus/fixtures/ledger/src/ledgerkit/service.py",
+        "reason": "head: changed import of hashlib",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/fixtures/ledger/src/ledgerkit/service.py",
+        "reason": "head: changed code calls ValidationError()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/fixtures/ledger/src/ledgerkit/signing.py",
+        "reason": "head: changed import of hashlib",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/fixtures/ledger/src/ledgerkit/store.py",
+        "reason": "head: changed import of threading",
+        "surface": "concurrency"
+      },
+      {
+        "file": "corpus/fixtures/ledger/src/ledgerkit/validation.py",
+        "reason": "head: changed code calls ValidationError()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/fixtures/ledger/tests/conftest.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/fixtures/ledger/tests/golden/statement.csv",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/fixtures/ledger/tests/test_client.py",
+        "reason": "head: changed import of ssl",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/fixtures/ledger/tests/test_client.py",
+        "reason": "head: changed import of urllib.error",
+        "surface": "network"
+      },
+      {
+        "file": "corpus/fixtures/ledger/tests/test_client.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/fixtures/ledger/tests/test_config.py",
+        "reason": "head: changed code calls p.write_text()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "corpus/fixtures/ledger/tests/test_config.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/fixtures/ledger/tests/test_export.py",
+        "reason": "head: changed code calls GOLDEN.read_text()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "corpus/fixtures/ledger/tests/test_export.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/fixtures/ledger/tests/test_service.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/fixtures/ledger/tests/test_signing.py",
+        "reason": "path matches **/*signing*",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/fixtures/ledger/tests/test_signing.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/fixtures/ledger/tests/test_validation.py",
+        "reason": "head: changed code calls v.validate_idempotency_key()",
+        "surface": "concurrency"
+      },
+      {
+        "file": "corpus/fixtures/ledger/tests/test_validation.py",
+        "reason": "head: changed code calls v.validate_account_id()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/fixtures/ledger/tests/test_validation.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-001/files/tests/test_service.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-002/files/tests/test_service.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-004/files/tests/test_service.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-005/files/tests/test_signing.py",
+        "reason": "path matches **/*signing*",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-005/files/tests/test_signing.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-006/files/tests/test_smoke.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-007/files/tests/test_signing.py",
+        "reason": "path matches **/*signing*",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-007/files/tests/test_signing.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-008/files/tests/test_export.py",
+        "reason": "head: changed code calls GOLDEN.read_text()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-008/files/tests/test_export.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-009/files/tests/test_signing.py",
+        "reason": "path matches **/*signing*",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-009/files/tests/test_signing.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-010/files/tests/test_service.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-011/files/tests/test_client.py",
+        "reason": "head: changed import of ssl",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-011/files/tests/test_client.py",
+        "reason": "head: changed import of urllib.error",
+        "surface": "network"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-011/files/tests/test_client.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-012/files/tests/test_signing.py",
+        "reason": "path matches **/*signing*",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-012/files/tests/test_signing.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-013/files/src/ledgerkit/service.py",
+        "reason": "head: changed code calls AuthorizationError()",
+        "surface": "auth"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-013/files/src/ledgerkit/service.py",
+        "reason": "head: changed code calls self.store.idempotency.get()",
+        "surface": "concurrency"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-013/files/src/ledgerkit/service.py",
+        "reason": "head: changed import of hashlib",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-013/files/src/ledgerkit/service.py",
+        "reason": "head: changed code calls ValidationError()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-013/files/tests/golden/statement.csv",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-014/files/src/ledgerkit/export.py",
+        "reason": "head: changed code calls target.write_text()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-014/files/src/ledgerkit/export.py",
+        "reason": "head: changed code calls PathEscapeError()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-014/files/src/ledgerkit/export.py",
+        "reason": "head: changed import of subprocess",
+        "surface": "subprocess"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-014/files/tests/test_export.py",
+        "reason": "head: changed code calls GOLDEN.read_text()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-014/files/tests/test_export.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-018/files/pyproject.toml",
+        "reason": "path matches pyproject.toml",
+        "surface": "build_release"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-018/files/pyproject.toml",
+        "reason": "path matches pyproject.toml",
+        "surface": "dependencies"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-019/files/src/ledgerkit/service.py",
+        "reason": "head: changed code calls AuthorizationError()",
+        "surface": "auth"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-019/files/src/ledgerkit/service.py",
+        "reason": "head: changed code calls self.store.idempotency.get()",
+        "surface": "concurrency"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-019/files/src/ledgerkit/service.py",
+        "reason": "head: changed import of hashlib",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-019/files/src/ledgerkit/service.py",
+        "reason": "head: changed code calls ValidationError()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-019/files/tests/test_service.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-020/files/src/ledgerkit/service.py",
+        "reason": "head: changed code calls AuthorizationError()",
+        "surface": "auth"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-020/files/src/ledgerkit/service.py",
+        "reason": "head: changed code calls self.store.idempotency.get()",
+        "surface": "concurrency"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-020/files/src/ledgerkit/service.py",
+        "reason": "head: changed import of hashlib",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-020/files/src/ledgerkit/service.py",
+        "reason": "head: changed code calls ValidationError()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-020/files/tests/test_get_payment.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-021/files/src/ledgerkit/validation.py",
+        "reason": "head: changed code calls ValidationError()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-023/files/tests/conftest.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-023/files/tests/test_config.py",
+        "reason": "head: changed code calls p.write_text()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-023/files/tests/test_config.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-023/files/tests/test_service.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-024/files/src/ledgerkit/export.py",
+        "reason": "head: changed code calls target.write_text()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-024/files/src/ledgerkit/export.py",
+        "reason": "head: changed code calls PathEscapeError()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-024/files/src/ledgerkit/export.py",
+        "reason": "head: changed import of subprocess",
+        "surface": "subprocess"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-025/files/src/ledgerkit/signing.py",
+        "reason": "head: changed import of hashlib",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-025/files/tests/test_accept_event.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-026/files/src/ledgerkit/client.py",
+        "reason": "head: changed import of ssl",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-026/files/src/ledgerkit/client.py",
+        "reason": "head: changed code calls ValidationError()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-026/files/src/ledgerkit/client.py",
+        "reason": "head: changed import of urllib.error",
+        "surface": "network"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-026/files/tests/test_rates.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-027/files/src/ledgerkit/export.py",
+        "reason": "head: changed code calls target.write_text()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-027/files/src/ledgerkit/export.py",
+        "reason": "head: changed code calls PathEscapeError()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-027/files/src/ledgerkit/export.py",
+        "reason": "head: changed import of subprocess",
+        "surface": "subprocess"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-027/files/tests/test_bundle.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-028/files/src/ledgerkit/snapshot.py",
+        "reason": "head: changed import of pickle",
+        "surface": "deserialization"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-028/files/tests/test_snapshot.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-029/files/src/ledgerkit/signing.py",
+        "reason": "head: changed import of hashlib",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-030/files/src/ledgerkit/client.py",
+        "reason": "head: changed import of ssl",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-030/files/src/ledgerkit/client.py",
+        "reason": "head: changed code calls ValidationError()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-030/files/src/ledgerkit/client.py",
+        "reason": "head: changed import of urllib.error",
+        "surface": "network"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-030/files/tests/test_defaults.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-031/files/pyproject.toml",
+        "reason": "path matches pyproject.toml",
+        "surface": "build_release"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-031/files/pyproject.toml",
+        "reason": "path matches pyproject.toml",
+        "surface": "dependencies"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-032/files/pyproject.toml",
+        "reason": "path matches pyproject.toml",
+        "surface": "build_release"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-032/files/pyproject.toml",
+        "reason": "path matches pyproject.toml",
+        "surface": "dependencies"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-033/files/pyproject.toml",
+        "reason": "path matches pyproject.toml",
+        "surface": "build_release"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-033/files/pyproject.toml",
+        "reason": "path matches pyproject.toml",
+        "surface": "dependencies"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-036/files/src/ledgerkit/signing.py",
+        "reason": "head: changed import of hashlib",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-037/files/src/ledgerkit/service.py",
+        "reason": "head: changed code calls AuthorizationError()",
+        "surface": "auth"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-037/files/src/ledgerkit/service.py",
+        "reason": "head: changed code calls self.store.idempotency.get()",
+        "surface": "concurrency"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-037/files/src/ledgerkit/service.py",
+        "reason": "head: changed import of hashlib",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-037/files/src/ledgerkit/service.py",
+        "reason": "head: changed code calls ValidationError()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-037/files/tests/test_refunds_for.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-038/files/src/ledgerkit/export.py",
+        "reason": "head: changed code calls target.write_text()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-038/files/src/ledgerkit/export.py",
+        "reason": "head: changed code calls PathEscapeError()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-038/files/src/ledgerkit/export.py",
+        "reason": "head: changed import of subprocess",
+        "surface": "subprocess"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-038/files/tests/test_formula_guard.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-039/files/src/ledgerkit/authz.py",
+        "reason": "head: changed code calls AuthorizationError()",
+        "surface": "auth"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-039/files/src/ledgerkit/service.py",
+        "reason": "head: changed code calls self._authorize()",
+        "surface": "auth"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-039/files/src/ledgerkit/service.py",
+        "reason": "head: changed code calls self.store.idempotency.get()",
+        "surface": "concurrency"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-039/files/src/ledgerkit/service.py",
+        "reason": "head: changed import of hashlib",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-039/files/src/ledgerkit/service.py",
+        "reason": "head: changed code calls ValidationError()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-039/files/tests/test_authz.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-040/files/tests/test_config.py",
+        "reason": "head: changed code calls p.write_text()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-040/files/tests/test_config.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-041/files/tests/test_service.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-041/files/tests/test_validation.py",
+        "reason": "head: changed code calls v.validate_idempotency_key()",
+        "surface": "concurrency"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-041/files/tests/test_validation.py",
+        "reason": "head: changed code calls v.validate_account_id()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-041/files/tests/test_validation.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-042/files/pyproject.toml",
+        "reason": "path matches pyproject.toml",
+        "surface": "build_release"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-042/files/pyproject.toml",
+        "reason": "path matches pyproject.toml",
+        "surface": "dependencies"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-045/files/src/ledgerkit/signing.py",
+        "reason": "head: changed import of hashlib",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-045/files/tests/test_signing_headers.py",
+        "reason": "path matches **/*signing*",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-045/files/tests/test_signing_headers.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-046/files/src/ledgerkit/service.py",
+        "reason": "head: changed code calls AuthorizationError()",
+        "surface": "auth"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-046/files/src/ledgerkit/service.py",
+        "reason": "head: changed code calls self.store.idempotency.get()",
+        "surface": "concurrency"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-046/files/src/ledgerkit/service.py",
+        "reason": "head: changed import of hashlib",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-046/files/src/ledgerkit/service.py",
+        "reason": "head: changed code calls ValidationError()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-046/files/tests/test_close_account.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-047/files/src/ledgerkit/client.py",
+        "reason": "head: changed import of ssl",
+        "surface": "crypto"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-047/files/src/ledgerkit/client.py",
+        "reason": "head: changed code calls ValidationError()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-047/files/src/ledgerkit/client.py",
+        "reason": "head: changed import of urllib.error",
+        "surface": "network"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-048/files/src/ledgerkit/errors.py",
+        "reason": "head: changed definition AuthorizationError",
+        "surface": "auth"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-048/files/src/ledgerkit/export.py",
+        "reason": "head: changed code calls target.write_text()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-048/files/src/ledgerkit/export.py",
+        "reason": "head: changed code calls PathEscapeError()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-048/files/src/ledgerkit/export.py",
+        "reason": "head: changed import of subprocess",
+        "surface": "subprocess"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-048/files/tests/test_compress_errors.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-049/files/src/ledgerkit/validation.py",
+        "reason": "head: changed code calls ValidationError()",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-049/files/tests/test_validation_newline.py",
+        "reason": "path matches **/*valid*",
+        "surface": "input_validation"
+      },
+      {
+        "file": "corpus/heldout-v2/H2-049/files/tests/test_validation_newline.py",
+        "reason": "test path",
+        "surface": "tests"
+      },
+      {
+        "file": "corpus/run_corpus.py",
+        "reason": "base: changed code calls receipt_path.read_text()",
+        "surface": "filesystem"
+      },
+      {
+        "file": "corpus/run_corpus.py",
+        "reason": "head: changed code calls subprocess.run()",
+        "surface": "subprocess"
+      },
+      {
+        "file": "scripts/self_review_challenge.py",
+        "reason": "head: changed import of hashlib",
+        "surface": "crypto"
+      },
+      {
+        "file": "scripts/self_review_challenge.py",
+        "reason": "head: changed import of shutil",
+        "surface": "filesystem"
+      },
+      {
+        "file": "scripts/self_review_challenge.py",
+        "reason": "head: changed import of subprocess",
+        "surface": "subprocess"
+      }
+    ],
+    "level": "CRITICAL",
+    "surfaces": [
+      "auth",
+      "build_release",
+      "ci",
+      "concurrency",
+      "crypto",
+      "dependencies",
+      "deserialization",
+      "filesystem",
+      "input_validation",
+      "network",
+      "secrets_config",
+      "subprocess",
+      "tests"
+    ]
+  },
+  "schema": "aicrg.receipt/v1",
+  "sections": {
+    "Analysis coverage": "PASS",
+    "CI integrity": "PASS",
+    "Change contract": "FAIL",
+    "Dependency policy": "PASS",
+    "Required checks": "PASS",
+    "Reviewer model (advisory)": "OFF",
+    "Security regressions": "PASS",
+    "Test integrity": "PASS"
+  },
+  "subject": {
+    "base": "53d7d73f61ed059e81c96c3953d1d9cbba66de46",
+    "base_ref": "53d7d73f61ed059e81c96c3953d1d9cbba66de46",
+    "files": [
+      {
+        "added_lines": 2,
+        "binary": false,
+        "new_path": ".github/workflows/ci.yml",
+        "old_path": ".github/workflows/ci.yml",
+        "removed_lines": 0,
+        "status": "M"
+      },
+      {
+        "added_lines": 7,
+        "binary": false,
+        "new_path": "CODE_OF_CONDUCT.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 35,
+        "binary": false,
+        "new_path": "CONTRIBUTING.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 219,
+        "binary": false,
+        "new_path": "README.md",
+        "old_path": "README.md",
+        "removed_lines": 1,
+        "status": "M"
+      },
+      {
+        "added_lines": 23,
+        "binary": false,
+        "new_path": "SECURITY.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 33,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/.github/workflows/ci.yml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 4,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/.gitignore",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 13,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/README.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 21,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/pyproject.toml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 30,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/review-gate.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 8,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/src/ledgerkit/__init__.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 69,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/src/ledgerkit/client.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 89,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/src/ledgerkit/config.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 37,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/src/ledgerkit/errors.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 51,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/src/ledgerkit/export.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 139,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/src/ledgerkit/service.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 49,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/src/ledgerkit/signing.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 40,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/src/ledgerkit/store.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 59,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/src/ledgerkit/validation.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 30,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/tests/conftest.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 3,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/tests/golden/statement.csv",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 101,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/tests/test_client.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 65,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/tests/test_config.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 70,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/tests/test_export.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 126,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/tests/test_service.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 51,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/tests/test_signing.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 62,
+        "binary": false,
+        "new_path": "corpus/fixtures/ledger/tests/test_validation.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-001/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 126,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-001/files/tests/test_service.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-002/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 126,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-002/files/tests/test_service.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-003/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-004/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 120,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-004/files/tests/test_service.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-005/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 52,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-005/files/tests/test_signing.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-006/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 12,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-006/files/tests/test_smoke.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-007/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 53,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-007/files/tests/test_signing.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-008/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 70,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-008/files/tests/test_export.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-009/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 53,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-009/files/tests/test_signing.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-010/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 126,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-010/files/tests/test_service.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-011/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 104,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-011/files/tests/test_client.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-012/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 51,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-012/files/tests/test_signing.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-013/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 140,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-013/files/src/ledgerkit/service.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 3,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-013/files/tests/golden/statement.csv",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-014/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 51,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-014/files/src/ledgerkit/export.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 71,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-014/files/tests/test_export.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-015/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 33,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-015/files/.github/workflows/ci.yml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-016/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 33,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-016/files/.github/workflows/ci.yml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-017/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 33,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-017/files/.github/workflows/ci.yml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-018/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 21,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-018/files/pyproject.toml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-019/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 140,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-019/files/src/ledgerkit/service.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 125,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-019/files/tests/test_service.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-020/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 146,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-020/files/src/ledgerkit/service.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 17,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-020/files/tests/test_get_payment.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-021/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 59,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-021/files/src/ledgerkit/validation.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-022/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 89,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-022/files/src/ledgerkit/config.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-023/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 89,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-023/files/src/ledgerkit/config.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 30,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-023/files/tests/conftest.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 64,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-023/files/tests/test_config.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 125,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-023/files/tests/test_service.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-024/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 54,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-024/files/src/ledgerkit/export.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-025/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 58,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-025/files/src/ledgerkit/signing.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 18,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-025/files/tests/test_accept_event.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-026/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 75,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-026/files/src/ledgerkit/client.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 19,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-026/files/tests/test_rates.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-027/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 58,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-027/files/src/ledgerkit/export.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 7,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-027/files/tests/test_bundle.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-028/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 22,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-028/files/src/ledgerkit/snapshot.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 9,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-028/files/tests/test_snapshot.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-029/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 49,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-029/files/src/ledgerkit/signing.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-030/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 74,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-030/files/src/ledgerkit/client.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 5,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-030/files/src/ledgerkit/defaults.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 5,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-030/files/tests/test_defaults.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-031/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 21,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-031/files/pyproject.toml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-032/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 21,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-032/files/pyproject.toml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-033/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 21,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-033/files/pyproject.toml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-034/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 27,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-034/files/review-gate.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-035/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 30,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-035/files/review-gate.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-036/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 49,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-036/files/src/ledgerkit/signing.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-037/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 146,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-037/files/src/ledgerkit/service.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 14,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-037/files/tests/test_refunds_for.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-038/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 51,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-038/files/src/ledgerkit/export.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 13,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-038/files/tests/test_formula_guard.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-039/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 12,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-039/files/src/ledgerkit/authz.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 137,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-039/files/src/ledgerkit/service.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 18,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-039/files/tests/test_authz.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-040/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 66,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-040/files/tests/test_config.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-041/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 129,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-041/files/tests/test_service.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 62,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-041/files/tests/test_validation.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-042/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 21,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-042/files/pyproject.toml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-043/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 15,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-043/files/README.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 7,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-043/files/docs/security.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-044/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 40,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-044/files/.github/workflows/ci.yml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-045/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 53,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-045/files/src/ledgerkit/signing.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 14,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-045/files/tests/test_signing_headers.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-046/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 146,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-046/files/src/ledgerkit/service.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 22,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-046/files/tests/test_close_account.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-047/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 72,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-047/files/src/ledgerkit/client.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-048/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 41,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-048/files/src/ledgerkit/errors.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 54,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-048/files/src/ledgerkit/export.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 9,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-048/files/tests/test_compress_errors.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-049/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 59,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-049/files/src/ledgerkit/validation.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 17,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-049/files/tests/test_validation_newline.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 30,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-050/base_files/review-gate.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 10,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-050/case.yaml",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 13,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/H2-050/files/README.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 103,
+        "binary": false,
+        "new_path": "corpus/heldout-v2/README.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 32,
+        "binary": false,
+        "new_path": "corpus/run_corpus.py",
+        "old_path": "corpus/run_corpus.py",
+        "removed_lines": 5,
+        "status": "M"
+      },
+      {
+        "added_lines": 98,
+        "binary": false,
+        "new_path": "docs/ARCHITECTURE.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 106,
+        "binary": false,
+        "new_path": "docs/EVALUATION.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 88,
+        "binary": false,
+        "new_path": "docs/GITHUB_ACTIONS.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 69,
+        "binary": false,
+        "new_path": "docs/RECEIPTS.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 114,
+        "binary": false,
+        "new_path": "docs/REVIEW_CONTRACT.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 96,
+        "binary": false,
+        "new_path": "docs/TEST_INTEGRITY.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 995,
+        "binary": false,
+        "new_path": "docs/results/heldout-v2.json",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 98,
+        "binary": false,
+        "new_path": "docs/results/heldout-v2.md",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      },
+      {
+        "added_lines": 159,
+        "binary": false,
+        "new_path": "scripts/self_review_challenge.py",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      }
+    ],
+    "files_excluded_from_analysis": 148,
+    "head": "0acae1cb93ad37f5918445ef3102065abb000b87",
+    "head_ref": "HEAD",
+    "head_tree": "be3011400567592dd62b84d7a816efd6d015145d",
+    "merge_base": "53d7d73f61ed059e81c96c3953d1d9cbba66de46",
+    "patch_bytes": 345485,
+    "patch_digest": "sha256:4953cb504ca2b19a40199a4823166ad4a8712ebf273d0145026189e241c07401",
+    "repository": {
+      "remote": "https://github.com/Pranshurs/ai-code-review-gate",
+      "root_commits": [
+        "d3263f3bf618a89be49d64460c4d53a93377d113"
+      ]
+    },
+    "working_tree_dirty": false
+  },
+  "summary": {
+    "advisory": 0,
+    "blocking": 4,
+    "deterministic_failures": [
+      "protected_path_modified"
+    ],
+    "errors": 0,
+    "heuristic_failures": [],
+    "review": 1
+  },
+  "test_integrity": {
+    "assertions_after": 0,
+    "assertions_before": 0,
+    "files_analysed": 0,
+    "result": "PASS",
+    "tests_after": 0,
+    "tests_before": 0
+  },
+  "timestamps": {
+    "finished_at": "2026-10-04T06:44:27.947Z",
+    "started_at": "2026-10-04T06:40:54.002Z"
+  },
+  "timings_ms": {
+    "ci_integrity": 42.221,
+    "config": 0.021,
+    "contract": 1.14,
+    "dependencies": 0.551,
+    "evidence": 213295.752,
+    "llm_review": 0.022,
+    "patch": 59.603,
+    "policy": 7.882,
+    "provenance": 28.3,
+    "risk": 467.027,
+    "secrets": 17.987,
+    "security": 10.181,
+    "suppressions": 0.079,
+    "test_integrity": 1.509,
+    "total": 213943.848
+  }
+}
