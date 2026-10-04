@@ -58,6 +58,8 @@ jobs:
         run: python corpus/run_corpus.py corpus/dev --out corpus-results
       - name: Held-out v1 (post-hoc; ratchet on the 6 recorded misses)
         run: python corpus/run_corpus.py corpus/heldout --out corpus-results --allow-mismatches 6
+      - name: Held-out v2 (blind; ratchet on the 10 recorded mismatches)
+        run: python corpus/run_corpus.py corpus/heldout-v2 --out corpus-results --allow-mismatches 10
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
