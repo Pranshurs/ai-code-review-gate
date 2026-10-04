@@ -161,3 +161,22 @@ determined tamper that restores its own write permission (as the files' owner
 can) and requires ERROR naming the modification; M53 now targets it. This
 matches the documented limit: locally, trusted files are protected by
 detection, not prevention.
+
+### PR #1 run 23: container tests could skip silently inside the gate
+
+On the pull request, `self-gate` ran AICRG under `main`'s contract and its
+required check `mutation-gate` **failed**, while the standalone `mutation` job
+passed 76/76 on the same commit. Cause: the `self-gate` job never pulled the
+`python:3.12-slim` test image, so the suite judged Docker unavailable and
+skipped the container tests, and container-only mutants survived (reproduced:
+with the image absent, M67 survives). The gate failed closed, as it should.
+But with the 0.2 contract merged, every future PR's self-gate would fail the
+same way. A related gap: three container tests in
+`test_security_review_regressions.py` skipped on `not DOCKER` and ignored
+`AICRG_REQUIRE_DOCKER=1` (reproduced), contrary to the documented guarantee
+that a missing runtime fails rather than skips.
+
+Fix: those tests use the shared `needs_docker` marker (image missing with
+`AICRG_REQUIRE_DOCKER=1` now fails 3 tests; without it they skip; with the
+image they pass), and the `self-gate` job pulls the image and sets
+`AICRG_REQUIRE_DOCKER=1` (CI change, separate commit).

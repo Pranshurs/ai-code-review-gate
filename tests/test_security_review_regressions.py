@@ -27,7 +27,7 @@ from aicrg.model import Decision
 from aicrg.receipt.receipt import write_receipt
 from aicrg.receipt.verify import verify_receipt
 from tests.conftest import codes
-from tests.test_execution_boundary import DOCKER, IMAGE
+from tests.test_execution_boundary import IMAGE, needs_docker
 
 PY = sys.executable
 
@@ -170,7 +170,7 @@ def test_f3_owner_restoring_write_permission_is_detected_local(repo, gate):
     assert "modified during its own run" in str(run.to_json()), run.to_json()
 
 
-@pytest.mark.skipif(not DOCKER, reason="docker unavailable")
+@needs_docker
 def test_f3_trusted_paths_are_read_only_in_container(repo, gate):
     pol = (
         f"version: 1\nexecution:\n  executor: container\n  container:\n    image: {IMAGE}\n"
@@ -498,7 +498,7 @@ def _n1_base(repo) -> None:
     repo.git("checkout", "-q", "-b", "agent")
 
 
-@pytest.mark.skipif(not DOCKER, reason="docker unavailable")
+@needs_docker
 def test_n1_trusted_run_sees_a_read_only_workspace(repo, gate):
     _n1_base(repo)
     repo.commit({"impl.py": "def add(a, b):\n    return b + a\n"})
@@ -506,7 +506,7 @@ def test_n1_trusted_run_sees_a_read_only_workspace(repo, gate):
     assert res.decision is Decision.PASS, res.receipt["reasons"]
 
 
-@pytest.mark.skipif(not DOCKER, reason="docker unavailable")
+@needs_docker
 def test_n1_no_writable_gap_next_to_trusted_dirs_in_container(repo, gate):
     """Create-then-delete of a test file in a sibling directory must not reach the run."""
     _n1_base(repo)
