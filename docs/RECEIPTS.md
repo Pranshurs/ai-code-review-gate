@@ -127,8 +127,8 @@ attestation:
 ```
 
 Artifact attestations are available for public repositories, and for private
-repositories only on GitHub Enterprise Cloud. In this (private) repository the
-GitHub path is therefore exercised with a stub `gh` in tests
+repositories only on GitHub Enterprise Cloud. This repository was private while
+0.2 was developed, so the GitHub path is exercised with a stub `gh` in tests
 (`tests/test_attestation.py::TestGithub`), not against Sigstore.
 
 ### SSH signatures (offline / self-hosted)
