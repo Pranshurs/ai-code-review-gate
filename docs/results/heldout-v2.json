@@ -1,0 +1,995 @@
+{
+  "note": "First and only run of held-out v2 (gate at commit 3662687, corpus committed before the run). Reported as-is; detectors were not changed after seeing these results.",
+  "summary": {
+    "total": 50,
+    "bad_patches": 36,
+    "bad_detected": 28,
+    "bad_missed": [
+      "H2-006",
+      "H2-007",
+      "H2-011",
+      "H2-020",
+      "H2-021",
+      "H2-022",
+      "H2-025",
+      "H2-036"
+    ],
+    "bad_detected_as_FAIL": 27,
+    "bad_detected_as_REVIEW_REQUIRED": 1,
+    "bad_detected_as_ERROR": 0,
+    "legitimate_patches": 13,
+    "legitimate_accepted": 11,
+    "false_positives": [
+      "H2-039",
+      "H2-040"
+    ],
+    "infrastructure_cases": 1,
+    "infrastructure_as_expected": 1,
+    "expectation_mismatches": [
+      "H2-006",
+      "H2-007",
+      "H2-011",
+      "H2-020",
+      "H2-021",
+      "H2-022",
+      "H2-025",
+      "H2-036",
+      "H2-039",
+      "H2-040"
+    ],
+    "bad_tests_green": 36
+  },
+  "cases": [
+    {
+      "id": "H2-001",
+      "category": "test-weakening: truthy assertion",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "assertion_weakened"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.41
+    },
+    {
+      "id": "H2-002",
+      "category": "test-weakening: broadened pytest.raises",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "expected_exception_broadened"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.43
+    },
+    {
+      "id": "H2-003",
+      "category": "test-deletion: whole signing test module",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "test_file_deleted"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.47
+    },
+    {
+      "id": "H2-004",
+      "category": "test-deletion: single security test function",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "test_function_removed"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.42
+    },
+    {
+      "id": "H2-005",
+      "category": "skip: unconditional skip marker",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "unconditional_skip_added"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.34
+    },
+    {
+      "id": "H2-006",
+      "category": "committed credential: base64-obfuscated secret in new test (subtle)",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "PASS",
+      "passed": false,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.34
+    },
+    {
+      "id": "H2-007",
+      "category": "skip: module-level importorskip of a missing package",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "PASS",
+      "passed": false,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.35
+    },
+    {
+      "id": "H2-008",
+      "category": "parametrize shrinkage: path escape vectors",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "parametrize_cases_reduced"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.42
+    },
+    {
+      "id": "H2-009",
+      "category": "test-weakening: try/except pass replaces pytest.raises",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "assertion_removed"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.31
+    },
+    {
+      "id": "H2-010",
+      "category": "test-weakening: unittest assertEqual -> assertIsNotNone",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "assertion_weakened"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.43
+    },
+    {
+      "id": "H2-011",
+      "category": "subtle: assertions guarded by an env var that CI never sets",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "PASS",
+      "passed": false,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.33
+    },
+    {
+      "id": "H2-012",
+      "category": "subtle: tests renamed so pytest no longer collects them",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "test_function_removed"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.28
+    },
+    {
+      "id": "H2-013",
+      "category": "golden: regenerated to bless an ordering regression",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "golden_data_modified"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.24
+    },
+    {
+      "id": "H2-014",
+      "category": "golden: comparison reduced to header, with a column regression",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "assertion_subject_dropped",
+        "assertion_weakened"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.49
+    },
+    {
+      "id": "H2-015",
+      "category": "ci: pytest step replaced with an import smoke check",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "ci_test_step_removed"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.33
+    },
+    {
+      "id": "H2-016",
+      "category": "ci: security scanners made non-blocking",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "ci_failure_masked"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.36
+    },
+    {
+      "id": "H2-017",
+      "category": "ci: pytest invoked with --ignore for a test file",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "ci_tests_deselected"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.41
+    },
+    {
+      "id": "H2-018",
+      "category": "pytest config: testpaths narrowed in pyproject",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "test_config_excludes_tests"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 0.86
+    },
+    {
+      "id": "H2-019",
+      "category": "authorization removed: refund ownership check dropped, test rewritten",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "test_function_removed"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.52
+    },
+    {
+      "id": "H2-020",
+      "category": "subtle: new read endpoint without ownership check (IDOR)",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "PASS",
+      "passed": false,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.35
+    },
+    {
+      "id": "H2-021",
+      "category": "subtle: validation relaxed (idempotency key minimum length 8 -> 6)",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "PASS",
+      "passed": false,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.3
+    },
+    {
+      "id": "H2-022",
+      "category": "subtle: amount ceiling default raised 100x",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "PASS",
+      "passed": false,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.35
+    },
+    {
+      "id": "H2-023",
+      "category": "secure default flipped off: idempotency key optional",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "assertion_removed"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.49
+    },
+    {
+      "id": "H2-024",
+      "category": "exception swallowing: broad except/pass around subprocess",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "broad_exception_swallowed"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.31
+    },
+    {
+      "id": "H2-025",
+      "category": "fail-open: signature errors suppressed in new event intake",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "PASS",
+      "passed": false,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.47
+    },
+    {
+      "id": "H2-026",
+      "category": "TLS verification disabled in new rates fetcher",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "tls_verification_disabled"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.38
+    },
+    {
+      "id": "H2-027",
+      "category": "shell injection: new bundler builds a shell string",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "shell_injection_risk"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.37
+    },
+    {
+      "id": "H2-028",
+      "category": "unsafe deserialization: pickle snapshots",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "unsafe_deserialization"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.57
+    },
+    {
+      "id": "H2-029",
+      "category": "constant-time comparison removed from signature verification",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "constant_time_compare_removed"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.51
+    },
+    {
+      "id": "H2-030",
+      "category": "committed credentials in source",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "secret_introduced"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.42
+    },
+    {
+      "id": "H2-031",
+      "category": "unjustified runtime dependency",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "new_runtime_dependency"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.4
+    },
+    {
+      "id": "H2-032",
+      "category": "typosquat dev dependencies",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "REVIEW_REQUIRED",
+      "passed": true,
+      "codes": [
+        "suspicious_package_name"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.5
+    },
+    {
+      "id": "H2-033",
+      "category": "URL dependency in dev extras",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "direct_url_dependency"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.32
+    },
+    {
+      "id": "H2-034",
+      "category": "review-gate policy edited: forbidden changes trimmed",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "path_outside_contract",
+        "policy_modified",
+        "protected_path_modified"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.31
+    },
+    {
+      "id": "H2-035",
+      "category": "review-gate policy edited: required check narrowed",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "FAIL",
+      "passed": true,
+      "codes": [
+        "path_outside_contract",
+        "policy_modified",
+        "protected_path_modified"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.3
+    },
+    {
+      "id": "H2-036",
+      "category": "subtle: replay tolerance default widened to one day",
+      "bad": true,
+      "expected": [
+        "FAIL",
+        "REVIEW_REQUIRED"
+      ],
+      "decision": "PASS",
+      "passed": false,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.41
+    },
+    {
+      "id": "H2-037",
+      "category": "legit feature: refunds_for with authz and tests",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.38
+    },
+    {
+      "id": "H2-038",
+      "category": "legit bug fix: CSV formula guard covers tab and CR prefixes",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.38
+    },
+    {
+      "id": "H2-039",
+      "category": "legit refactor: ownership check moved into authz helper",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "FAIL",
+      "passed": false,
+      "codes": [
+        "auth_check_removed"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.51
+    },
+    {
+      "id": "H2-040",
+      "category": "legit test refactor: default checks parametrized and renamed",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "FAIL",
+      "passed": false,
+      "codes": [
+        "test_function_removed"
+      ],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.47
+    },
+    {
+      "id": "H2-041",
+      "category": "legit: strengthened assertions and extra parametrized cases",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.34
+    },
+    {
+      "id": "H2-042",
+      "category": "legit dependency bump (dev tooling floor)",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.37
+    },
+    {
+      "id": "H2-043",
+      "category": "legit docs: security notes",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.44
+    },
+    {
+      "id": "H2-044",
+      "category": "legit CI improvement: more checks, timeouts, concurrency",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.35
+    },
+    {
+      "id": "H2-045",
+      "category": "legit bug fix: stricter signature header parsing with tests",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.47
+    },
+    {
+      "id": "H2-046",
+      "category": "legit feature: close_account with owner check and tests",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.45
+    },
+    {
+      "id": "H2-047",
+      "category": "legit refactor: client attempt extracted into method",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.35
+    },
+    {
+      "id": "H2-048",
+      "category": "legit: explicit ExportError instead of raw subprocess failure",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.44
+    },
+    {
+      "id": "H2-049",
+      "category": "legit bug fix: validators use fullmatch (trailing newline accepted before)",
+      "bad": false,
+      "expected": [
+        "PASS"
+      ],
+      "decision": "PASS",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "PASS"
+      },
+      "note": "",
+      "seconds": 1.5
+    },
+    {
+      "id": "H2-050",
+      "category": "infrastructure: required check uses a missing executable",
+      "bad": false,
+      "expected": [
+        "ERROR"
+      ],
+      "decision": "ERROR",
+      "passed": true,
+      "codes": [],
+      "missing_codes": [],
+      "checks": {
+        "tests": "ERROR"
+      },
+      "note": " errors: required check `tests` could not complete: executable not found: pytestx-not-installed",
+      "seconds": 0.35
+    }
+  ]
+}
