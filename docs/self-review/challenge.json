@@ -1,0 +1,34 @@
+{
+  "base": "9a06ecc",
+  "head": "b905f90b8be630c48ac63240ae8d9b1a49da286a",
+  "self_review": {
+    "exit_code": 0,
+    "decision": "PASS",
+    "reasons": [],
+    "receipt_digest": "sha256:ae6bcd299385aff84c0bf1f6579745c3cc9ef882b5facdbbf1f03ecf67bd1881"
+  },
+  "mutant": {
+    "commit": "99ccf7417780c7b7d0cdb8224dc7ffc683c21fac",
+    "exit_code": 1,
+    "decision": "FAIL",
+    "blocking": [
+      "assertion_weakened"
+    ]
+  },
+  "restoration": {
+    "exact": true,
+    "before": {
+      "head": "b905f90b8be630c48ac63240ae8d9b1a49da286a",
+      "status": "",
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktrees": "worktree /home/user/ai-code-review-gate\nHEAD b905f90b8be630c48ac63240ae8d9b1a49da286a\nbranch refs/heads/claude/friendly-ride-x3c5ob"
+    },
+    "after": {
+      "head": "b905f90b8be630c48ac63240ae8d9b1a49da286a",
+      "status": "",
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktrees": "worktree /home/user/ai-code-review-gate\nHEAD b905f90b8be630c48ac63240ae8d9b1a49da286a\nbranch refs/heads/claude/friendly-ride-x3c5ob"
+    },
+    "mutant_reachable_from_branches": ""
+  }
+}
