@@ -59,7 +59,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "self-review"
-PREFIX = "run3-"
+PREFIX = os.environ.get("AICRG_CHALLENGE_PREFIX", "run5-")
 INVARIANTS = "tests/test_gate_invariants.py"
 WEAK_ANCHOR = (
     "        res = gate()\n"
@@ -460,7 +460,6 @@ def main() -> int:
     for name in ("weaken-test", "sabotage-with-trusted", "unrelated-github-sha"):
         shutil.copy2(tmp / f"{name}.json", OUT / f"{PREFIX}{name}-receipt.json")
     shutil.rmtree(tmp, ignore_errors=True)
-    (OUT / f"{PREFIX}challenge.json").write_text(json.dumps(summary, indent=2) + "\n")
     blocked = all(r["decision"] in BLOCKING | {"REJECTED"} for r in ch.results.values())
     controls_ok = (
         ch.controls.get("trusted-signed", {}).get("decision") == "ACCEPTED"
@@ -483,6 +482,9 @@ def main() -> int:
     }
     ok = before == after and not any(reachable.values()) and blocked and controls_ok
     ok = ok and subject_kept and doctor_flags
+    summary["verdict"] = "PASSED" if ok else "FAILED"
+    # Written after the verdict so the record carries the checks it was decided on.
+    (OUT / f"{PREFIX}challenge.json").write_text(json.dumps(summary, indent=2) + "\n")
     print(json.dumps({k: v for k, v in summary.items() if k != "restoration"}, indent=2)[:6000])
     leaked = any(reachable.values())
     print(f"restoration exact: {before == after}; challenge commits reachable: {leaked}")

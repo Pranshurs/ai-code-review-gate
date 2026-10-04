@@ -16,6 +16,8 @@ gate-overhead numbers):
                     head checkout + run (local), the same as trusted evidence
                     (checkout + base overlay + run), and through the container
                     executor (if docker is available)
+  provider_*        a required external SARIF report (bound to the head) ingested
+                    and judged: empty, and with 1000 results
   receipt_*         ssh-keygen sign / verify-receipt with signature check
   potency           changed-code mutation on the small scenario with the
                     fixture's own pytest suite; cost scales with mutants x suite
@@ -193,6 +195,48 @@ def evidence_overheads(repo: Path, tmp: Path, n: int) -> dict[str, object]:
         out["evidence_head_trivial_check_container"] = _timed_gate(repo, cont, max(5, n // 5))
     else:
         out["evidence_head_trivial_check_container"] = "skipped: docker/image unavailable"
+    head = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=repo, capture_output=True, text=True, check=True
+    ).stdout.strip()
+    ext = tmp / "external.yaml"
+    ext.write_text("version: 1\nexternal_evidence:\n  - name: codeql\n    format: sarif\n")
+    for label, k in (("empty", 0), ("1000_results", 1000)):
+        results = [
+            {
+                "ruleId": f"r{i % 20}",
+                "level": "note",
+                "message": {"text": f"finding {i}"},
+                "locations": [
+                    {
+                        "physicalLocation": {
+                            "artifactLocation": {"uri": "src/webapp/api.py"},
+                            "region": {"startLine": 1 + i % 50},
+                        }
+                    }
+                ],
+            }
+            for i in range(k)
+        ]
+        report = tmp / f"codeql-{label}.sarif"
+        report.write_text(
+            json.dumps(
+                {
+                    "version": "2.1.0",
+                    "runs": [
+                        {
+                            "tool": {"driver": {"name": "CodeQL"}},
+                            "results": results,
+                            "versionControlProvenance": [
+                                {"repositoryUri": "u", "revisionId": head}
+                            ],
+                        }
+                    ],
+                }
+            )
+        )
+        r = _timed_gate(repo, ext, n, external_evidence={"codeql": str(report)})
+        r["report_bytes"] = report.stat().st_size
+        out[f"provider_sarif_{label}"] = r
     return out
 
 
@@ -265,7 +309,15 @@ def main() -> int:
     ap.add_argument("-n", type=int, default=100)
     ap.add_argument("--json", type=Path)
     args = ap.parse_args()
+    git_out = [
+        subprocess.run(
+            ["git", *a], cwd=ROOT, capture_output=True, text=True, check=True
+        ).stdout.strip()
+        for a in (("rev-parse", "HEAD"), ("status", "--porcelain"))
+    ]
     out: dict[str, object] = {
+        "aicrg_commit": git_out[0],
+        "aicrg_tree_clean": git_out[1] == "",
         "hardware": {
             "platform": platform.platform(),
             "machine": platform.machine(),
