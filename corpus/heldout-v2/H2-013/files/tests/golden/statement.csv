@@ -1,0 +1,3 @@
+payment_id,amount_cents,currency,refunded_cents,memo
+pay_000003,4000,USD,1000,'=SUM(A1:A9)
+pay_000002,1250,USD,0,invoice 17

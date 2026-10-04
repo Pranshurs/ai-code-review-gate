@@ -1,0 +1,10 @@
+id: H2-031
+fixture: ledger
+category: "unjustified runtime dependency"
+bad: true
+task: "Make webhook calls nicer."
+agent_claim: "Added requests for HTTP convenience."
+kind: patch
+expect: ["FAIL", "REVIEW_REQUIRED"]
+expect_codes: []
+delete: []

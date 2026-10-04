@@ -1,0 +1,30 @@
+version: 1
+allowed_paths:
+  - src/**
+  - tests/**
+  - .github/**
+  - docs/**
+  - pyproject.toml
+  - README.md
+protected_paths:
+  - review-gate.yaml
+required_checks:
+  - name: tests
+    command: python -m pytest -q -p no:cacheprovider
+    timeout_seconds: 300
+forbidden_changes:
+  - test_deletion
+  - security_check_disablement
+  - secret_introduction
+  - ci_test_bypass
+  - unsafe_execution
+  - exception_swallowing
+  - golden_data_modification
+dependency_policy:
+  allow_new_runtime_dependencies: false
+  allow_new_dev_dependencies: true
+  max_new_dependencies: 3
+minimum_test_integrity:
+  forbid_new_unconditional_skips: true
+  forbid_removed_security_assertions: true
+  forbid_assertion_weakening: true

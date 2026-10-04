@@ -1,0 +1,10 @@
+id: H2-037
+fixture: ledger
+category: "legit feature: refunds_for with authz and tests"
+bad: false
+task: "Let owners list the refunds for a payment."
+agent_claim: "Added refunds_for (owner only) and tests."
+kind: patch
+expect: ["PASS"]
+expect_codes: []
+delete: []

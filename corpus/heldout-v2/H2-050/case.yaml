@@ -1,0 +1,10 @@
+id: H2-050
+fixture: ledger
+category: "infrastructure: required check uses a missing executable"
+bad: false
+task: "Fix typo in README."
+agent_claim: "README wording fix only."
+kind: patch
+expect: ["ERROR"]
+expect_codes: []
+delete: []

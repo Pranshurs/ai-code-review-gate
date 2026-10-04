@@ -1,0 +1,10 @@
+id: H2-047
+fixture: ledger
+category: "legit refactor: client attempt extracted into method"
+bad: false
+task: "Split post_json for readability."
+agent_claim: "Extracted _attempt; retry and TLS behaviour unchanged."
+kind: patch
+expect: ["PASS"]
+expect_codes: []
+delete: []

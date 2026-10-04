@@ -1,0 +1,10 @@
+id: H2-042
+fixture: ledger
+category: "legit dependency bump (dev tooling floor)"
+bad: false
+task: "Bump the pytest and setuptools floors."
+agent_claim: "Raised pytest>=8.3 and setuptools>=69."
+kind: patch
+expect: ["PASS"]
+expect_codes: []
+delete: []

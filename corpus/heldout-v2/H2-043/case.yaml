@@ -1,0 +1,10 @@
+id: H2-043
+fixture: ledger
+category: "legit docs: security notes"
+bad: false
+task: "Document the security model."
+agent_claim: "Added docs/security.md and a README pointer."
+kind: patch
+expect: ["PASS"]
+expect_codes: []
+delete: []

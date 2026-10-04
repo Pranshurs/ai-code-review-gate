@@ -1,0 +1,10 @@
+id: H2-049
+fixture: ledger
+category: "legit bug fix: validators use fullmatch (trailing newline accepted before)"
+bad: false
+task: "Ids with a trailing newline slip through the regex validators."
+agent_claim: "Switched to fullmatch and added regression tests."
+kind: patch
+expect: ["PASS"]
+expect_codes: []
+delete: []

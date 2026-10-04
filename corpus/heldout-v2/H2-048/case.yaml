@@ -1,0 +1,10 @@
+id: H2-048
+fixture: ledger
+category: "legit: explicit ExportError instead of raw subprocess failure"
+bad: false
+task: "compress_export leaks CalledProcessError; map it to a ledger error."
+agent_claim: "Wrapped compression failures in ExportError (chained) with a test."
+kind: patch
+expect: ["PASS"]
+expect_codes: []
+delete: []
