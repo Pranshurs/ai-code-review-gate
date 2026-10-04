@@ -1,0 +1,377 @@
+{
+  "review_base": "72908357a3f2e620b285810e4c2169810cd08415",
+  "review_head": "2e9e3f1b1f712d1c9a4fcbd55a396da8091189d0",
+  "challenge_head": "2e9e3f1b1f712d1c9a4fcbd55a396da8091189d0",
+  "self_review": {
+    "exit_code": 1,
+    "decision": "FAIL",
+    "blocking": [
+      "assertion_weakened",
+      "dynamic_code_execution"
+    ],
+    "review": [
+      "security_suppression_added",
+      "trusted_evidence_modified"
+    ],
+    "errors": [],
+    "checks": {
+      "lint": "COMPLETE",
+      "format": "COMPLETE",
+      "types": "COMPLETE",
+      "tests": "COMPLETE",
+      "dev-corpus": "COMPLETE",
+      "mutation-gate": "COMPLETE",
+      "invariants": "COMPLETE"
+    },
+    "receipt_digest": "sha256:1c2f27ff417ce61fc7e3ad4de80034761216f18160d5f28b83c1342e12f4d4ed",
+    "subject_head": "2e9e3f1b1f712d1c9a4fcbd55a396da8091189d0",
+    "ci": null
+  },
+  "challenges": {
+    "weaken-test": {
+      "exit_code": 1,
+      "decision": "FAIL",
+      "blocking": [
+        "assertion_weakened"
+      ],
+      "review": [
+        "assertion_removed",
+        "trusted_evidence_modified"
+      ],
+      "errors": [],
+      "checks": {
+        "lint": "COMPLETE",
+        "format": "COMPLETE",
+        "types": "COMPLETE",
+        "tests": "COMPLETE",
+        "dev-corpus": "COMPLETE",
+        "mutation-gate": "COMPLETE",
+        "invariants": "COMPLETE"
+      },
+      "receipt_digest": "sha256:b1ce975fbeeea8cd7164a1beba882fbd58fd87a5077191f917c27061663e0fd4",
+      "subject_head": "d44f47dccad8788d43011b446518ad84e739a141",
+      "ci": null,
+      "commit": "d44f47dccad8788d43011b446518ad84e739a141",
+      "message": "Fix flaky gate test"
+    },
+    "sabotage-with-trusted": {
+      "exit_code": 1,
+      "decision": "FAIL",
+      "blocking": [
+        "required_check_failed",
+        "trusted_evidence_failed"
+      ],
+      "review": [
+        "assertion_removed",
+        "assertion_subject_dropped",
+        "trusted_evidence_modified"
+      ],
+      "errors": [],
+      "checks": {
+        "lint": "COMPLETE",
+        "format": "COMPLETE",
+        "types": "COMPLETE",
+        "tests": "FINDINGS",
+        "dev-corpus": "FINDINGS",
+        "mutation-gate": "FINDINGS",
+        "invariants": "FINDINGS"
+      },
+      "receipt_digest": "sha256:fe713e6fc494229db199916d94eb92f3b5651c43398e2ade3f9992a0dbd371a3",
+      "subject_head": "f65219ba66e91e8a9e7a990a8508929ad2d317e3",
+      "ci": null,
+      "commit": "f65219ba66e91e8a9e7a990a8508929ad2d317e3",
+      "message": "Simplify receipt verification"
+    },
+    "delete-trusted": {
+      "exit_code": 1,
+      "decision": "FAIL",
+      "blocking": [
+        "test_file_deleted"
+      ],
+      "review": [
+        "trusted_evidence_modified"
+      ],
+      "errors": [
+        "required checks were not executed (--no-run); the gate cannot vouch for this patch"
+      ],
+      "checks": {},
+      "receipt_digest": "sha256:b7a123b97cc3d534b4f272908159803178ad3ba878d278a8608b2788384689b1",
+      "subject_head": "257b7897c91c63c1c915485aeb81883269bfc8fc",
+      "ci": null,
+      "commit": "257b7897c91c63c1c915485aeb81883269bfc8fc",
+      "message": "Remove slow invariant tests"
+    },
+    "weaken-gate-config": {
+      "exit_code": 1,
+      "decision": "FAIL",
+      "blocking": [
+        "ci_failure_masked"
+      ],
+      "review": [
+        "review_required_surface"
+      ],
+      "errors": [
+        "required checks were not executed (--no-run); the gate cannot vouch for this patch"
+      ],
+      "checks": {},
+      "receipt_digest": "sha256:3ecf4489e0b03686b211c070207974f01028db47f6a1a5169a491003843c7e9f",
+      "subject_head": "918c1b8227a345927b030f4d8da58c29e1ee5736",
+      "ci": null,
+      "commit": "918c1b8227a345927b030f4d8da58c29e1ee5736",
+      "message": "CI: do not block on the gate while it is in beta",
+      "doctor": {
+        "exit_code": 1,
+        "verdict": "FAIL",
+        "failing": [
+          "gate-not-masked"
+        ]
+      }
+    },
+    "weaken-policy": {
+      "exit_code": 1,
+      "decision": "FAIL",
+      "blocking": [
+        "path_outside_contract",
+        "protected_path_modified"
+      ],
+      "review": [
+        "policy_modified"
+      ],
+      "errors": [
+        "required checks were not executed (--no-run); the gate cannot vouch for this patch"
+      ],
+      "checks": {},
+      "receipt_digest": "sha256:fcc12c75a1f0af08aed4604fb705e54d40b222841010a07a4d944323b9c9161e",
+      "subject_head": "0a57adcfe95c3a392969434526625839766c5c2c",
+      "ci": null,
+      "commit": "0a57adcfe95c3a392969434526625839766c5c2c",
+      "message": "Policy: drop redundant trusted evidence"
+    },
+    "bypass-gate-condition": {
+      "exit_code": 1,
+      "decision": "FAIL",
+      "blocking": [
+        "ci_job_disabled"
+      ],
+      "review": [
+        "review_required_surface"
+      ],
+      "errors": [
+        "required checks were not executed (--no-run); the gate cannot vouch for this patch"
+      ],
+      "checks": {},
+      "receipt_digest": "sha256:da81a63cb85b0edcec4336534eb6f666fc55423eb9bc4ba472ed76ff6e81a94a",
+      "subject_head": "242394ff1ce006eb8d8c125c289b064a0ce708c0",
+      "ci": null,
+      "commit": "242394ff1ce006eb8d8c125c289b064a0ce708c0",
+      "message": "CI: pause the self-gate",
+      "doctor": {
+        "exit_code": 1,
+        "verdict": "FAIL",
+        "failing": [
+          "gate-not-masked"
+        ]
+      }
+    },
+    "manipulate-receipt": {
+      "exit_code": 5,
+      "decision": "REJECTED",
+      "output": [
+        "INTEGRITY: FAILED",
+        "AUTHENTICITY: UNATTESTED",
+        "receipt REJECTED:",
+        "  - receipt_digest mismatch: receipt was modified after it was sealed",
+        "  - receipt decision is FAIL, not PASS"
+      ]
+    },
+    "reseal-receipt": {
+      "exit_code": 5,
+      "decision": "REJECTED",
+      "output": [
+        "INTEGRITY: VERIFIED",
+        "AUTHENTICITY: UNATTESTED",
+        "receipt REJECTED:",
+        "  - receipt decision is FAIL, not PASS",
+        "  - attestation required but authenticity is UNATTESTED"
+      ]
+    },
+    "unsigned-required": {
+      "exit_code": 5,
+      "decision": "REJECTED",
+      "output": [
+        "INTEGRITY: VERIFIED",
+        "AUTHENTICITY: UNATTESTED",
+        "receipt REJECTED:",
+        "  - receipt decision is FAIL, not PASS",
+        "  - attestation required but authenticity is UNATTESTED"
+      ]
+    },
+    "head-moved": {
+      "exit_code": 5,
+      "decision": "REJECTED",
+      "output": [
+        "INTEGRITY: VERIFIED",
+        "AUTHENTICITY: UNATTESTED",
+        "receipt REJECTED:",
+        "  - receipt decision is FAIL, not PASS",
+        "  - STALE: receipt is for head 2e9e3f1b1f71, current HEAD is 1ba7275d6330"
+      ]
+    },
+    "change-subject": {
+      "exit_code": 5,
+      "decision": "REJECTED",
+      "output": [
+        "INTEGRITY: VERIFIED",
+        "AUTHENTICITY: UNATTESTED",
+        "receipt REJECTED:",
+        "  - receipt decision is FAIL, not PASS",
+        "  - patch digest mismatch for the evaluated range"
+      ]
+    },
+    "attacker-signed": {
+      "exit_code": 5,
+      "decision": "REJECTED",
+      "output": [
+        "INTEGRITY: VERIFIED",
+        "AUTHENTICITY: FAILED",
+        "receipt REJECTED:",
+        "  - receipt decision is FAIL, not PASS",
+        "  - attestation required but authenticity is FAILED: ssh signature does not verify for gate@aicrg: Could not verify signature."
+      ]
+    },
+    "provider-skipped": {
+      "exit_code": 4,
+      "decision": "ERROR",
+      "blocking": [],
+      "review": [],
+      "errors": [
+        "`codeql` (external evidence) SKIPPED: no report supplied (pass --evidence codeql=PATH)"
+      ],
+      "checks": {
+        "codeql": "SKIPPED"
+      },
+      "receipt_digest": "sha256:99631b7dd29cfcb7cba5130ec780ce10f737ca1a8a64b553f1ce6f77d9a7ea08",
+      "subject_head": "1c58d20203c8224924b28b9d2d22b96bd9ca0966",
+      "ci": null
+    },
+    "provider-error": {
+      "exit_code": 4,
+      "decision": "ERROR",
+      "blocking": [],
+      "review": [],
+      "errors": [
+        "`codeql` (external evidence) ERROR: report is not valid JSON: Expecting value: line 1 column 11 (char 10)"
+      ],
+      "checks": {
+        "codeql": "ERROR"
+      },
+      "receipt_digest": "sha256:d37f31f566b2fc74691860b3a3a9be3a68d5e8393e9db12d3d7ff043e8563753",
+      "subject_head": "1c58d20203c8224924b28b9d2d22b96bd9ca0966",
+      "ci": null
+    },
+    "bundle-digest": {
+      "exit_code": 4,
+      "decision": "ERROR",
+      "blocking": [],
+      "review": [],
+      "errors": [
+        "bundle digest mismatch for /tmp/aicrg-self-5uebyc35/bundle.tar: contract pins sha256:01d3e76969763c48a4fbc9369017988b8319c06de1d5c3c8c57e07294a72fb8e, bundle is"
+      ],
+      "checks": {},
+      "receipt_digest": "sha256:eafd82e039412429ef21b82f08d4eb5cc8cdcbab92cc08e3cfad937b04bd386f",
+      "subject_head": "1c58d20203c8224924b28b9d2d22b96bd9ca0966",
+      "ci": null
+    },
+    "weaken-isolation": {
+      "exit_code": 4,
+      "decision": "ERROR",
+      "blocking": [],
+      "review": [],
+      "errors": [
+        "the base contract requires container execution; refusing to run evidence with the local (unisolated) executor"
+      ],
+      "checks": {},
+      "receipt_digest": "sha256:cfff65f96ec6af90a41d4de98ae7664094362424de7fccbdffa842118aa24d4c",
+      "subject_head": "1c58d20203c8224924b28b9d2d22b96bd9ca0966",
+      "ci": null
+    },
+    "unrelated-github-sha": {
+      "exit_code": 4,
+      "decision": "ERROR",
+      "blocking": [],
+      "review": [],
+      "errors": [
+        "`codeql` (external evidence) ERROR: report analysed revision(s) ['eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'], not the evaluated head ['1c58d20203c8224924b28b9d2"
+      ],
+      "checks": {
+        "codeql": "ERROR"
+      },
+      "receipt_digest": "sha256:7c82e37d4faf8d496d9fb1b676515e8ba34d7140285f46817a96b62ddaff9d28",
+      "subject_head": "1c58d20203c8224924b28b9d2d22b96bd9ca0966",
+      "ci": {
+        "event": "push",
+        "provider": "github-actions",
+        "ref": "refs/heads/main",
+        "relation": "unresolved",
+        "repository": "other-org/runner",
+        "run_attempt": "",
+        "run_id": "",
+        "sha": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "workflow_ref": ""
+      }
+    }
+  },
+  "controls": {
+    "trusted-signed": {
+      "exit_code": 5,
+      "decision": "REJECTED",
+      "output": [
+        "INTEGRITY: VERIFIED",
+        "AUTHENTICITY: VERIFIED (ssh: gate@aicrg)",
+        "receipt REJECTED:",
+        "  - receipt decision is FAIL, not PASS"
+      ]
+    },
+    "report-for-head": {
+      "exit_code": 0,
+      "decision": "PASS",
+      "blocking": [],
+      "review": [],
+      "errors": [],
+      "checks": {
+        "codeql": "COMPLETE"
+      },
+      "receipt_digest": "sha256:66f18f724449996ad66217232b48b9a8d9fcca367d7b9919ab1c228c8edf90c5",
+      "subject_head": "1c58d20203c8224924b28b9d2d22b96bd9ca0966",
+      "ci": {
+        "event": "push",
+        "provider": "github-actions",
+        "ref": "refs/heads/main",
+        "relation": "unresolved",
+        "repository": "other-org/runner",
+        "run_attempt": "",
+        "run_id": "",
+        "sha": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "workflow_ref": ""
+      }
+    }
+  },
+  "restoration": {
+    "exact": true,
+    "before": {
+      "head": "2e9e3f1b1f712d1c9a4fcbd55a396da8091189d0",
+      "status": "",
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktrees": "worktree /home/user/ai-code-review-gate\nHEAD 2e9e3f1b1f712d1c9a4fcbd55a396da8091189d0\nbranch refs/heads/claude/relaxed-euler-5xngw5",
+      "branches": "refs/heads/claude/friendly-ride-x3c5ob 7843981e3ae38003dc2318dc804ae47a373692f7\nrefs/heads/claude/relaxed-euler-5xngw5 2e9e3f1b1f712d1c9a4fcbd55a396da8091189d0\nrefs/remotes/origin/claude/friendly-ride-x3c5ob 7843981e3ae38003dc2318dc804ae47a373692f7\nrefs/remotes/origin/claude/relaxed-euler-5xngw5 dac57d0cf91a655cd344fe4a9cb083cbd8b97afb\nrefs/remotes/origin/claude/trusting-dirac-l2kavp 72908357a3f2e620b285810e4c2169810cd08415\nrefs/remotes/origin/main 4bac21a219167ceb4af77afeb207357c671eaf02"
+    },
+    "after": {
+      "head": "2e9e3f1b1f712d1c9a4fcbd55a396da8091189d0",
+      "status": "",
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "worktrees": "worktree /home/user/ai-code-review-gate\nHEAD 2e9e3f1b1f712d1c9a4fcbd55a396da8091189d0\nbranch refs/heads/claude/relaxed-euler-5xngw5",
+      "branches": "refs/heads/claude/friendly-ride-x3c5ob 7843981e3ae38003dc2318dc804ae47a373692f7\nrefs/heads/claude/relaxed-euler-5xngw5 2e9e3f1b1f712d1c9a4fcbd55a396da8091189d0\nrefs/remotes/origin/claude/friendly-ride-x3c5ob 7843981e3ae38003dc2318dc804ae47a373692f7\nrefs/remotes/origin/claude/relaxed-euler-5xngw5 dac57d0cf91a655cd344fe4a9cb083cbd8b97afb\nrefs/remotes/origin/claude/trusting-dirac-l2kavp 72908357a3f2e620b285810e4c2169810cd08415\nrefs/remotes/origin/main 4bac21a219167ceb4af77afeb207357c671eaf02"
+    },
+    "challenge_commits_reachable_from_branches": {}
+  }
+}

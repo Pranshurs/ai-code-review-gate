@@ -1,0 +1,247 @@
+{
+  "checks": [
+    {
+      "argv": [],
+      "duration_ms": 0.284,
+      "exit_code": null,
+      "finished_at": "2026-10-04T15:11:15.336Z",
+      "name": "codeql",
+      "output_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "output_tail": "",
+      "provider_status": "ERROR",
+      "reason": "report analysed revision(s) ['eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'], not the evaluated head ['1c58d20203c8224924b28b9d2d22b96bd9ca0966']",
+      "revision": "head",
+      "source": "external",
+      "started_at": "2026-10-04T15:11:15.336Z",
+      "status": "ERROR",
+      "tool_version": null
+    }
+  ],
+  "decision": "ERROR",
+  "dependencies": [],
+  "environment": {
+    "aicrg": "0.2.0.dev0",
+    "env_vars_withheld_from_checks": 18,
+    "git": "git version 2.43.0",
+    "machine": "x86_64",
+    "platform": "Linux-6.18.44-fc-v64-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "errors": [
+    {
+      "message": "`codeql` (external evidence) ERROR: report analysed revision(s) ['eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'], not the evaluated head ['1c58d20203c8224924b28b9d2d22b96bd9ca0966']",
+      "stage": "evidence"
+    }
+  ],
+  "evidence": [
+    {
+      "head_status": "ERROR",
+      "name": "codeql",
+      "required": true,
+      "source": "external"
+    }
+  ],
+  "execution": {
+    "executor": "local",
+    "isolation": "none",
+    "note": "trusted-code mode: commands run with the gate's user, filesystem and network"
+  },
+  "findings": [],
+  "gate": {
+    "name": "ai-code-review-gate",
+    "version": "0.2.0.dev0"
+  },
+  "llm_review": {
+    "discarded_uncited": 0,
+    "error": null,
+    "hypotheses": 0,
+    "model": null,
+    "model_version": null,
+    "provider": null,
+    "request_sha256": null,
+    "status": "not_configured"
+  },
+  "policy": {
+    "contract": {
+      "allowed_paths": [],
+      "attestation": {
+        "allowed_signers": null,
+        "identity": null,
+        "method": "github",
+        "repository": null,
+        "required": false,
+        "signer_ref": "refs/heads/main",
+        "signer_workflow": null
+      },
+      "container": null,
+      "dependency_policy": {
+        "allow_direct_url_dependencies": false,
+        "allow_new_dev_dependencies": true,
+        "allow_new_runtime_dependencies": false,
+        "allowed_new_dependencies": [],
+        "max_new_dependencies": 3,
+        "require_pinned_versions": false
+      },
+      "env_passthrough": [],
+      "exclude_from_analysis": [],
+      "executor": "local",
+      "external_evidence": [
+        {
+          "argv": [],
+          "block_levels": [
+            "error"
+          ],
+          "differential": false,
+          "min_changed_coverage": null,
+          "name": "codeql",
+          "preexisting_failure": "review",
+          "report_format": "sarif",
+          "report_path": null,
+          "require_revision": false,
+          "required": true,
+          "source": "external",
+          "timeout_seconds": 900
+        }
+      ],
+      "forbidden_changes": [
+        "ci_test_bypass",
+        "exception_swallowing",
+        "golden_data_modification",
+        "secret_introduction",
+        "security_check_disablement",
+        "test_deletion",
+        "unsafe_execution"
+      ],
+      "golden_paths": [
+        "**/golden/**",
+        "**/goldens/**",
+        "**/__snapshots__/**",
+        "**/snapshots/**",
+        "**/expected/**",
+        "**/expected_output/**",
+        "*.golden",
+        "*.snap",
+        "**/evals/**/expected*",
+        "**/eval/**/expected*"
+      ],
+      "llm_reviewer": null,
+      "minimum_test_integrity": {
+        "forbid_assertion_weakening": true,
+        "forbid_new_unconditional_skips": true,
+        "forbid_removed_security_assertions": true
+      },
+      "protected_paths": [],
+      "required_checks": [],
+      "review_required_surfaces": [],
+      "test_potency": null,
+      "trusted_evidence": [],
+      "version": 1
+    },
+    "contract_digest": "sha256:80773cf5192454d9922bd57f1465e47256dc07c5a454bc853352e6464be624ef",
+    "raw_digest": "sha256:35f9f66f49f545f533913c1460980737b7575f2cb84c61ef2acfbc2b7eed9453",
+    "repo_path": null,
+    "source": "file:/tmp/aicrg-self-5uebyc35/external.yaml"
+  },
+  "reasons": [
+    "gate error (evidence): `codeql` (external evidence) ERROR: report analysed revision(s) ['eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'], not the evaluated head ['1c58d20203c8224924b28b9d2d22b96bd9ca0966']"
+  ],
+  "receipt_digest": "sha256:7c82e37d4faf8d496d9fb1b676515e8ba34d7140285f46817a96b62ddaff9d28",
+  "risk": {
+    "evidence": [],
+    "level": "LOW",
+    "surfaces": []
+  },
+  "schema": "aicrg.receipt/v2",
+  "sections": {
+    "Analysis coverage": "PASS",
+    "CI integrity": "PASS",
+    "Change contract": "PASS",
+    "Dependency policy": "PASS",
+    "Required checks": "ERROR",
+    "Reviewer model (advisory)": "OFF",
+    "Security regressions": "PASS",
+    "Test integrity": "PASS",
+    "Test potency": "OFF",
+    "Trusted evidence": "NONE"
+  },
+  "subject": {
+    "base": "2e9e3f1b1f712d1c9a4fcbd55a396da8091189d0",
+    "base_ref": "2e9e3f1b1f712d1c9a4fcbd55a396da8091189d0",
+    "ci": {
+      "event": "push",
+      "provider": "github-actions",
+      "ref": "refs/heads/main",
+      "relation": "unresolved",
+      "repository": "other-org/runner",
+      "run_attempt": "",
+      "run_id": "",
+      "sha": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "workflow_ref": ""
+    },
+    "files": [
+      {
+        "added_lines": 1,
+        "binary": false,
+        "new_path": "CHANGE.txt",
+        "old_path": null,
+        "removed_lines": 0,
+        "status": "A"
+      }
+    ],
+    "files_excluded_from_analysis": 0,
+    "head": "1c58d20203c8224924b28b9d2d22b96bd9ca0966",
+    "head_ref": "1c58d20203c8224924b28b9d2d22b96bd9ca0966",
+    "head_tree": "888e2d9b04cb91ddd199bc99e8ac2265d0d42a75",
+    "merge_base": "2e9e3f1b1f712d1c9a4fcbd55a396da8091189d0",
+    "patch_bytes": 195,
+    "patch_digest": "sha256:01f6aab71632dcf9e3cf7f8f08994ef0d7ec9eb214e73907a1d79b37e19fb2f9",
+    "repository": {
+      "remote": "https://github.com/Pranshurs/ai-code-review-gate",
+      "root_commits": [
+        "d3263f3bf618a89be49d64460c4d53a93377d113"
+      ]
+    },
+    "working_tree_dirty": false
+  },
+  "summary": {
+    "advisory": 0,
+    "blocking": 0,
+    "deterministic_failures": [],
+    "errors": 1,
+    "heuristic_failures": [],
+    "review": 0
+  },
+  "test_integrity": {
+    "assertions_after": 0,
+    "assertions_before": 0,
+    "files_analysed": 0,
+    "result": "PASS",
+    "tests_after": 0,
+    "tests_before": 0
+  },
+  "test_potency": {
+    "status": "not_run"
+  },
+  "timestamps": {
+    "finished_at": "2026-10-04T15:11:15.336Z",
+    "started_at": "2026-10-04T15:11:15.282Z"
+  },
+  "timings_ms": {
+    "ci_integrity": 0.134,
+    "config": 0.006,
+    "contract": 0.022,
+    "dependencies": 0.112,
+    "evidence": 1.042,
+    "llm_review": 0.007,
+    "patch": 10.91,
+    "policy": 1.451,
+    "provenance": 32.122,
+    "risk": 4.87,
+    "secrets": 0.01,
+    "security": 0.006,
+    "suppressions": 0.002,
+    "test_integrity": 0.69,
+    "total": 54.4
+  },
+  "trusted_evidence": []
+}
