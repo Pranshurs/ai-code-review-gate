@@ -46,6 +46,23 @@ required_checks:
     command: python scripts/mutation_gate.py
     timeout_seconds: 1800
 
+# Base-owned invariant tests. The gate overlays the BASE TIP version of these
+# files onto the candidate and runs them against the candidate's code, so a
+# patch cannot weaken the tests that pin AICRG's own security invariants and
+# still pass. Changing them needs a base change (owner review).
+trusted_evidence:
+  - name: invariants
+    source: base
+    paths:
+      - ./tests/__init__.py
+      - ./tests/conftest.py
+      - ./tests/trusted.ini
+      - ./tests/test_gate_invariants.py
+      - ./tests/test_security_review_regressions.py
+      - ./tests/test_execution_boundary.py
+    command: python -m pytest -q -p no:cacheprovider -c tests/trusted.ini --rootdir . tests/test_gate_invariants.py tests/test_security_review_regressions.py
+    timeout_seconds: 1800
+
 dependency_policy:
   allow_new_runtime_dependencies: false
   allow_new_dev_dependencies: true
