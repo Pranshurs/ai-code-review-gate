@@ -77,7 +77,9 @@ def overlay(src: Path, dst: Path) -> None:
         if path.is_file():
             target = dst / path.relative_to(src)
             target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(path, target)
+            # copyfile, not copy2: preserving mtimes lets git's stat cache treat a
+            # same-size overwrite as unchanged (seen in CI with fresh checkouts).
+            shutil.copyfile(path, target)
 
 
 def build_repo(case_dir: Path, spec: dict, tmp: Path) -> Path:
@@ -92,6 +94,7 @@ def build_repo(case_dir: Path, spec: dict, tmp: Path) -> Path:
     git(repo, "init", "-q", "-b", "main")
     git(repo, "add", "-A")
     git(repo, "commit", "-q", "-m", "base")
+    verify_applied(case_dir / "base_files", repo, [])
     git(repo, "checkout", "-q", "-b", "agent")
     for rel in spec.get("delete", []) or []:
         target = repo / rel
@@ -100,9 +103,34 @@ def build_repo(case_dir: Path, spec: dict, tmp: Path) -> Path:
         else:
             target.unlink()
     overlay(case_dir / "files", repo)
-    git(repo, "add", "-A")
-    git(repo, "commit", "-q", "--allow-empty", "-m", f"agent: {spec.get('task', spec['id'])}")
+    commit_all(repo, f"agent: {spec.get('task', spec['id'])}")
+    verify_applied(case_dir / "files", repo, spec.get("delete", []) or [])
     return repo
+
+
+def commit_all(repo: Path, message: str) -> None:
+    # Drop the index and re-add so every file is re-hashed (no stat-cache shortcuts).
+    git(repo, "rm", "-r", "-q", "--cached", ".")
+    git(repo, "add", "-A")
+    git(repo, "commit", "-q", "--allow-empty", "-m", message)
+
+
+def verify_applied(files_dir: Path, repo: Path, deleted: list[str]) -> None:
+    """Harness self-check: the head commit must contain exactly the case's patch."""
+    for path in sorted(files_dir.rglob("*")) if files_dir.is_dir() else []:
+        if path.is_file():
+            rel = path.relative_to(files_dir).as_posix()
+            committed = subprocess.run(
+                ["git", "show", f"HEAD:{rel}"], cwd=repo, capture_output=True, check=False
+            ).stdout
+            if committed != path.read_bytes():
+                raise RuntimeError(f"harness error: {rel} not committed as written by the case")
+    for rel in deleted:
+        exists = subprocess.run(
+            ["git", "cat-file", "-e", f"HEAD:{rel}"], cwd=repo, capture_output=True, check=False
+        )
+        if exists.returncode == 0:
+            raise RuntimeError(f"harness error: {rel} should be deleted at head")
 
 
 def run_case(case_dir: Path) -> CaseResult:
@@ -122,8 +150,7 @@ def run_case(case_dir: Path) -> CaseResult:
             receipt_path = write_receipt(result.receipt, tmp / "receipts")
             before = verify_receipt(receipt_path, repo)
             overlay(case_dir / "after_files", repo)
-            git(repo, "add", "-A")
-            git(repo, "commit", "-q", "--allow-empty", "-m", "post-review change")
+            commit_all(repo, "post-review change")
             after = verify_receipt(receipt_path, repo)
             tampered = json.loads(receipt_path.read_text())
             tampered["decision"] = "PASS" if decision != "PASS" else tampered["decision"]
