@@ -175,6 +175,7 @@ class AttestationPolicy:
     method: str = "github"  # github | ssh
     repository: str | None = None  # github: owner/repo
     signer_workflow: str | None = None  # github: e.g. owner/repo/.github/workflows/gate.yml
+    signer_ref: str = "refs/heads/main"  # github: the ref the signer workflow must run from
     allowed_signers: str | None = None  # ssh: repo-relative path at base
     identity: str | None = None  # ssh: principal expected in allowed_signers
 
@@ -545,7 +546,7 @@ def _attestation(sec: dict[str, Any]) -> AttestationPolicy:
     if method not in ("github", "ssh"):
         raise PolicyError("attestation.method: expected 'github' or 'ssh'")
     kw["method"] = method
-    for k in ("repository", "signer_workflow", "allowed_signers", "identity"):
+    for k in ("repository", "signer_workflow", "signer_ref", "allowed_signers", "identity"):
         if k in sec:
             v = sec[k]
             if not isinstance(v, str) or not v:
@@ -555,8 +556,9 @@ def _attestation(sec: dict[str, Any]) -> AttestationPolicy:
         if "allowed_signers" not in kw or "identity" not in kw:
             raise PolicyError("attestation (ssh): 'allowed_signers' and 'identity' are required")
         kw["allowed_signers"] = _rel_path("attestation.allowed_signers", kw["allowed_signers"])
-    if method == "github" and kw["required"] and "repository" not in kw:
-        raise PolicyError("attestation (github): 'repository' is required")
+    if method == "github" and kw["required"] and not {"repository", "signer_workflow"} <= set(kw):
+        # Unpinned, an attestation made by a PR-edited workflow would verify.
+        raise PolicyError("attestation (github): 'repository' and 'signer_workflow' are required")
     return AttestationPolicy(**kw)
 
 

@@ -7,6 +7,7 @@ from an exception to PASS.
 
 from __future__ import annotations
 
+import os
 import platform
 import sys
 import time
@@ -199,8 +200,28 @@ def _provenance(repo: Repo, opts: GateOptions, run: _Run) -> tuple[str, str, str
             "working_tree_dirty": repo.is_dirty(),
         }
     )
+    ci = _ci_context()
+    if ci:
+        run.subject["ci"] = ci
     run.env_info["git"] = repo.git_version()
     return base_sha, merge_base, head_sha
+
+
+def _ci_context() -> dict[str, str] | None:
+    """Where the gate ran, as the CI reports it. An attestation signs this commit."""
+    env = os.environ
+    if env.get("GITHUB_ACTIONS") != "true":
+        return None
+    keys = {
+        "repository": "GITHUB_REPOSITORY",
+        "sha": "GITHUB_SHA",
+        "ref": "GITHUB_REF",
+        "event": "GITHUB_EVENT_NAME",
+        "workflow_ref": "GITHUB_WORKFLOW_REF",
+        "run_id": "GITHUB_RUN_ID",
+        "run_attempt": "GITHUB_RUN_ATTEMPT",
+    }
+    return {"provider": "github-actions", **{k: env.get(v, "") for k, v in keys.items()}}
 
 
 NEVER_EXCLUDED = (".github/workflows/*.yml", ".github/workflows/*.yaml")
