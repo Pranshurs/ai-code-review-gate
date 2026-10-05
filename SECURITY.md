@@ -1,6 +1,6 @@
 # Security policy
 
-AI Code Review Gate is pre-release software. Its security claims and limits are
+AI Code Review Gate is early-stage software. Its security claims and limits are
 in [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md).
 
 ## Reporting a vulnerability
