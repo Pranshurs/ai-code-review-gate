@@ -50,7 +50,7 @@ hypotheses (at most REVIEW_REQUIRED); it can never turn a deterministic FAIL or
 ERROR into PASS. It works the same whether the patch came from Claude Code,
 Codex, Cursor, Copilot, another agent, or a human.
 
-> Status: **pre-release** (`0.2.0.dev0`). Python-first. Public on GitHub;
+> Status: **0.2.0** (early-stage). Python-first. Public on GitHub;
 > **not published to PyPI**: install from a release tag.
 > Read [what a PASS means](docs/THREAT_MODEL.md#what-a-pass-means) and the
 > [measured miss rate](#does-it-work) before relying on it.
@@ -58,7 +58,7 @@ Codex, Cursor, Copilot, another agent, or a human.
 ## Five-minute quickstart
 
 ```bash
-pip install "git+https://github.com/Pranshurs/ai-code-review-gate@v0.2.0.dev0"   # not on PyPI
+pip install "git+https://github.com/Pranshurs/ai-code-review-gate@v0.2.0"   # not on PyPI
 
 aicrg check --base origin/main --head HEAD
 ```
