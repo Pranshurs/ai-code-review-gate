@@ -210,7 +210,11 @@ corpus is still pending.
   is blocked; positive controls (an allowed-key signature, a report bound to the
   head) are accepted; the repository is verified to be restored exactly. The
   latest full-range self-review is **FAIL**: the gate blocked test changes made
-  in the 0.2 continuation, which await owner review (run 3).
+  in the 0.2 continuation, which await owner review (run 3). Run 4, scoped to
+  the harness commit (fcc6f00 → 2e9e3f1), is **PASS**: all 7 required checks
+  completed with no blocking or review findings, the adversarial challenges
+  passed, positive controls were accepted, and the repository was restored
+  exactly.
 
 ## Overhead
 
